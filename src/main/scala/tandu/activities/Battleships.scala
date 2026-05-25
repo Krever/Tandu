@@ -286,17 +286,16 @@ object Battleships extends Activity:
     div(
       cls := "stack-lg",
       playerHeader(shooter),
-      Components.banner(bannerKind, AppState.strings.map(msgFn)),
-      enemyWatersSection(shooter, gameSignal, onTap = None, highlight = Some(target)),
       div(
-        cls := "row no-print",
-        styleAttr := "justify-content: center;",
+        cls := "bs-resolve-bar",
+        Components.banner(bannerKind, AppState.strings.map(msgFn)),
         button(
-          cls := "btn btn--player btn--lg",
+          cls := "btn btn--player btn--lg no-print",
           child.text <-- s(_.bsEndTurn),
           onClick --> (_ => endTurn())
         )
       ),
+      enemyWatersSection(shooter, gameSignal, onTap = Some(_ => endTurn()), highlight = Some(target)),
       myBoardSection(shooter, gameSignal, showMyBoard)
     )
 

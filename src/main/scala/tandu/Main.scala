@@ -5,6 +5,7 @@ import org.scalajs.dom
 import tandu.pages.{ActivityPage, HomePage, ToolPage}
 
 @main def main(): Unit =
+  Pwa.init()
   val container = dom.document.getElementById("app")
   val app = div(
     child <-- Routing.router.currentPageSignal.map {

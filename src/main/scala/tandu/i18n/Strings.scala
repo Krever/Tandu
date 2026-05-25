@@ -32,7 +32,8 @@ object Strings:
       suggestActivity: String,
       suggestAnother: String,
       tools: String,
-      activities: String
+      activities: String,
+      installApp: String
   )
 
   final case class CategoryLabels(
@@ -124,7 +125,8 @@ object Strings:
       suggestActivity = "Suggest activity",
       suggestAnother = "Suggest another",
       tools = "Tools",
-      activities = "Activities"
+      activities = "Activities",
+      installApp = "Install app"
     ),
     category = CategoryLabels(
       all = "All",
@@ -207,7 +209,8 @@ object Strings:
       suggestActivity = "Zaproponuj zabawę",
       suggestAnother = "Inna propozycja",
       tools = "Narzędzia",
-      activities = "Zabawy"
+      activities = "Zabawy",
+      installApp = "Zainstaluj aplikację"
     ),
     category = CategoryLabels(
       all = "Wszystkie",
@@ -290,7 +293,8 @@ object Strings:
       suggestActivity = "Sugerir actividad",
       suggestAnother = "Otra sugerencia",
       tools = "Herramientas",
-      activities = "Actividades"
+      activities = "Actividades",
+      installApp = "Instalar app"
     ),
     category = CategoryLabels(
       all = "Todas",
@@ -373,7 +377,8 @@ object Strings:
       suggestActivity = "Proposer une activité",
       suggestAnother = "Une autre idée",
       tools = "Outils",
-      activities = "Activités"
+      activities = "Activités",
+      installApp = "Installer l'app"
     ),
     category = CategoryLabels(
       all = "Toutes",
@@ -456,7 +461,8 @@ object Strings:
       suggestActivity = "Aktivität vorschlagen",
       suggestAnother = "Andere Idee",
       tools = "Werkzeuge",
-      activities = "Aktivitäten"
+      activities = "Aktivitäten",
+      installApp = "App installieren"
     ),
     category = CategoryLabels(
       all = "Alle",

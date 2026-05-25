@@ -1,7 +1,7 @@
 package tandu.ui
 
 import com.raquo.laminar.api.L.*
-import tandu.{AppState, Page, Routing}
+import tandu.{AppState, Page, Pwa, Routing}
 import tandu.i18n.{Lang, Strings}
 
 object Components:
@@ -26,6 +26,16 @@ object Components:
       h1(child.text <-- title),
       div(
         cls := "header__actions",
+        child <-- Pwa.available.map {
+          case true =>
+            button(
+              cls := "btn btn--ghost btn--icon",
+              aria.label <-- s(_.home.installApp),
+              "⤓",
+              onClick --> (_ => Pwa.prompt())
+            )
+          case false => emptyNode
+        },
         onInfo.map: cb =>
           button(
             cls := "btn btn--ghost btn--icon",

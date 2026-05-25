@@ -487,9 +487,6 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .cg-round > .wa-card--phrase { font-size: 26px; min-height: 0; }
 .cg-round > .wa-card--letter { font-size: 96px; min-height: 0; }
 
-/* Would you rather: muted prompt above option A, "or" divider between
-   cards. Pairs reuse .wa-card--phrase since options are short verb
-   phrases similar in shape to Categories prompts. */
 .wyr-prefix {
   font-size: 18px;
   font-weight: 600;

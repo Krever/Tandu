@@ -12,9 +12,8 @@ object WouldYouRather extends Activity:
   def description(s: Strings): String = s.wouldYouRather.description
   val categories: Set[Category] = Set(Category.Car)
 
-  /** Draw two distinct options, avoiding any of the previous pair's items
-    * so consecutive dilemmas don't share an option. Falls back to the
-    * full pool if the bank is too small for the avoid filter. */
+  // Avoid the previous pair's items so consecutive dilemmas don't share
+  // an option — repeats feel like bugs even when the pool is large.
   private def pickPair(pool: Vector[String], avoid: Set[String]): (String, String) =
     val available =
       if pool.size > avoid.size + 1 then pool.filterNot(avoid.contains) else pool

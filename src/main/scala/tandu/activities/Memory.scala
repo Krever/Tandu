@@ -148,9 +148,9 @@ object Memory extends Activity:
     val statusSignal: Signal[String] =
       state.signal.combineWith(AppState.strings).map { (st, str) =>
         st.winner match
-          case Some(w) => s"${str.common.player} ${w.num} — ${str.memory.wins}"
+          case Some(w) => s"${w.labelKey(str)} — ${str.memory.wins}"
           case None if st.finished => str.common.draw
-          case None => s"${str.common.player} ${st.turn.num} — ${str.memory.turn}"
+          case None => s"${st.turn.labelKey(str)} — ${str.memory.turn}"
       }
 
     div(
@@ -197,8 +197,7 @@ object Memory extends Activity:
   private def scoreView(p: Player, stateSig: Signal[State]): HtmlElement =
     val isTurn = stateSig.map(st => !st.finished && st.turn == p)
     div(
-      cls := "mem-score",
-      cls(s"mem-score--p${p.num}") := true,
+      cls := s"mem-score mem-score--p${p.num}",
       cls("is-active") <-- isTurn,
       div(cls := "mem-score__label", child.text <-- s(p.labelKey)),
       div(cls := "mem-score__value", child.text <-- stateSig.map(_.scores(p).toString))

@@ -9,3 +9,7 @@ enum Player:
   def labelKey(str: Strings): String = this match
     case P1 => str.common.player1
     case P2 => str.common.player2
+
+object Player:
+  def labelOf(num: Int, str: Strings): String =
+    if num == 1 then str.common.player1 else str.common.player2

@@ -1,3 +1,6 @@
+
+See DESIGN.md
+
 TODO:
 
 * e2e tests
@@ -11,3 +14,4 @@ TODO:
 * filtering
   * num of player
   * online/offline
+* README.md

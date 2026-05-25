@@ -112,9 +112,9 @@ object TicTacToe extends Activity:
     val labelSignal: Signal[String] =
       state.signal.combineWith(AppState.strings).map { (st, str) =>
         st.winner match
-          case Some(w) => s"${str.common.player} ${w.num} — ${str.ticTacToe.wins}"
+          case Some(w) => s"${Player.labelOf(w.num, str)} — ${str.ticTacToe.wins}"
           case None if st.isDraw => str.common.draw
-          case None => s"${str.common.player} ${st.turn.num} — ${str.ticTacToe.turn}"
+          case None => s"${Player.labelOf(st.turn.num, str)} — ${str.ticTacToe.turn}"
       }
     val indicatorSignal: Signal[String] =
       state.signal.map(_.activeMark.map(_.label).getOrElse(""))

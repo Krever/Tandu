@@ -177,7 +177,7 @@ object Battleships extends Activity:
       cls := "center",
       div(
         cls := "player-badge",
-        child.text <-- AppState.strings.map(str => s"${str.common.player} ${me.num} — ${str.battleships.yourTurn}")
+        child.text <-- AppState.strings.map(str => s"${me.labelKey(str)} — ${str.battleships.yourTurn}")
       )
     )
 
@@ -299,7 +299,7 @@ object Battleships extends Activity:
       cls := "handoff card no-print",
       div(
         cls := "player-badge",
-        child.text <-- AppState.strings.map(str => s"${str.common.player} ${winner.num}")
+        child.text <-- AppState.strings.map(str => winner.labelKey(str))
       ),
       div(
         cls := "handoff__title",

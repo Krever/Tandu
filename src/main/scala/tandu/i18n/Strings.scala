@@ -13,6 +13,7 @@ final case class Strings(
     solitaire: Strings.Solitaire,
     memory: Strings.Memory,
     hangman: Strings.Hangman,
+    checkers: Strings.Checkers,
     dice: Strings.Dice
 )
 
@@ -23,7 +24,6 @@ object Strings:
       playAgain: String,
       youWin: String,
       draw: String,
-      player: String,
       player1: String,
       player2: String,
       confirm: String,
@@ -123,6 +123,12 @@ object Strings:
       youLost: String
   )
 
+  final case class Checkers(
+      name: String,
+      description: String,
+      turn: String
+  )
+
   final case class Dice(
       name: String,
       description: String,
@@ -140,7 +146,6 @@ object Strings:
       playAgain = "Play again",
       youWin = "You win!",
       draw = "It's a draw",
-      player = "Player",
       player1 = "Player 1",
       player2 = "Player 2",
       confirm = "OK",
@@ -225,6 +230,11 @@ object Strings:
       youWon = "You got it!",
       youLost = "Out of guesses."
     ),
+    checkers = Checkers(
+      name = "Checkers",
+      description = "Capture all the other player's pieces, or block them in.",
+      turn = "Turn"
+    ),
     dice = Dice(
       name = "Virtual dice",
       description = "Roll dice when you've lost the real ones",
@@ -243,7 +253,6 @@ object Strings:
       playAgain = "Zagraj ponownie",
       youWin = "Wygrywasz!",
       draw = "Remis",
-      player = "Gracz",
       player1 = "Gracz 1",
       player2 = "Gracz 2",
       confirm = "OK",
@@ -328,6 +337,11 @@ object Strings:
       youWon = "Udało się!",
       youLost = "Koniec prób."
     ),
+    checkers = Checkers(
+      name = "Warcaby",
+      description = "Zbij wszystkie pionki przeciwnika albo go zablokuj.",
+      turn = "Tura"
+    ),
     dice = Dice(
       name = "Wirtualne kości",
       description = "Rzucaj kośćmi, gdy prawdziwe się zgubiły",
@@ -346,7 +360,6 @@ object Strings:
       playAgain = "Jugar otra vez",
       youWin = "¡Ganaste!",
       draw = "Empate",
-      player = "Jugador",
       player1 = "Jugador 1",
       player2 = "Jugador 2",
       confirm = "OK",
@@ -431,6 +444,11 @@ object Strings:
       youWon = "¡Acertaste!",
       youLost = "Sin intentos."
     ),
+    checkers = Checkers(
+      name = "Damas",
+      description = "Captura todas las piezas del otro jugador o bloquéalo.",
+      turn = "Turno"
+    ),
     dice = Dice(
       name = "Dados virtuales",
       description = "Tira los dados cuando hayas perdido los de verdad",
@@ -449,7 +467,6 @@ object Strings:
       playAgain = "Rejouer",
       youWin = "Vous gagnez !",
       draw = "Égalité",
-      player = "Joueur",
       player1 = "Joueur 1",
       player2 = "Joueur 2",
       confirm = "OK",
@@ -534,6 +551,11 @@ object Strings:
       youWon = "Trouvé !",
       youLost = "Plus d'essais."
     ),
+    checkers = Checkers(
+      name = "Dames",
+      description = "Capturez toutes les pièces de l'adversaire ou bloquez-le.",
+      turn = "Tour"
+    ),
     dice = Dice(
       name = "Dés virtuels",
       description = "Lancez des dés quand vous avez perdu les vrais",
@@ -552,7 +574,6 @@ object Strings:
       playAgain = "Nochmal spielen",
       youWin = "Du gewinnst!",
       draw = "Unentschieden",
-      player = "Spieler",
       player1 = "Spieler 1",
       player2 = "Spieler 2",
       confirm = "OK",
@@ -636,6 +657,11 @@ object Strings:
       newWord = "Neues Wort",
       youWon = "Geschafft!",
       youLost = "Keine Versuche mehr."
+    ),
+    checkers = Checkers(
+      name = "Dame",
+      description = "Schlage alle Steine des Gegners oder blockiere ihn.",
+      turn = "Zug"
     ),
     dice = Dice(
       name = "Virtuelle Würfel",

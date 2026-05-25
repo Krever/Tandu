@@ -3,7 +3,7 @@ package tandu.activities
 import scala.util.Random
 
 object Registry:
-  val all: List[Activity] = List(Battleships, Solitaire, TicTacToe, Memory, Hangman, WordAssociation, Categories)
+  val all: List[Activity] = List(Battleships, Solitaire, TicTacToe, Memory, Hangman, Checkers, WordAssociation, Categories)
 
   def byId(id: String): Option[Activity] = all.find(_.id == id)
 

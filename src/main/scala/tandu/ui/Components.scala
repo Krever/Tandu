@@ -9,7 +9,8 @@ object Components:
   def header(
       title: Signal[String],
       back: Option[Page] = Some(Page.Home),
-      showLang: Boolean = true
+      showLang: Boolean = true,
+      onInfo: Option[() => Unit] = None
   ): HtmlElement =
     div(
       cls := "header no-print",
@@ -23,12 +24,28 @@ object Components:
         case None => div()
       ,
       h1(child.text <-- title),
-      if showLang then langToggle() else div()
+      div(
+        cls := "header__actions",
+        onInfo.map: cb =>
+          button(
+            cls := "btn btn--ghost btn--icon",
+            "ⓘ",
+            onClick --> (_ => cb())
+          )
+        ,
+        if showLang then langToggle() else emptyNode
+      )
     )
 
   def langToggle(): HtmlElement =
-    val options = Lang.values.toList.map(l => (l, Val(l.code.toUpperCase)))
-    segmentedToggle("lang-toggle", "lang-btn", options, AppState.lang)
+    select(
+      cls := "lang-select",
+      value <-- AppState.lang.signal.map(_.code),
+      onChange.mapToValue --> { code =>
+        Lang.fromCode(code).foreach(AppState.lang.set)
+      },
+      Lang.values.toList.map(l => option(value := l.code, l.flag))
+    )
 
   def segmentedToggle[A](
       containerCls: String,
@@ -88,3 +105,24 @@ object Components:
     )
 
   def s(f: Strings => String): Signal[String] = AppState.strings.map(f)
+
+  def modal(isOpen: Var[Boolean], title: Signal[String], body: Signal[String]): HtmlElement =
+    div(
+      cls := "modal-backdrop no-print",
+      cls("is-open") <-- isOpen.signal,
+      onClick --> (_ => isOpen.set(false)),
+      div(
+        cls := "modal",
+        onClick.stopPropagation --> (_ => ()),
+        h2(cls := "modal__title", child.text <-- title),
+        p(cls := "modal__body", child.text <-- body),
+        div(
+          cls := "modal__actions",
+          button(
+            cls := "btn",
+            child.text <-- s(_.common.close),
+            onClick --> (_ => isOpen.set(false))
+          )
+        )
+      )
+    )

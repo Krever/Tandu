@@ -26,7 +26,7 @@ object ActivityPage:
       div(
         cls := "no-print",
         Components.ghost(
-          s(_.suggestAnother),
+          s(_.home.suggestAnother),
           Routing.replace(Page.Activity(Registry.pickRandom(None).id))
         )
       )

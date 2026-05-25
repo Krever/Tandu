@@ -7,8 +7,8 @@ import tandu.ui.Components.s
 
 object WordAssociation extends Activity:
   val id = "word-association"
-  def name(s: Strings): String = s.waName
-  def description(s: Strings): String = s.waDesc
+  def name(s: Strings): String = s.wordAssociation.name
+  def description(s: Strings): String = s.wordAssociation.description
   val categories: Set[Category] = Set(Category.Car)
 
   private def pickWord(lang: Lang, avoid: Option[String]): String =
@@ -29,7 +29,7 @@ object WordAssociation extends Activity:
     div(
       cls := "stack-lg",
       langChange,
-      p(cls := "muted center", child.text <-- s(_.waHint)),
+      p(cls := "muted center", child.text <-- s(_.wordAssociation.hint)),
       div(
         cls := "wa-card",
         child.text <-- currentWord.signal
@@ -39,7 +39,7 @@ object WordAssociation extends Activity:
         styleAttr := "justify-content: center;",
         button(
           cls := "btn btn--lg",
-          child.text <-- s(_.waNextWord),
+          child.text <-- s(_.wordAssociation.nextWord),
           onClick --> (_ => next())
         )
       )

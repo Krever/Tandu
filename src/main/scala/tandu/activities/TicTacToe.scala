@@ -8,8 +8,8 @@ import tandu.ui.Components.s
 
 object TicTacToe extends Activity:
   val id = "tic-tac-toe"
-  def name(s: Strings): String = s.tttName
-  def description(s: Strings): String = s.tttDesc
+  def name(s: Strings): String = s.ticTacToe.name
+  def description(s: Strings): String = s.ticTacToe.description
   val categories: Set[Category] = Set(Category.Tabletop)
 
   enum Mark:
@@ -28,8 +28,8 @@ object TicTacToe extends Activity:
   )
 
   val variants: List[Variant] = List(
-    Variant("classic", 3, 3, dense = false, _.tttClassicName, _.tttClassicDesc),
-    Variant("gomoku", 10, 5, dense = true, _.tttGomokuName, _.tttGomokuDesc)
+    Variant("classic", 3, 3, dense = false, _.ticTacToe.classic.name, _.ticTacToe.classic.description),
+    Variant("gomoku", 10, 5, dense = true, _.ticTacToe.gomoku.name, _.ticTacToe.gomoku.description)
   )
 
   private case class CellView(mark: Option[Mark], isWin: Boolean)
@@ -83,7 +83,7 @@ object TicTacToe extends Activity:
   private def chooserView(onPick: Variant => Unit): HtmlElement =
     sectionTag(
       cls := "stack",
-      h2(cls := "h2", child.text <-- s(_.tttChooseVariant)),
+      h2(cls := "h2", child.text <-- s(_.ticTacToe.chooseVariant)),
       div(
         cls := "stack",
         variants.map { v =>
@@ -112,9 +112,9 @@ object TicTacToe extends Activity:
     val labelSignal: Signal[String] =
       state.signal.combineWith(AppState.strings).map { (st, str) =>
         st.winner match
-          case Some(w) => s"${str.player} ${w.num} — ${str.tttWins}"
-          case None if st.isDraw => str.draw
-          case None => s"${str.player} ${st.turn.num} — ${str.tttTurn}"
+          case Some(w) => s"${str.common.player} ${w.num} — ${str.ticTacToe.wins}"
+          case None if st.isDraw => str.common.draw
+          case None => s"${str.common.player} ${st.turn.num} — ${str.ticTacToe.turn}"
       }
     val indicatorSignal: Signal[String] =
       state.signal.map(_.activeMark.map(_.label).getOrElse(""))
@@ -143,7 +143,7 @@ object TicTacToe extends Activity:
         cls("board--dense") := v.dense,
         styleAttr := s"grid-template-columns: repeat(${v.size}, 1fr);",
         (0 until v.size * v.size).map: i =>
-          val cv = cellViews.map(_(i))
+          val cv = cellViews.map(_(i)).distinct
           div(
             cls := "cell cell--btn",
             cls("cell--x") <-- cv.map(_.mark.contains(Mark.X)),
@@ -156,10 +156,10 @@ object TicTacToe extends Activity:
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",
-        Components.ghost(s(_.tttChangeVariant), onBack()),
+        Components.ghost(s(_.ticTacToe.changeVariant), onBack()),
         button(
           cls := "btn btn--player",
-          child.text <-- s(_.playAgain),
+          child.text <-- s(_.common.playAgain),
           disabled <-- finished.map(!_),
           onClick --> (_ => reset())
         )

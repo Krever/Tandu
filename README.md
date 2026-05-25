@@ -6,4 +6,4 @@ TODO:
 * multi language picker
 * scalafmt, linter
 * CI/CD
-* battleships "click on baord to continue"
+* P2P cooperation

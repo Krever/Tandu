@@ -7,8 +7,8 @@ import tandu.ui.Components.s
 
 object Categories extends Activity:
   val id = "categories"
-  def name(s: Strings): String = s.cgName
-  def description(s: Strings): String = s.cgDesc
+  def name(s: Strings): String = s.categoriesGame.name
+  def description(s: Strings): String = s.categoriesGame.description
   val categories: Set[Category] = Set(Category.Car)
 
   final case class Round(prompt: String, letter: Char)
@@ -32,7 +32,7 @@ object Categories extends Activity:
     div(
       cls := "stack-lg",
       langChange,
-      p(cls := "muted center", child.text <-- s(_.cgHint)),
+      p(cls := "muted center", child.text <-- s(_.categoriesGame.hint)),
       div(
         cls := "cg-round",
         div(
@@ -49,7 +49,7 @@ object Categories extends Activity:
         styleAttr := "justify-content: center;",
         button(
           cls := "btn btn--lg",
-          child.text <-- s(_.cgNext),
+          child.text <-- s(_.categoriesGame.next),
           onClick --> (_ => next())
         )
       )

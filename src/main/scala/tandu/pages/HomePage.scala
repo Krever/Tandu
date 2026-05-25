@@ -11,12 +11,18 @@ object HomePage:
 
   def render(): HtmlElement =
     val filter: Var[Option[Category]] = Var(None)
+    val aboutOpen: Var[Boolean] = Var(false)
 
     div(
       cls := "app stack-lg",
-      Components.header(s(_.appTitle), back = None),
+      Components.header(
+        s(_.appTitle),
+        back = None,
+        onInfo = Some(() => aboutOpen.set(true))
+      ),
+      Components.modal(aboutOpen, s(_.about.title), s(_.about.body)),
       Components.primaryBig(
-        s(_.suggestActivity),
+        s(_.home.suggestActivity),
         Routing.go(Page.Activity(Registry.pickRandom(filter.now()).id))
       ),
       sectionTag(
@@ -24,7 +30,7 @@ object HomePage:
         div(
           cls := "row",
           styleAttr := "justify-content: space-between; align-items: center;",
-          h2(cls := "h2", child.text <-- s(_.activities)),
+          h2(cls := "h2", child.text <-- s(_.home.activities)),
           categoryPill(filter)
         ),
         div(
@@ -42,7 +48,7 @@ object HomePage:
       ),
       sectionTag(
         cls := "stack",
-        h2(cls := "h2", child.text <-- s(_.tools)),
+        h2(cls := "h2", child.text <-- s(_.home.tools)),
         div(
           cls := "stack",
           Tools.all.map: t =>
@@ -57,6 +63,6 @@ object HomePage:
 
   private def categoryPill(filter: Var[Option[Category]]): HtmlElement =
     val options: List[(Option[Category], Signal[String])] =
-      (None, s(_.catAll)) ::
+      (None, s(_.category.all)) ::
         Category.values.toList.map(c => (Some(c), s(c.label)))
     Components.segmentedToggle("pill-toggle no-print", "pill-btn", options, filter)

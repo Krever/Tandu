@@ -10,8 +10,8 @@ import scala.util.Random
 
 object Dice extends Tool:
   val id = "dice"
-  def name(s: Strings): String = s.diceToolName
-  def description(s: Strings): String = s.diceToolDesc
+  def name(s: Strings): String = s.dice.name
+  def description(s: Strings): String = s.dice.description
 
   private val SidesOptions = List(4, 6, 8, 10, 12, 20)
   private val CountOptions = List(1, 2, 3, 4, 5)
@@ -46,7 +46,7 @@ object Dice extends Tool:
           styleAttr := "justify-content: center;",
           label(
             cls := "field",
-            child.text <-- s(_.dice),
+            child.text <-- s(_.dice.dice),
             select(
               CountOptions.map(n => option(value := n.toString, n.toString)),
               value <-- state.signal.map(_.count.toString),
@@ -55,7 +55,7 @@ object Dice extends Tool:
           ),
           label(
             cls := "field",
-            child.text <-- s(_.sides),
+            child.text <-- s(_.dice.sides),
             select(
               SidesOptions.map(n => option(value := n.toString, s"d$n")),
               value <-- state.signal.map(_.sides.toString),
@@ -79,13 +79,13 @@ object Dice extends Tool:
       div(
         cls := "center",
         styleAttr := "font-size: 18px;",
-        span(cls := "muted", child.text <-- s(_.total), ": "),
+        span(cls := "muted", child.text <-- s(_.dice.total), ": "),
         span(child.text <-- state.signal.map(_.faces.sum.toString))
       ),
-      Components.primaryBig(s(_.roll), roll()),
+      Components.primaryBig(s(_.dice.roll), roll()),
       div(
         cls := "stack",
-        h2(cls := "h2", child.text <-- s(_.lastRolls)),
+        h2(cls := "h2", child.text <-- s(_.dice.lastRolls)),
         div(
           cls := "stack",
           children <-- state.signal.map(_.history).map { hist =>

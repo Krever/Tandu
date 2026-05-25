@@ -11,8 +11,8 @@ import scala.util.Random
 
 object Battleships extends Activity:
   val id = "battleships"
-  def name(s: Strings): String = s.bsName
-  def description(s: Strings): String = s.bsDesc
+  def name(s: Strings): String = s.battleships.name
+  def description(s: Strings): String = s.battleships.description
   val categories: Set[Category] = Set(Category.Tabletop)
 
   private val Size = 10
@@ -164,7 +164,7 @@ object Battleships extends Activity:
         button(
           cls := "btn btn--ghost",
           disabled := true,
-          child.text <-- s(_.bsPrint)
+          child.text <-- s(_.battleships.print)
         )
       )
     )
@@ -182,7 +182,7 @@ object Battleships extends Activity:
       cls := "center",
       div(
         cls := "player-badge",
-        child.text <-- AppState.strings.map(str => s"${str.player} ${me.num} — ${str.bsYourTurn}")
+        child.text <-- AppState.strings.map(str => s"${str.common.player} ${me.num} — ${str.battleships.yourTurn}")
       )
     )
 
@@ -194,7 +194,7 @@ object Battleships extends Activity:
   ): HtmlElement =
     sectionTag(
       cls := "stack",
-      h2(cls := "h2 center", child.text <-- s(_.bsEnemyBoard)),
+      h2(cls := "h2 center", child.text <-- s(_.battleships.enemyBoard)),
       boardView(
         cells = gameSignal.map { g =>
           val enemyFleet = g.fleets(shooter.other)
@@ -227,7 +227,7 @@ object Battleships extends Activity:
         button(
           cls := "btn btn--ghost",
           child.text <-- showMyBoard.signal.combineWith(AppState.strings).map { (shown, str) =>
-            if shown then str.bsHideMyBoard else str.bsShowMyBoard
+            if shown then str.battleships.hideMyBoard else str.battleships.showMyBoard
           },
           onClick --> (_ => showMyBoard.update(!_))
         )
@@ -264,7 +264,7 @@ object Battleships extends Activity:
     div(
       cls := "stack-lg",
       playerHeader(me),
-      p(cls := "muted center", child.text <-- s(_.bsFireAt)),
+      p(cls := "muted center", child.text <-- s(_.battleships.fireAt)),
       enemyWatersSection(me, gameSignal, onTap = Some(c => fire(me, c)), highlight = None),
       myBoardSection(me, gameSignal, showMyBoard)
     )
@@ -279,9 +279,9 @@ object Battleships extends Activity:
   ): HtmlElement =
     val gameSignal = game.signal
     val (bannerKind, msgFn): (String, Strings => String) = result match
-      case ShotResult.Hit  => ("hit",  (str: Strings) => str.bsHit)
-      case ShotResult.Sunk => ("hit",  (str: Strings) => str.bsSunk)
-      case ShotResult.Miss => ("miss", (str: Strings) => str.bsMiss)
+      case ShotResult.Hit  => ("hit",  (str: Strings) => str.battleships.hit)
+      case ShotResult.Sunk => ("hit",  (str: Strings) => str.battleships.sunk)
+      case ShotResult.Miss => ("miss", (str: Strings) => str.battleships.miss)
 
     div(
       cls := "stack-lg",
@@ -291,7 +291,7 @@ object Battleships extends Activity:
         Components.banner(bannerKind, AppState.strings.map(msgFn)),
         button(
           cls := "btn btn--player btn--lg no-print",
-          child.text <-- s(_.bsEndTurn),
+          child.text <-- s(_.battleships.endTurn),
           onClick --> (_ => endTurn())
         )
       ),
@@ -304,15 +304,15 @@ object Battleships extends Activity:
       cls := "handoff card no-print",
       div(
         cls := "player-badge",
-        child.text <-- AppState.strings.map(str => s"${str.player} ${winner.num}")
+        child.text <-- AppState.strings.map(str => s"${str.common.player} ${winner.num}")
       ),
       div(
         cls := "handoff__title",
-        child.text <-- s(_.bsAllSunk)
+        child.text <-- s(_.battleships.allSunk)
       ),
       button(
         cls := "btn btn--player btn--lg",
-        child.text <-- s(_.playAgain),
+        child.text <-- s(_.common.playAgain),
         onClick --> (_ => restart())
       )
     )
@@ -335,7 +335,7 @@ object Battleships extends Activity:
     div(
       cls := "board bs-grid",
       allCells.zipWithIndex.map { (cellPos, i) =>
-        val viewSig = cells.map(_(i))
+        val viewSig = cells.map(_(i)).distinct
         div(
           cls := "cell",
           cls("cell--btn") := onTap.isDefined,

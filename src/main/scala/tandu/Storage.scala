@@ -1,0 +1,16 @@
+package tandu
+
+import org.scalajs.dom
+import scala.util.Try
+
+object Storage:
+  private val KeyLang = "tandu.lang"
+
+  def getString(key: String): Option[String] =
+    Try(Option(dom.window.localStorage.getItem(key))).toOption.flatten
+
+  def setString(key: String, value: String): Unit =
+    Try(dom.window.localStorage.setItem(key, value))
+
+  def loadLangCode(): Option[String] = getString(KeyLang)
+  def saveLangCode(code: String): Unit = setString(KeyLang, code)

@@ -17,6 +17,8 @@ final case class Strings(
     chess: Strings.Chess,
     twentyQuestions: Strings.TwentyQuestions,
     storyBuilding: Strings.StoryBuilding,
+    lastLetter: Strings.LastLetter,
+    wouldYouRather: Strings.WouldYouRather,
     dice: Strings.Dice
 )
 
@@ -166,6 +168,22 @@ object Strings:
       variantSentence: String
   )
 
+  final case class LastLetter(
+      name: String,
+      description: String,
+      hint: String,
+      newLetter: String
+  )
+
+  final case class WouldYouRather(
+      name: String,
+      description: String,
+      hint: String,
+      prefix: String,
+      or: String,
+      next: String
+  )
+
   final case class Dice(
       name: String,
       description: String,
@@ -302,6 +320,20 @@ object Strings:
       variantsTitle = "Choose a granularity",
       variantWord = "One word each — quick, chaotic, great for short bursts.",
       variantSentence = "One sentence each — slower, builds a longer story."
+    ),
+    lastLetter = LastLetter(
+      name = "Last letter",
+      description = "Each word starts with the last letter of the previous one.",
+      hint = "Take turns. Say a word that starts with the last letter of the word before. No repeats.",
+      newLetter = "New letter"
+    ),
+    wouldYouRather = WouldYouRather(
+      name = "Would you rather",
+      description = "Pick between two silly options — and say why.",
+      hint = "Read both. Everyone picks one and explains why. No wrong answers.",
+      prefix = "Would you rather...",
+      or = "or",
+      next = "New dilemma"
     ),
     dice = Dice(
       name = "Virtual dice",
@@ -441,6 +473,20 @@ object Strings:
       variantWord = "Po jednym słowie — szybko, chaotycznie, świetne na krótkie zabawy.",
       variantSentence = "Po jednym zdaniu — wolniej, ale powstaje dłuższa opowieść."
     ),
+    lastLetter = LastLetter(
+      name = "Ostatnia litera",
+      description = "Każde słowo zaczyna się od ostatniej litery poprzedniego.",
+      hint = "Po kolei. Powiedz słowo zaczynające się na ostatnią literę poprzedniego. Bez powtórek.",
+      newLetter = "Nowa litera"
+    ),
+    wouldYouRather = WouldYouRather(
+      name = "Co wolisz",
+      description = "Wybierz między dwoma szalonymi opcjami — i powiedz dlaczego.",
+      hint = "Przeczytajcie obie. Każdy wybiera jedną i mówi dlaczego. Nie ma złych odpowiedzi.",
+      prefix = "Wolisz...",
+      or = "czy",
+      next = "Nowy dylemat"
+    ),
     dice = Dice(
       name = "Wirtualne kości",
       description = "Rzucaj kośćmi, gdy prawdziwe się zgubiły",
@@ -578,6 +624,20 @@ object Strings:
       variantsTitle = "Elegid la unidad",
       variantWord = "Una palabra cada uno — rápido, caótico, ideal para ratos cortos.",
       variantSentence = "Una frase cada uno — más lento, pero crece una historia más larga."
+    ),
+    lastLetter = LastLetter(
+      name = "Última letra",
+      description = "Cada palabra empieza con la última letra de la anterior.",
+      hint = "Por turnos. Di una palabra que empiece con la última letra de la anterior. Sin repetir.",
+      newLetter = "Nueva letra"
+    ),
+    wouldYouRather = WouldYouRather(
+      name = "¿Esto o lo otro?",
+      description = "Elige entre dos opciones disparatadas — y di por qué.",
+      hint = "Leed las dos. Cada uno elige una y dice por qué. No hay respuesta incorrecta.",
+      prefix = "¿Qué prefieres?",
+      or = "o",
+      next = "Otro dilema"
     ),
     dice = Dice(
       name = "Dados virtuales",
@@ -717,6 +777,20 @@ object Strings:
       variantWord = "Un mot chacun — rapide, chaotique, parfait pour les courtes parties.",
       variantSentence = "Une phrase chacun — plus lent, mais ça donne une vraie histoire."
     ),
+    lastLetter = LastLetter(
+      name = "Dernière lettre",
+      description = "Chaque mot commence par la dernière lettre du précédent.",
+      hint = "Chacun son tour. Dites un mot qui commence par la dernière lettre du mot précédent. Sans répétition.",
+      newLetter = "Nouvelle lettre"
+    ),
+    wouldYouRather = WouldYouRather(
+      name = "Ceci ou cela ?",
+      description = "Choisis entre deux options farfelues — et dis pourquoi.",
+      hint = "Lisez les deux. Chacun en choisit une et dit pourquoi. Pas de mauvaise réponse.",
+      prefix = "Tu préfères ?",
+      or = "ou",
+      next = "Nouveau dilemme"
+    ),
     dice = Dice(
       name = "Dés virtuels",
       description = "Lancez des dés quand vous avez perdu les vrais",
@@ -854,6 +928,20 @@ object Strings:
       variantsTitle = "Wählt die Einheit",
       variantWord = "Ein Wort pro Person — schnell, chaotisch, ideal für kurze Runden.",
       variantSentence = "Ein Satz pro Person — langsamer, dafür wird daraus eine längere Geschichte."
+    ),
+    lastLetter = LastLetter(
+      name = "Letzter Buchstabe",
+      description = "Jedes Wort beginnt mit dem letzten Buchstaben des vorigen.",
+      hint = "Reihum. Sag ein Wort, das mit dem letzten Buchstaben des vorigen beginnt. Keine Wiederholungen.",
+      newLetter = "Neuer Buchstabe"
+    ),
+    wouldYouRather = WouldYouRather(
+      name = "Lieber so oder so?",
+      description = "Wähle zwischen zwei verrückten Möglichkeiten — und sag warum.",
+      hint = "Lest beide. Jeder wählt eine aus und sagt warum. Keine falschen Antworten.",
+      prefix = "Was wäre dir lieber:",
+      or = "oder",
+      next = "Neues Dilemma"
     ),
     dice = Dice(
       name = "Virtuelle Würfel",

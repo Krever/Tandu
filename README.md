@@ -19,3 +19,4 @@ TODO:
 * mode selection: 
   * offline where possible
   * lichess for chess
+* review translations

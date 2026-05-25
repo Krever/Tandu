@@ -487,6 +487,23 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .cg-round > .wa-card--phrase { font-size: 26px; min-height: 0; }
 .cg-round > .wa-card--letter { font-size: 96px; min-height: 0; }
 
+/* Would you rather: muted prompt above option A, "or" divider between
+   cards. Pairs reuse .wa-card--phrase since options are short verb
+   phrases similar in shape to Categories prompts. */
+.wyr-prefix {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-muted);
+  margin: 0;
+}
+.wyr-or {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
 /* 20 questions: hidden state desaturates the card so the keeper can tell
    at a glance whether the word is exposed before passing the phone. */
 .tq-card { position: relative; }

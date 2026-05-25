@@ -69,6 +69,8 @@ screen offers:
 | Word association  | Prompt (seed word from bank, optional timer) |
 | 20 questions      | In-app guided (timer, question count)        |
 | Story building    | Prompt (seed sentence/word, turn indicator)  |
+| Last letter       | Prompt (random starting letter)              |
+| Would you rather  | Prompt (random pair of options from bank)    |
 
 Support levels:
 
@@ -112,19 +114,7 @@ picking blindly from the whole catalog.
 
 Not committed to building, but the obvious candidates once tags exist:
 
-- **Categories** (*gra w państwa-miasta* style, but freeform) — app picks a category ("animals starting with K",
-  "things that are blue"), players take turns naming items until
-  someone repeats or stalls.
-- **Last letter** —
-  app picks a starting word; each next word must start with the last
-  letter of the previous one.
-- **I spy** (*widzę coś na literę…*) — app picks the letter or color;
-  one player spots, others guess.
-- **Would you rather** — app draws a kid-appropriate dilemma from a
-  bank; everyone answers and discusses.
 - **Riddles** — app shows a riddle, players guess; tap to reveal.
-- **License plate words** — app prompts "make a phrase from these
-  three letters"; players invent the funniest one.
 
 ## Tools
 
@@ -170,14 +160,3 @@ Settled, not up for debate at this stage:
 - **scalatest** for logic, **Selenium** for e2e.
 - If a backend ever appears, it will be Scala sharing models via a
   `shared/` cross-project.
-
-## Open questions to resolve per-activity (not blockers for starting)
-
-Content/UX decisions to make when building each activity:
-
-- **Memory**: card content (emoji set? themed image pack?), number of pairs.
-- **Hangman**: word bank sourcing per language, kid-appropriate filter,
-  difficulty.
-- **20 questions**: is the app the asker or the answerer? Different UX.
-- **Tic-tac-toe / Checkers pass-and-play**: turn indicator, undo, reset
-  confirmation (kids will mash buttons).

@@ -123,6 +123,14 @@ object Components:
       onClick --> (_ => onTap)
     )
 
+  def activityCard(name: Signal[String], desc: Signal[String], onTap: => Unit): HtmlElement =
+    button(
+      cls := "activity-card",
+      div(cls := "activity-card__name", child.text <-- name),
+      div(cls := "activity-card__desc", child.text <-- desc),
+      onClick --> (_ => onTap)
+    )
+
   def s(f: Strings => String): Signal[String] = AppState.strings.map(f)
 
   def modal(

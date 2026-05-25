@@ -58,10 +58,10 @@ object HomePage:
           categoryPill(filter)
         ),
         div(
-          cls := "stack",
+          cls := "activity-grid",
           children <-- filter.signal.map { c =>
             Registry.filtered(c).map { a =>
-              Components.tile(
+              Components.activityCard(
                 s(a.name),
                 s(a.description),
                 Routing.go(Page.Activity(a.id))

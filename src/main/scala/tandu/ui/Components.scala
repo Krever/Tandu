@@ -116,7 +116,12 @@ object Components:
 
   def s(f: Strings => String): Signal[String] = AppState.strings.map(f)
 
-  def modal(isOpen: Var[Boolean], title: Signal[String], body: Signal[String]): HtmlElement =
+  def modal(
+      isOpen: Var[Boolean],
+      title: Signal[String],
+      body: Signal[String],
+      extraActions: Seq[HtmlElement] = Nil
+  ): HtmlElement =
     div(
       cls := "modal-backdrop no-print",
       cls("is-open") <-- isOpen.signal,
@@ -128,6 +133,7 @@ object Components:
         p(cls := "modal__body", child.text <-- body),
         div(
           cls := "modal__actions",
+          extraActions,
           button(
             cls := "btn",
             child.text <-- s(_.common.close),

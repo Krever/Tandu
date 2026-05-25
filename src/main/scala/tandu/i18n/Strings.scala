@@ -11,6 +11,8 @@ final case class Strings(
     wordAssociation: Strings.WordAssociation,
     categoriesGame: Strings.Categories,
     solitaire: Strings.Solitaire,
+    memory: Strings.Memory,
+    hangman: Strings.Hangman,
     dice: Strings.Dice
 )
 
@@ -98,6 +100,29 @@ object Strings:
       newGame: String
   )
 
+  final case class MemoryVariant(name: String, description: String)
+
+  final case class Memory(
+      name: String,
+      description: String,
+      turn: String,
+      wins: String,
+      chooseVariant: String,
+      changeVariant: String,
+      easy: MemoryVariant,
+      medium: MemoryVariant,
+      hard: MemoryVariant
+  )
+
+  final case class Hangman(
+      name: String,
+      description: String,
+      livesLeft: String,
+      newWord: String,
+      youWon: String,
+      youLost: String
+  )
+
   final case class Dice(
       name: String,
       description: String,
@@ -180,6 +205,25 @@ object Strings:
       description = "The classic one-player card game.",
       undo = "Undo",
       newGame = "New game"
+    ),
+    memory = Memory(
+      name = "Memory",
+      description = "Find the matching pairs. Take turns.",
+      turn = "Turn",
+      wins = "wins!",
+      chooseVariant = "Choose size",
+      changeVariant = "Change size",
+      easy = MemoryVariant("Easy", "6 pairs — quick warm-up."),
+      medium = MemoryVariant("Medium", "8 pairs — a real game."),
+      hard = MemoryVariant("Hard", "12 pairs — for sharp eyes.")
+    ),
+    hangman = Hangman(
+      name = "Hangman",
+      description = "Guess the word, letter by letter.",
+      livesLeft = "Lives left:",
+      newWord = "New word",
+      youWon = "You got it!",
+      youLost = "Out of guesses."
     ),
     dice = Dice(
       name = "Virtual dice",
@@ -265,6 +309,25 @@ object Strings:
       undo = "Cofnij",
       newGame = "Nowa gra"
     ),
+    memory = Memory(
+      name = "Memory",
+      description = "Znajdź pary obrazków. Grajcie na zmianę.",
+      turn = "Ruch",
+      wins = "wygrywa!",
+      chooseVariant = "Wybierz rozmiar",
+      changeVariant = "Zmień rozmiar",
+      easy = MemoryVariant("Łatwy", "6 par — krótka rozgrzewka."),
+      medium = MemoryVariant("Średni", "8 par — prawdziwa gra."),
+      hard = MemoryVariant("Trudny", "12 par — dla bystrych oczu.")
+    ),
+    hangman = Hangman(
+      name = "Wisielec",
+      description = "Zgadnij słowo, litera po literze.",
+      livesLeft = "Życia:",
+      newWord = "Nowe słowo",
+      youWon = "Udało się!",
+      youLost = "Koniec prób."
+    ),
     dice = Dice(
       name = "Wirtualne kości",
       description = "Rzucaj kośćmi, gdy prawdziwe się zgubiły",
@@ -348,6 +411,25 @@ object Strings:
       description = "El clásico juego de cartas para uno.",
       undo = "Deshacer",
       newGame = "Nueva partida"
+    ),
+    memory = Memory(
+      name = "Memoria",
+      description = "Encuentra las parejas. Por turnos.",
+      turn = "Turno",
+      wins = "¡gana!",
+      chooseVariant = "Elige el tamaño",
+      changeVariant = "Cambiar tamaño",
+      easy = MemoryVariant("Fácil", "6 parejas — calentamiento rápido."),
+      medium = MemoryVariant("Medio", "8 parejas — partida de verdad."),
+      hard = MemoryVariant("Difícil", "12 parejas — para ojos atentos.")
+    ),
+    hangman = Hangman(
+      name = "Ahorcado",
+      description = "Adivina la palabra, letra a letra.",
+      livesLeft = "Vidas:",
+      newWord = "Nueva palabra",
+      youWon = "¡Acertaste!",
+      youLost = "Sin intentos."
     ),
     dice = Dice(
       name = "Dados virtuales",
@@ -433,6 +515,25 @@ object Strings:
       undo = "Annuler",
       newGame = "Nouvelle partie"
     ),
+    memory = Memory(
+      name = "Memory",
+      description = "Trouvez les paires identiques. Chacun son tour.",
+      turn = "Tour",
+      wins = "gagne !",
+      chooseVariant = "Choisir la taille",
+      changeVariant = "Changer la taille",
+      easy = MemoryVariant("Facile", "6 paires — petit échauffement."),
+      medium = MemoryVariant("Moyen", "8 paires — vraie partie."),
+      hard = MemoryVariant("Difficile", "12 paires — pour les yeux vifs.")
+    ),
+    hangman = Hangman(
+      name = "Le pendu",
+      description = "Devinez le mot, lettre par lettre.",
+      livesLeft = "Vies :",
+      newWord = "Nouveau mot",
+      youWon = "Trouvé !",
+      youLost = "Plus d'essais."
+    ),
     dice = Dice(
       name = "Dés virtuels",
       description = "Lancez des dés quand vous avez perdu les vrais",
@@ -516,6 +617,25 @@ object Strings:
       description = "Das klassische Kartenspiel für eine Person.",
       undo = "Rückgängig",
       newGame = "Neues Spiel"
+    ),
+    memory = Memory(
+      name = "Memory",
+      description = "Finde die passenden Paare. Reihum.",
+      turn = "Zug",
+      wins = "gewinnt!",
+      chooseVariant = "Größe wählen",
+      changeVariant = "Größe ändern",
+      easy = MemoryVariant("Leicht", "6 Paare — kurze Runde."),
+      medium = MemoryVariant("Mittel", "8 Paare — echtes Spiel."),
+      hard = MemoryVariant("Schwer", "12 Paare — für scharfe Augen.")
+    ),
+    hangman = Hangman(
+      name = "Galgenmännchen",
+      description = "Errate das Wort, Buchstabe für Buchstabe.",
+      livesLeft = "Leben:",
+      newWord = "Neues Wort",
+      youWon = "Geschafft!",
+      youLost = "Keine Versuche mehr."
     ),
     dice = Dice(
       name = "Virtuelle Würfel",

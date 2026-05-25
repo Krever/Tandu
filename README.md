@@ -1,9 +1,13 @@
 TODO:
 
 * e2e tests
-* battleships printing
+* printing
+  * battleships
+  * memory
 * url routing
-* multi language picker
 * scalafmt, linter
 * CI/CD
 * P2P cooperation
+* filtering
+  * num of player
+  * online/offline

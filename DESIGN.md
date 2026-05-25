@@ -57,25 +57,83 @@ custom-activity form labels — must be available in both.
 Each activity has a **support level** that determines what the activity
 screen offers:
 
-| Activity     | Support level                         |
-|--------------|---------------------------------------|
-| Tic-tac-toe  | In-app, pass-and-play                 |
-| Solitaire    | In-app                                |
-| Memory       | In-app, pass-and-play                 |
-| Hangman      | In-app (built-in word bank)           |
-| Checkers     | In-app, pass-and-play                 |
-| Battleships  | In-app *or* printable board           |
-| 20 questions | In-app guided (timer, question count) |
-| Chess        | Idea only + link to lichess/chesskid  |
+| Activity          | Support level                                |
+|-------------------|----------------------------------------------|
+| Tic-tac-toe       | In-app, pass-and-play                        |
+| Solitaire         | In-app                                       |
+| Memory            | In-app, pass-and-play                        |
+| Hangman           | In-app (built-in word bank)                  |
+| Checkers          | In-app, pass-and-play                        |
+| Battleships       | In-app *or* printable board                  |
+| 20 questions      | In-app guided (timer, question count)        |
+| Chess             | Idea only + link to lichess/chesskid         |
+| Word association  | Prompt (seed word from bank, optional timer) |
+| Story building    | Prompt (seed sentence/word, turn indicator)  |
 
 Support levels:
 
 - **idea-only** — title, description, "go play".
 - **printable** — render a board/sheet to print or screenshot.
 - **external** — deep link to another site/app.
+- **prompt** — app supplies starting content (a word, a category, a
+  seed sentence) and optionally a timer or turn cue; the game itself is
+  played verbally. Good for hands-busy contexts like the car.
 - **in-app** — fully playable inside Tandu.
 
 A single activity can combine these (battleships = printable + in-app).
+
+### Notes on verbal games
+
+- **Word association**: app shows a starting word
+  drawn from a per-language bank. Players take turns saying the first
+  word that comes to mind. Optional round timer; optional "next seed"
+  button when the chain dies.
+- **Story building**: app shows a seed (a sentence opener, a single
+  word, or a "who / where / what" trio). Players add one word, one
+  sentence, or one paragraph at a time — granularity is outr of app choice.
+
+## Tags / contexts
+
+Activities differ in what they require from the player — a flat surface,
+a screen, two hands, the ability to look at the phone. We want to be
+able to ask the app "what can we play *right now*, in *this* situation?"
+without scrolling past everything that doesn't fit.
+
+The concrete schema is not settled (single tag, multi-tag, structured
+"requires" fields, etc.) — what matters for design is that each activity
+carries enough metadata to be filtered by context. Likely dimensions:
+
+- **Setting** — at a table, on the couch, in the car, outdoors, waiting
+  in a queue.
+- **Attention on phone** — required (memory, tic-tac-toe), helpful
+  (20 questions, hangman), none (word association, story building).
+- **Materials** — none, paper + pen, printed board, dice (covered by
+  the in-app tool), cards.
+- **Player count** — solo, two, two-plus.
+- **Rough age band** — to be added later (see non-goals).
+
+This unlocks features like a **"Car games"** entry point (filter:
+setting=car, attention=none) that only suggests verbal/prompt-style
+activities, and lets *Suggest activity* be scoped by context instead of
+picking blindly from the whole catalog.
+
+### Other car-friendly activities worth adding
+
+Not committed to building, but the obvious candidates once tags exist:
+
+- **Categories** (*gra w państwa-miasta* style, but freeform) — app picks a category ("animals starting with K",
+  "things that are blue"), players take turns naming items until
+  someone repeats or stalls.
+- **Last letter** —
+  app picks a starting word; each next word must start with the last
+  letter of the previous one.
+- **I spy** (*widzę coś na literę…*) — app picks the letter or color;
+  one player spots, others guess.
+- **Would you rather** — app draws a kid-appropriate dilemma from a
+  bank; everyone answers and discusses.
+- **Riddles** — app shows a riddle, players guess; tap to reveal.
+- **License plate words** — app prompts "make a phrase from these
+  three letters"; players invent the funniest one.
 
 ## Tools
 

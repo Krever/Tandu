@@ -27,14 +27,23 @@ object Components:
     )
 
   def langToggle(): HtmlElement =
+    val options = Lang.values.toList.map(l => (l, Val(l.code.toUpperCase)))
+    segmentedToggle("lang-toggle", "lang-btn", options, AppState.lang)
+
+  def segmentedToggle[A](
+      containerCls: String,
+      btnCls: String,
+      options: List[(A, Signal[String])],
+      selected: Var[A]
+  ): HtmlElement =
     div(
-      cls := "lang-toggle",
-      Lang.values.toList.map: l =>
+      cls := containerCls,
+      options.map: (value, label) =>
         button(
-          cls := "lang-btn",
-          cls("is-active") <-- AppState.lang.signal.map(_ == l),
-          l.code.toUpperCase,
-          onClick --> (_ => AppState.lang.set(l))
+          cls := btnCls,
+          cls("is-active") <-- selected.signal.map(_ == value),
+          child.text <-- label,
+          onClick --> (_ => selected.set(value))
         )
     )
 

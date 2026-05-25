@@ -50,7 +50,21 @@ final case class Strings(
     player: String,
     player1: String,
     player2: String,
-    confirm: String
+    confirm: String,
+    // categories / filter pill
+    catAll: String,
+    catTabletop: String,
+    catCar: String,
+    // word association
+    waName: String,
+    waDesc: String,
+    waHint: String,
+    waNextWord: String,
+    // categories game
+    cgName: String,
+    cgDesc: String,
+    cgHint: String,
+    cgNext: String
 )
 
 object Strings:
@@ -100,7 +114,18 @@ object Strings:
     player = "Player",
     player1 = "Player 1",
     player2 = "Player 2",
-    confirm = "OK"
+    confirm = "OK",
+    catAll = "All",
+    catTabletop = "At home",
+    catCar = "In the car",
+    waName = "Word association",
+    waDesc = "Say the first word that pops into your head.",
+    waHint = "Take turns. Each player says the first word the previous one brings to mind.",
+    waNextWord = "New word",
+    cgName = "Categories",
+    cgDesc = "Name things in a category, all starting with a given letter.",
+    cgHint = "Take turns. Whoever stalls or repeats loses the round.",
+    cgNext = "New round"
   )
 
   val pl: Strings = Strings(
@@ -149,7 +174,18 @@ object Strings:
     player = "Gracz",
     player1 = "Gracz 1",
     player2 = "Gracz 2",
-    confirm = "OK"
+    confirm = "OK",
+    catAll = "Wszystkie",
+    catTabletop = "W domu",
+    catCar = "W aucie",
+    waName = "Skojarzenia",
+    waDesc = "Powiedz pierwsze słowo, które przychodzi ci do głowy.",
+    waHint = "Grajcie po kolei. Każdy mówi pierwsze słowo, które kojarzy mu się z poprzednim.",
+    waNextWord = "Nowe słowo",
+    cgName = "Kategorie",
+    cgDesc = "Wymieniajcie rzeczy z kategorii, wszystkie na podaną literę.",
+    cgHint = "Po kolei. Kto się zatnie albo powtórzy — przegrywa rundę.",
+    cgNext = "Nowa runda"
   )
 
   def of(lang: Lang): Strings = lang match

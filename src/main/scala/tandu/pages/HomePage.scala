@@ -1,8 +1,8 @@
 package tandu.pages
 
 import com.raquo.laminar.api.L.*
-import tandu.{AppState, Page, Routing}
-import tandu.activities.Registry
+import tandu.{Page, Routing}
+import tandu.activities.{Category, Registry}
 import tandu.tools.Tools
 import tandu.ui.Components
 import tandu.ui.Components.s
@@ -10,24 +10,34 @@ import tandu.ui.Components.s
 object HomePage:
 
   def render(): HtmlElement =
+    val filter: Var[Option[Category]] = Var(None)
+
     div(
       cls := "app stack-lg",
       Components.header(s(_.appTitle), back = None),
       Components.primaryBig(
         s(_.suggestActivity),
-        Routing.go(Page.Activity(Registry.pickRandom().id))
+        Routing.go(Page.Activity(Registry.pickRandom(filter.now()).id))
       ),
       sectionTag(
         cls := "stack",
-        h2(cls := "h2", child.text <-- s(_.activities)),
+        div(
+          cls := "row",
+          styleAttr := "justify-content: space-between; align-items: center;",
+          h2(cls := "h2", child.text <-- s(_.activities)),
+          categoryPill(filter)
+        ),
         div(
           cls := "stack",
-          Registry.all.map: a =>
-            Components.tile(
-              s(a.name),
-              s(a.description),
-              Routing.go(Page.Activity(a.id))
-            )
+          children <-- filter.signal.map { c =>
+            Registry.filtered(c).map { a =>
+              Components.tile(
+                s(a.name),
+                s(a.description),
+                Routing.go(Page.Activity(a.id))
+              )
+            }
+          }
         )
       ),
       sectionTag(
@@ -44,3 +54,9 @@ object HomePage:
         )
       )
     )
+
+  private def categoryPill(filter: Var[Option[Category]]): HtmlElement =
+    val options: List[(Option[Category], Signal[String])] =
+      (None, s(_.catAll)) ::
+        Category.values.toList.map(c => (Some(c), s(c.label)))
+    Components.segmentedToggle("pill-toggle no-print", "pill-btn", options, filter)

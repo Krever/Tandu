@@ -1,0 +1,46 @@
+package tandu.activities
+
+import com.raquo.laminar.api.L.*
+import tandu.AppState
+import tandu.i18n.{Lang, Strings}
+import tandu.ui.Components.s
+
+object WordAssociation extends Activity:
+  val id = "word-association"
+  def name(s: Strings): String = s.waName
+  def description(s: Strings): String = s.waDesc
+  val categories: Set[Category] = Set(Category.Car)
+
+  private def pickWord(lang: Lang, avoid: Option[String]): String =
+    Picker.pickAvoiding(WordBank.forLang(lang), avoid)
+
+  def render(): HtmlElement =
+    val currentWord: Var[String] = Var(pickWord(AppState.lang.now(), avoid = None))
+
+    def next(): Unit =
+      currentWord.update(prev => pickWord(AppState.lang.now(), avoid = Some(prev)))
+
+    // If the user switches language while on the page, draw a fresh
+    // seed word from the new language's bank.
+    val langChange = AppState.lang.signal.changes --> { lang =>
+      currentWord.set(pickWord(lang, avoid = None))
+    }
+
+    div(
+      cls := "stack-lg",
+      langChange,
+      p(cls := "muted center", child.text <-- s(_.waHint)),
+      div(
+        cls := "wa-card",
+        child.text <-- currentWord.signal
+      ),
+      div(
+        cls := "row no-print",
+        styleAttr := "justify-content: center;",
+        button(
+          cls := "btn btn--lg",
+          child.text <-- s(_.waNextWord),
+          onClick --> (_ => next())
+        )
+      )
+    )

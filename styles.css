@@ -112,14 +112,16 @@ select { font-family: inherit; font-size: inherit; }
 .big { font-size: 56px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
 .bigger { font-size: 96px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
 
-.lang-toggle {
+.lang-toggle,
+.pill-toggle {
   display: inline-flex;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-surface);
 }
-.lang-toggle button {
+.lang-toggle button,
+.pill-toggle .pill-btn {
   background: transparent;
   border: 0;
   padding: var(--space-2) var(--space-3);
@@ -128,7 +130,8 @@ select { font-family: inherit; font-size: inherit; }
   cursor: pointer;
   min-height: 40px;
 }
-.lang-toggle button.is-active {
+.lang-toggle button.is-active,
+.pill-toggle .pill-btn.is-active {
   background: var(--color-primary);
   color: var(--color-primary-text);
 }
@@ -307,6 +310,47 @@ label.field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; 
 label.field select { padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); min-height: 40px; }
 
 .spacer { flex: 1; }
+
+.wa-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-7) var(--space-4);
+  min-height: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: var(--color-text);
+  word-break: break-word;
+}
+/* Phrase variant for multi-word prompts (e.g. categories) — smaller
+   type so they fit without wrapping awkwardly. */
+.wa-card--phrase { font-size: 32px; letter-spacing: 0; min-height: 140px; }
+/* Single-letter variant — oversized, accent-colored, readable across
+   the back seat. */
+.wa-card--letter {
+  font-size: 120px;
+  line-height: 1;
+  color: var(--color-primary);
+  min-height: 180px;
+}
+
+/* Categories game: phrase + letter shown side-by-side. Equal width so
+   both halves carry visual weight; cards stretch to match the taller
+   card's height. Type sizes are tuned for narrower columns. */
+.cg-round {
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+.cg-round > .wa-card { flex: 1 1 0; padding: var(--space-5) var(--space-3); }
+.cg-round > .wa-card--phrase { font-size: 26px; min-height: 0; }
+.cg-round > .wa-card--letter { font-size: 96px; min-height: 0; }
 
 @media print {
   .no-print { display: none !important; }

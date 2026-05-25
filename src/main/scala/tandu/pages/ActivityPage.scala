@@ -27,7 +27,7 @@ object ActivityPage:
         cls := "no-print",
         Components.ghost(
           s(_.suggestAnother),
-          Routing.replace(Page.Activity(Registry.pickRandom().id))
+          Routing.replace(Page.Activity(Registry.pickRandom(None).id))
         )
       )
     )

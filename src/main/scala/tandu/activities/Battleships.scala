@@ -13,6 +13,7 @@ object Battleships extends Activity:
   val id = "battleships"
   def name(s: Strings): String = s.bsName
   def description(s: Strings): String = s.bsDesc
+  val categories: Set[Category] = Set(Category.Tabletop)
 
   private val Size = 10
   // Polish variant: 1×4, 2×3, 3×2, 4×1 — placed largest first so big ships find space.

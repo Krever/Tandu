@@ -3,15 +3,22 @@ package tandu.activities
 import scala.util.Random
 
 object Registry:
-  val all: List[Activity] = List(Battleships, TicTacToe)
+  val all: List[Activity] = List(Battleships, TicTacToe, WordAssociation, Categories)
 
   def byId(id: String): Option[Activity] = all.find(_.id == id)
 
+  def filtered(category: Option[Category]): List[Activity] = category match
+    case None    => all
+    case Some(c) => all.filter(_.categories.contains(c))
+
   private var lastPicked: Option[String] = None
 
-  def pickRandom(): Activity =
-    val candidates = all.filterNot(a => lastPicked.contains(a.id))
-    val pool = if candidates.isEmpty then all else candidates
+  private def orFallback[A](xs: List[A], fallback: List[A]): List[A] =
+    if xs.isEmpty then fallback else xs
+
+  def pickRandom(category: Option[Category]): Activity =
+    val byCategory = orFallback(filtered(category), all)
+    val pool = orFallback(byCategory.filterNot(a => lastPicked.contains(a.id)), byCategory)
     val pick = pool(Random.nextInt(pool.size))
     lastPicked = Some(pick.id)
     pick

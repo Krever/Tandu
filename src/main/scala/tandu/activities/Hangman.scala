@@ -102,11 +102,7 @@ object Hangman extends Activity:
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",
-        button(
-          cls := "btn",
-          child.text <-- s(_.hangman.newWord),
-          onClick --> (_ => nextWord())
-        )
+        Components.replayButton(s(_.hangman.newWord), nextWord(), state.signal.map(_.finished))
       )
     )
 

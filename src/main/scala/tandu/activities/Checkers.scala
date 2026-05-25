@@ -3,6 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
+import tandu.ui.Components
 import tandu.ui.Components.s
 
 object Checkers extends Activity:
@@ -200,10 +201,6 @@ object Checkers extends Activity:
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",
-        button(
-          cls := "btn btn--player",
-          child.text <-- s(_.common.playAgain),
-          onClick --> (_ => reset())
-        )
+        Components.replayButton(s(_.common.playAgain), reset(), state.signal.map(_.winner.isDefined))
       )
     )

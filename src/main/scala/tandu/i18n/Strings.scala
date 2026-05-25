@@ -14,6 +14,9 @@ final case class Strings(
     memory: Strings.Memory,
     hangman: Strings.Hangman,
     checkers: Strings.Checkers,
+    chess: Strings.Chess,
+    twentyQuestions: Strings.TwentyQuestions,
+    storyBuilding: Strings.StoryBuilding,
     dice: Strings.Dice
 )
 
@@ -129,6 +132,40 @@ object Strings:
       turn: String
   )
 
+  final case class Chess(
+      name: String,
+      description: String,
+      turn: String,
+      check: String
+  )
+
+  final case class TwentyQuestions(
+      name: String,
+      description: String,
+      hint: String,
+      hidden: String,
+      reveal: String,
+      hide: String,
+      questionsLeft: String,
+      askedOne: String,
+      undo: String,
+      outOfQuestions: String,
+      newWord: String
+  )
+
+  final case class StoryBuilding(
+      name: String,
+      description: String,
+      hint: String,
+      howTitle: String,
+      step1: String,
+      step2: String,
+      step3: String,
+      variantsTitle: String,
+      variantWord: String,
+      variantSentence: String
+  )
+
   final case class Dice(
       name: String,
       description: String,
@@ -234,6 +271,37 @@ object Strings:
       name = "Checkers",
       description = "Capture all the other player's pieces, or block them in.",
       turn = "Turn"
+    ),
+    chess = Chess(
+      name = "Chess",
+      description = "The classic strategy game.",
+      turn = "Turn",
+      check = "Check!"
+    ),
+    twentyQuestions = TwentyQuestions(
+      name = "20 questions",
+      description = "One player thinks of a thing. The others have 20 yes/no questions to guess it.",
+      hint = "Keeper: tap reveal to peek at the word, then hide it. Tap \"Asked!\" each time a question is asked.",
+      hidden = "🤫 hidden",
+      reveal = "Reveal",
+      hide = "Hide",
+      questionsLeft = "Questions left:",
+      askedOne = "Asked!",
+      undo = "−1",
+      outOfQuestions = "Out of questions! Last guess wins or loses.",
+      newWord = "New word"
+    ),
+    storyBuilding = StoryBuilding(
+      name = "Story building",
+      description = "Make up a story together, one piece at a time.",
+      hint = "No app help — just rules. Take turns and see where the story goes.",
+      howTitle = "How to play",
+      step1 = "Someone starts with one piece — a word or a sentence.",
+      step2 = "Going around, each person adds one more piece that continues the story.",
+      step3 = "Try to keep it making sense. Laugh when it doesn't.",
+      variantsTitle = "Choose a granularity",
+      variantWord = "One word each — quick, chaotic, great for short bursts.",
+      variantSentence = "One sentence each — slower, builds a longer story."
     ),
     dice = Dice(
       name = "Virtual dice",
@@ -342,6 +410,37 @@ object Strings:
       description = "Zbij wszystkie pionki przeciwnika albo go zablokuj.",
       turn = "Tura"
     ),
+    chess = Chess(
+      name = "Szachy",
+      description = "Klasyczna gra strategiczna.",
+      turn = "Tura",
+      check = "Szach!"
+    ),
+    twentyQuestions = TwentyQuestions(
+      name = "20 pytań",
+      description = "Ktoś wymyśla rzecz. Reszta zgaduje, zadając 20 pytań tak/nie.",
+      hint = "Trzymający hasło: stuknij „Pokaż\", podejrzyj słowo i ukryj. Stukaj „Pytanie!\" przy każdym pytaniu.",
+      hidden = "🤫 ukryte",
+      reveal = "Pokaż",
+      hide = "Ukryj",
+      questionsLeft = "Pytań zostało:",
+      askedOne = "Pytanie!",
+      undo = "−1",
+      outOfQuestions = "Koniec pytań! Czas zgadywać.",
+      newWord = "Nowe słowo"
+    ),
+    storyBuilding = StoryBuilding(
+      name = "Budowanie historii",
+      description = "Wymyślcie wspólnie historię, kawałek po kawałku.",
+      hint = "Bez pomocy aplikacji — same zasady. Po kolei, zobaczcie, dokąd zaprowadzi was opowieść.",
+      howTitle = "Jak grać",
+      step1 = "Ktoś zaczyna — jednym słowem albo jednym zdaniem.",
+      step2 = "Po kolei każdy dodaje kolejny kawałek, który ciągnie historię dalej.",
+      step3 = "Starajcie się, żeby miało sens. Śmiejcie się, gdy nie ma.",
+      variantsTitle = "Wybierzcie wariant",
+      variantWord = "Po jednym słowie — szybko, chaotycznie, świetne na krótkie zabawy.",
+      variantSentence = "Po jednym zdaniu — wolniej, ale powstaje dłuższa opowieść."
+    ),
     dice = Dice(
       name = "Wirtualne kości",
       description = "Rzucaj kośćmi, gdy prawdziwe się zgubiły",
@@ -448,6 +547,37 @@ object Strings:
       name = "Damas",
       description = "Captura todas las piezas del otro jugador o bloquéalo.",
       turn = "Turno"
+    ),
+    chess = Chess(
+      name = "Ajedrez",
+      description = "El clásico juego de estrategia.",
+      turn = "Turno",
+      check = "¡Jaque!"
+    ),
+    twentyQuestions = TwentyQuestions(
+      name = "20 preguntas",
+      description = "Alguien piensa una cosa. Los demás tienen 20 preguntas de sí/no para adivinar.",
+      hint = "El que sabe: toca \"Mostrar\" para ver la palabra y vuelve a ocultarla. Toca \"¡Preguntado!\" en cada pregunta.",
+      hidden = "🤫 oculto",
+      reveal = "Mostrar",
+      hide = "Ocultar",
+      questionsLeft = "Preguntas restantes:",
+      askedOne = "¡Preguntado!",
+      undo = "−1",
+      outOfQuestions = "¡Sin preguntas! Toca adivinar.",
+      newWord = "Nueva palabra"
+    ),
+    storyBuilding = StoryBuilding(
+      name = "Construir una historia",
+      description = "Inventad una historia juntos, trozo a trozo.",
+      hint = "Sin ayuda de la app — solo las reglas. Por turnos, a ver adónde llega la historia.",
+      howTitle = "Cómo jugar",
+      step1 = "Alguien empieza con un trozo — una palabra o una frase.",
+      step2 = "Por turnos, cada cual añade otro trozo que continúa la historia.",
+      step3 = "Intentad que tenga sentido. Reíd cuando no lo tenga.",
+      variantsTitle = "Elegid la unidad",
+      variantWord = "Una palabra cada uno — rápido, caótico, ideal para ratos cortos.",
+      variantSentence = "Una frase cada uno — más lento, pero crece una historia más larga."
     ),
     dice = Dice(
       name = "Dados virtuales",
@@ -556,6 +686,37 @@ object Strings:
       description = "Capturez toutes les pièces de l'adversaire ou bloquez-le.",
       turn = "Tour"
     ),
+    chess = Chess(
+      name = "Échecs",
+      description = "Le classique jeu de stratégie.",
+      turn = "Tour",
+      check = "Échec !"
+    ),
+    twentyQuestions = TwentyQuestions(
+      name = "20 questions",
+      description = "Quelqu'un pense à une chose. Les autres ont 20 questions oui/non pour deviner.",
+      hint = "Le maître du mot : touche « Révéler » pour jeter un œil, puis cache. Touche « Posée ! » à chaque question.",
+      hidden = "🤫 caché",
+      reveal = "Révéler",
+      hide = "Cacher",
+      questionsLeft = "Questions restantes :",
+      askedOne = "Posée !",
+      undo = "−1",
+      outOfQuestions = "Plus de questions ! À vous de deviner.",
+      newWord = "Nouveau mot"
+    ),
+    storyBuilding = StoryBuilding(
+      name = "Histoire à plusieurs",
+      description = "Inventez une histoire ensemble, morceau par morceau.",
+      hint = "Pas d'aide de l'app — juste les règles. Chacun son tour, voyez où l'histoire vous emmène.",
+      howTitle = "Comment jouer",
+      step1 = "Quelqu'un commence par un morceau — un mot ou une phrase.",
+      step2 = "Chacun son tour ajoute un morceau qui continue l'histoire.",
+      step3 = "Essayez que ça ait du sens. Riez quand ça en a plus.",
+      variantsTitle = "Choisissez l'unité",
+      variantWord = "Un mot chacun — rapide, chaotique, parfait pour les courtes parties.",
+      variantSentence = "Une phrase chacun — plus lent, mais ça donne une vraie histoire."
+    ),
     dice = Dice(
       name = "Dés virtuels",
       description = "Lancez des dés quand vous avez perdu les vrais",
@@ -662,6 +823,37 @@ object Strings:
       name = "Dame",
       description = "Schlage alle Steine des Gegners oder blockiere ihn.",
       turn = "Zug"
+    ),
+    chess = Chess(
+      name = "Schach",
+      description = "Das klassische Strategiespiel.",
+      turn = "Zug",
+      check = "Schach!"
+    ),
+    twentyQuestions = TwentyQuestions(
+      name = "20 Fragen",
+      description = "Eine Person denkt sich eine Sache aus. Die anderen haben 20 Ja/Nein-Fragen, um sie zu erraten.",
+      hint = "Wortgeber: Tippe „Zeigen\", schau das Wort an und versteck es wieder. Tippe „Gefragt!\" bei jeder Frage.",
+      hidden = "🤫 versteckt",
+      reveal = "Zeigen",
+      hide = "Verstecken",
+      questionsLeft = "Fragen übrig:",
+      askedOne = "Gefragt!",
+      undo = "−1",
+      outOfQuestions = "Keine Fragen mehr! Jetzt raten.",
+      newWord = "Neues Wort"
+    ),
+    storyBuilding = StoryBuilding(
+      name = "Geschichte bauen",
+      description = "Erfindet zusammen eine Geschichte, Stück für Stück.",
+      hint = "Keine App-Hilfe — nur Regeln. Reihum, und schaut, wohin die Geschichte führt.",
+      howTitle = "So geht's",
+      step1 = "Jemand beginnt mit einem Stück — einem Wort oder einem Satz.",
+      step2 = "Reihum hängt jede:r ein weiteres Stück an, das die Geschichte fortsetzt.",
+      step3 = "Versucht, dass es Sinn ergibt. Lacht, wenn nicht.",
+      variantsTitle = "Wählt die Einheit",
+      variantWord = "Ein Wort pro Person — schnell, chaotisch, ideal für kurze Runden.",
+      variantSentence = "Ein Satz pro Person — langsamer, dafür wird daraus eine längere Geschichte."
     ),
     dice = Dice(
       name = "Virtuelle Würfel",

@@ -157,11 +157,6 @@ object TicTacToe extends Activity:
         cls := "row no-print",
         styleAttr := "justify-content: center;",
         Components.ghost(s(_.ticTacToe.changeVariant), onBack()),
-        button(
-          cls := "btn btn--player",
-          child.text <-- s(_.common.playAgain),
-          disabled <-- finished.map(!_),
-          onClick --> (_ => reset())
-        )
+        Components.replayButton(s(_.common.playAgain), reset(), finished)
       )
     )

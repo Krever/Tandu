@@ -186,11 +186,7 @@ object Memory extends Activity:
         cls := "row no-print",
         styleAttr := "justify-content: center;",
         Components.ghost(s(_.memory.changeVariant), onBack()),
-        button(
-          cls := "btn btn--player",
-          child.text <-- s(_.common.playAgain),
-          onClick --> (_ => reset())
-        )
+        Components.replayButton(s(_.common.playAgain), reset(), state.signal.map(_.finished))
       )
     )
 

@@ -65,9 +65,9 @@ screen offers:
 | Hangman           | In-app (built-in word bank)                  |
 | Checkers          | In-app, pass-and-play                        |
 | Battleships       | In-app *or* printable board                  |
-| 20 questions      | In-app guided (timer, question count)        |
 | Chess             | Idea only + link to lichess/chesskid         |
 | Word association  | Prompt (seed word from bank, optional timer) |
+| 20 questions      | In-app guided (timer, question count)        |
 | Story building    | Prompt (seed sentence/word, turn indicator)  |
 
 Support levels:
@@ -82,15 +82,6 @@ Support levels:
 
 A single activity can combine these (battleships = printable + in-app).
 
-### Notes on verbal games
-
-- **Word association**: app shows a starting word
-  drawn from a per-language bank. Players take turns saying the first
-  word that comes to mind. Optional round timer; optional "next seed"
-  button when the chain dies.
-- **Story building**: app shows a seed (a sentence opener, a single
-  word, or a "who / where / what" trio). Players add one word, one
-  sentence, or one paragraph at a time — granularity is outr of app choice.
 
 ## Tags / contexts
 

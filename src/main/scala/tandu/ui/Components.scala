@@ -95,6 +95,15 @@ object Components:
       onClick --> (_ => onTap)
     )
 
+  def replayButton(label: Signal[String], onTap: => Unit, finished: Signal[Boolean]): HtmlElement =
+    button(
+      cls := "btn",
+      cls("btn--ghost") <-- finished.map(!_).distinct,
+      cls("btn--player") <-- finished.distinct,
+      child.text <-- label,
+      onClick --> (_ => onTap)
+    )
+
   def primary(label: Signal[String], onTap: => Unit, isDisabled: Signal[Boolean] = Val(false)): HtmlElement =
     button(
       cls := "btn",

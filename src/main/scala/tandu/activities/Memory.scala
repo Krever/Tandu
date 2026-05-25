@@ -38,14 +38,6 @@ object Memory extends Activity:
     Variant("hard",  12,  4, _.memory.hard.name,   _.memory.hard.description)
   )
 
-  enum Player:
-    case P1, P2
-    def next: Player = this match { case P1 => P2; case P2 => P1 }
-    def num: Int = this match { case P1 => 1; case P2 => 2 }
-    def labelKey(str: Strings): String = this match
-      case P1 => str.common.player1
-      case P2 => str.common.player2
-
   final case class CardState(emoji: String, faceUp: Boolean, matched: Boolean)
 
   enum Phase:
@@ -123,7 +115,7 @@ object Memory extends Activity:
             val cleared = cur.cards
               .updated(a, cur.cards(a).copy(faceUp = false))
               .updated(b, cur.cards(b).copy(faceUp = false))
-            state.set(cur.copy(cards = cleared, phase = Phase.Idle, turn = cur.turn.next))
+            state.set(cur.copy(cards = cleared, phase = Phase.Idle, turn = cur.turn.other))
           case _ => ()
       })
 

@@ -30,11 +30,6 @@ object Battleships extends Activity:
     def shipAt(c: Cell): Option[Ship] = ships.find(_.contains(c))
     def allSunk(shots: Set[Cell]): Boolean = occupied.subsetOf(shots)
 
-  enum Player:
-    case P1, P2
-    def other: Player = this match { case P1 => P2; case P2 => P1 }
-    def num: Int = this match { case P1 => 1; case P2 => 2 }
-
   enum ShotResult:
     case Miss, Hit, Sunk
 

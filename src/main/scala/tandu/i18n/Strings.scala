@@ -2,10 +2,15 @@ package tandu.i18n
 
 final case class Strings(
     appTitle: String,
+    tagline: String,
     common: Strings.Common,
     home: Strings.Home,
     category: Strings.CategoryLabels,
     about: Strings.About,
+    mode: Strings.Mode,
+    printable: Strings.Printable,
+    timer: Strings.Timer,
+    offline: Strings.Offline,
     ticTacToe: Strings.TicTacToe,
     battleships: Strings.Battleships,
     wordAssociation: Strings.WordAssociation,
@@ -53,6 +58,123 @@ object Strings:
       open: String,
       title: String,
       body: String
+  )
+
+  final case class Mode(
+      choose: String,
+      inApp: String,
+      offline: String,
+      lichess: String,
+      external: String
+  )
+
+  final case class Printable(
+      print: String,
+      printMaps: String,
+      printRules: String
+  )
+
+  final case class Timer(
+      name: String,
+      description: String,
+      start: String,
+      pause: String,
+      restart: String
+  )
+
+  final case class Materials(
+      paperPen: String,
+      printer: String,
+      scissors: String,
+      laminatorOptional: String,
+      deck52: String,
+      chessBoard: String,
+      checkersBoard: String,
+      board: String,
+      none: String
+  )
+
+  final case class Rules(
+      title: String,
+      lines: List[String]
+  )
+
+  final case class BattleshipsOff(
+      printTitle: String,
+      ownLabel: String,
+      enemyLabel: String,
+      fleetTitle: String,
+      fleetLine: String,
+      rules: Rules,
+      modeAsk: String
+  )
+
+  final case class MemoryOff(
+      printTitle: String,
+      cutHint: String,
+      materialsHint: String,
+      rules: Rules
+  )
+
+  final case class HangmanOff(
+      keeperTitle: String,
+      keeperHint: String,
+      reveal: String,
+      hide: String,
+      tap: String,
+      categorySetting: String,
+      categoryAny: String,
+      categoryAnimals: String,
+      categoryFoods: String,
+      categoryCountries: String,
+      drawHint: String,
+      rules: Rules,
+      gallowsTitle: String
+  )
+
+  final case class ChessOff(
+      rules: Rules,
+      pieces: Rules,
+      specials: Rules,
+      printTitle: String,
+      lichessLabel: String
+  )
+
+  final case class TicTacToeOff(
+      rules: Rules,
+      gomokuTipTitle: String,
+      gomokuTip: String
+  )
+
+  final case class SolitaireOff(
+      rules: Rules,
+      setupExample: String
+  )
+
+  final case class CategoriesOff(
+      printTitle: String,
+      categoriesLabel: String,
+      lettersLabel: String,
+      scoresLabel: String,
+      curatedNote: String,
+      rules: Rules
+  )
+
+  final case class CheckersOff(
+      rules: Rules,
+      lichessLabel: String
+  )
+
+  final case class Offline(
+      materials: Materials,
+      battleships: BattleshipsOff,
+      memory: MemoryOff,
+      hangman: HangmanOff,
+      chess: ChessOff,
+      ticTacToe: TicTacToeOff,
+      solitaire: SolitaireOff,
+      categories: CategoriesOff,
+      checkers: CheckersOff
   )
 
   final case class TttVariant(name: String, description: String)
@@ -196,6 +318,7 @@ object Strings:
 
   val en: Strings = Strings(
     appTitle = "Tandu",
+    tagline = "Your time together",
     common = Common(
       back = "Back",
       playAgain = "Play again",
@@ -222,6 +345,146 @@ object Strings:
       open = "About",
       title = "About Tandu",
       body = "Tandu is a little helper for picking something fun to do with the kids. Tap \"Suggest activity\" for a random idea, or browse the list. Some games are playable in the app, others are prompts for things you do offline — perfect for the car, the couch, or a rainy afternoon."
+    ),
+    mode = Mode(
+      choose = "How do you want to play?",
+      inApp = "Play in app",
+      offline = "Play offline",
+      lichess = "Play online",
+      external = "Open online"
+    ),
+    printable = Printable(
+      print = "Print",
+      printMaps = "Print maps",
+      printRules = "Print rules"
+    ),
+    timer = Timer(
+      name = "Timer",
+      description = "Pick a duration and count down with a beep at the end",
+      start = "Start",
+      pause = "Pause",
+      restart = "Restart"
+    ),
+    offline = Offline(
+      materials = Materials(
+        paperPen = "paper + pen",
+        printer = "printer",
+        scissors = "scissors",
+        laminatorOptional = "laminator (optional, for reuse)",
+        deck52 = "standard 52-card deck",
+        chessBoard = "chess board + pieces",
+        checkersBoard = "checkers board + pieces",
+        board = "a flat surface",
+        none = "nothing — just imagination"
+      ),
+      battleships = BattleshipsOff(
+        printTitle = "Battleships — boards for two players",
+        ownLabel = "My fleet",
+        enemyLabel = "Enemy waters",
+        fleetTitle = "Fleet (Polish variant)",
+        fleetLine = "1 × 4-deck · 2 × 3-deck · 3 × 2-deck · 4 × 1-deck",
+        rules = Rules("How to play", List(
+          "Place your fleet in secret on the \"My fleet\" grid. Ships are placed horizontally or vertically; ships may not touch, not even diagonally.",
+          "Take turns calling shots by grid coordinates (letter + number). Mark hits with × and misses with · on the \"Enemy waters\" grid.",
+          "After a hit, call \"hit\" — the opponent answers \"sunk\" once the whole ship is down.",
+          "First player to sink the entire enemy fleet wins."
+        )),
+        modeAsk = "How do you want to play Battleships?"
+      ),
+      memory = MemoryOff(
+        printTitle = "Memory — cut out the cards",
+        cutHint = "Print the sheet, cut along the lines, shuffle face-down and play.",
+        materialsHint = "Print one sheet, cut along the lines. A laminator makes the cards reusable.",
+        rules = Rules("How to play", List(
+          "Shuffle the cards and lay them face-down in a grid.",
+          "Take turns. Flip two cards: keep them if they match and go again; otherwise turn them back over.",
+          "The player with the most pairs when the table is empty wins."
+        ))
+      ),
+      hangman = HangmanOff(
+        keeperTitle = "Word for the keeper",
+        keeperHint = "Hold the phone, peek at the word, then hide it. The others guess letters and you draw the gallows on paper.",
+        reveal = "Show word",
+        hide = "Hide word",
+        tap = "Tap to reveal",
+        categorySetting = "Category",
+        categoryAny = "Any word",
+        categoryAnimals = "Animals",
+        categoryFoods = "Foods",
+        categoryCountries = "Countries",
+        drawHint = "Draw one body part of the hanged figure for each wrong letter.",
+        rules = Rules("How to play", List(
+          "One player thinks of a word (or the phone picks one) and draws blanks on paper — one blank per letter.",
+          "The others guess letters one at a time. Correct letters go on the blanks; wrong letters are listed off to the side.",
+          "Each wrong letter adds one body part to the gallows.",
+          "Win by completing the word before the figure is whole; lose if the figure is finished first."
+        )),
+        gallowsTitle = "Drawing the gallows"
+      ),
+      chess = ChessOff(
+        rules = Rules("How to play", List(
+          "Two players. White moves first; players alternate one move per turn.",
+          "Capture the opposing king (checkmate) to win.",
+          "A king under attack is \"in check\" — you must get out of check on the next move.",
+          "If you have no legal moves and you're not in check, the game is a draw (stalemate)."
+        )),
+        pieces = Rules("How the pieces move", List(
+          "Pawn: forward one square; two from its starting square. Captures diagonally one square.",
+          "Knight: L-shape — two then one, jumps over other pieces.",
+          "Bishop: any number of squares diagonally.",
+          "Rook: any number of squares in a straight line (horizontal or vertical).",
+          "Queen: any number of squares in any direction.",
+          "King: one square in any direction."
+        )),
+        specials = Rules("Special moves", List(
+          "Castling: king moves two squares toward a rook, the rook hops over to the other side. Allowed if neither piece has moved, no pieces are between them, and the king isn't crossing through check.",
+          "En passant: a pawn that has just moved two squares can be captured by an adjacent enemy pawn — but only on the very next move.",
+          "Promotion: a pawn that reaches the far rank becomes a queen (or rook/bishop/knight, your choice)."
+        )),
+        printTitle = "Chess — how the pieces move",
+        lichessLabel = "Open Lichess"
+      ),
+      ticTacToe = TicTacToeOff(
+        rules = Rules("How to play", List(
+          "Draw a 3×3 grid on paper.",
+          "Take turns marking X or O in empty squares.",
+          "First to get three in a row — horizontal, vertical, or diagonal — wins."
+        )),
+        gomokuTipTitle = "Mastered it?",
+        gomokuTip = "Try gomoku next: a bigger grid, get five in a row. Same idea, much more interesting."
+      ),
+      solitaire = SolitaireOff(
+        rules = Rules("Klondike — how to play", List(
+          "Deal seven tableau columns: 1, 2, 3, 4, 5, 6, 7 cards. Top card of each column face-up.",
+          "Remaining cards form the stock — flip one (or three) onto the waste pile.",
+          "Build the tableau down in alternating colors. Move sequences as a unit. An empty column accepts a king.",
+          "Build the foundations up by suit, Ace to King. Win when all four foundations are complete."
+        )),
+        setupExample = "Initial setup"
+      ),
+      categories = CategoriesOff(
+        printTitle = "Scattergories sheet",
+        categoriesLabel = "Category",
+        lettersLabel = "Letter",
+        scoresLabel = "Score",
+        curatedNote = "Three rounds, one letter per column. Fill in a word for every category that starts with that letter.",
+        rules = Rules("How to play", List(
+          "Each column has a letter at the top — that's the letter for the round.",
+          "Set a timer (about three minutes). Everyone tries to write one word per category that starts with that letter.",
+          "When time's up, compare answers: one point per unique answer; if two players wrote the same word, neither scores.",
+          "Play all three columns. Highest total wins."
+        ))
+      ),
+      checkers = CheckersOff(
+        rules = Rules("How to play", List(
+          "Each player has 12 pieces on the dark squares of the back three rows.",
+          "Move diagonally forward to an empty dark square. Capture by jumping over an adjacent enemy onto the empty square beyond.",
+          "If a capture is available you must take it; multi-jumps continue in one turn.",
+          "Reach the back row and your piece is \"crowned\" — a king can move and capture both forward and backward.",
+          "Win by capturing all enemy pieces or blocking them so they can't move."
+        )),
+        lichessLabel = "Open lidraughts"
+      )
     ),
     ticTacToe = TicTacToe(
       name = "Tic-tac-toe",
@@ -348,6 +611,7 @@ object Strings:
 
   val pl: Strings = Strings(
     appTitle = "Tandu",
+    tagline = "Wasz czas razem",
     common = Common(
       back = "Wstecz",
       playAgain = "Zagraj ponownie",
@@ -374,6 +638,146 @@ object Strings:
       open = "O aplikacji",
       title = "O Tandu",
       body = "Tandu to mały pomocnik, gdy szukacie pomysłu na zabawę z dziećmi. Stuknij „Zaproponuj zabawę\", żeby wylosować coś na chybił trafił, albo przeglądaj listę. Część gier zagrasz w aplikacji, inne to pomysły do zabawy offline — idealne do auta, na kanapę albo deszczowe popołudnie."
+    ),
+    mode = Mode(
+      choose = "Jak chcecie grać?",
+      inApp = "Gra w aplikacji",
+      offline = "Gra offline",
+      lichess = "Zagraj online",
+      external = "Otwórz online"
+    ),
+    printable = Printable(
+      print = "Drukuj",
+      printMaps = "Drukuj plansze",
+      printRules = "Drukuj zasady"
+    ),
+    timer = Timer(
+      name = "Stoper",
+      description = "Wybierz czas i odlicz, na końcu zabrzmi sygnał",
+      start = "Start",
+      pause = "Pauza",
+      restart = "Restart"
+    ),
+    offline = Offline(
+      materials = Materials(
+        paperPen = "kartka + długopis",
+        printer = "drukarka",
+        scissors = "nożyczki",
+        laminatorOptional = "laminator (opcjonalnie, do wielokrotnego użytku)",
+        deck52 = "talia 52 kart",
+        chessBoard = "szachownica + figury",
+        checkersBoard = "warcabnica + pionki",
+        board = "płaski stół",
+        none = "nic — sama wyobraźnia"
+      ),
+      battleships = BattleshipsOff(
+        printTitle = "Statki — plansze dla dwóch graczy",
+        ownLabel = "Moja flota",
+        enemyLabel = "Wody przeciwnika",
+        fleetTitle = "Flota (wariant polski)",
+        fleetLine = "1 × 4-masztowiec · 2 × 3-masztowce · 3 × 2-masztowce · 4 × 1-masztowce",
+        rules = Rules("Jak grać", List(
+          "Ustaw flotę w tajemnicy na planszy „Moja flota\". Statki stawia się poziomo lub pionowo; statki nie mogą się stykać, nawet po skosie.",
+          "Na zmianę podawajcie współrzędne (litera + cyfra). Trafienia oznaczcie ×, pudła kropką · na planszy „Wody przeciwnika\".",
+          "Po trafieniu mów „trafiony\" — przeciwnik odpowiada „zatopiony\", gdy cały statek pada.",
+          "Wygrywa ten, kto pierwszy zatopi całą flotę przeciwnika."
+        )),
+        modeAsk = "Jak chcecie zagrać w Statki?"
+      ),
+      memory = MemoryOff(
+        printTitle = "Memory — karty do wycięcia",
+        cutHint = "Wydrukujcie kartkę, wytnijcie po liniach, potasujcie odwrócone i grajcie.",
+        materialsHint = "Wydrukujcie jedną stronę, wytnijcie po liniach. Laminator sprawi, że karty będą wielokrotnego użytku.",
+        rules = Rules("Jak grać", List(
+          "Potasujcie karty i ułóżcie zakryte w siatce.",
+          "Na zmianę: odkryj dwie karty. Jeśli pasują — zatrzymujesz parę i grasz dalej; jeśli nie — odwracasz z powrotem.",
+          "Wygrywa osoba z największą liczbą par, gdy plansza jest pusta."
+        ))
+      ),
+      hangman = HangmanOff(
+        keeperTitle = "Słowo dla trzymającego telefon",
+        keeperHint = "Trzymasz telefon, podglądasz słowo i je chowasz. Reszta zgaduje litery, a wisielca rysujecie na kartce.",
+        reveal = "Pokaż słowo",
+        hide = "Ukryj słowo",
+        tap = "Stuknij, by pokazać",
+        categorySetting = "Kategoria",
+        categoryAny = "Dowolne słowo",
+        categoryAnimals = "Zwierzęta",
+        categoryFoods = "Jedzenie",
+        categoryCountries = "Państwa",
+        drawHint = "Za każdą złą literę dorysuj jedną część wisielca.",
+        rules = Rules("Jak grać", List(
+          "Ktoś wymyśla słowo (albo telefon je losuje) i rysuje na kartce kreski — po jednej na każdą literę.",
+          "Reszta zgaduje litery, jedną na raz. Trafione litery wpisz na kreski; pudła wypisz z boku.",
+          "Każde pudło dorysowuje kolejną część wisielca.",
+          "Wygrasz, jeśli ułożycie słowo, zanim rysunek się dokończy; przegrana — gdy wisielec gotowy."
+        )),
+        gallowsTitle = "Jak rysować szubienicę"
+      ),
+      chess = ChessOff(
+        rules = Rules("Jak grać", List(
+          "Dwóch graczy. Białe zaczynają; gracze wykonują po jednym ruchu na zmianę.",
+          "Wygrywasz dając mata królowi przeciwnika.",
+          "Król pod atakiem jest „w szachu\" — następny ruch musi go z szachu uwolnić.",
+          "Brak legalnych ruchów bez szacha to remis (pat)."
+        )),
+        pieces = Rules("Jak chodzą figury", List(
+          "Pion: do przodu o jedno pole; o dwa z pozycji startowej. Bije po skosie o jedno pole.",
+          "Skoczek: w kształcie litery L — dwa pola i jedno; może przeskakiwać inne figury.",
+          "Goniec: dowolna liczba pól po skosie.",
+          "Wieża: dowolna liczba pól w pionie lub poziomie.",
+          "Hetman: dowolna liczba pól w dowolnym kierunku.",
+          "Król: o jedno pole w dowolnym kierunku."
+        )),
+        specials = Rules("Ruchy specjalne", List(
+          "Roszada: król rusza się o dwa pola w stronę wieży, a wieża przeskakuje na drugą stronę króla. Wolno, jeśli żadna z figur się nie ruszała, między nimi jest pusto i król nie przechodzi przez pole bicia.",
+          "Bicie w przelocie: pion, który właśnie zrobił dwa kroki, może być zbity przez pion przeciwnika obok — tylko w następnym ruchu.",
+          "Promocja: pion, który dotrze do ostatniego rzędu, zamienia się w hetmana (lub wieżę/gońca/skoczka — do wyboru)."
+        )),
+        printTitle = "Szachy — jak chodzą figury",
+        lichessLabel = "Otwórz Lichess"
+      ),
+      ticTacToe = TicTacToeOff(
+        rules = Rules("Jak grać", List(
+          "Narysujcie siatkę 3×3 na kartce.",
+          "Na zmianę stawiajcie X lub O w pustym polu.",
+          "Pierwszy, który ułoży trzy w rzędzie — w poziomie, pionie lub po skosie — wygrywa."
+        )),
+        gomokuTipTitle = "Umiecie już?",
+        gomokuTip = "Spróbujcie gomoku: większa plansza, pięć w rzędzie. Ten sam pomysł, znacznie ciekawszy."
+      ),
+      solitaire = SolitaireOff(
+        rules = Rules("Klondike — jak grać", List(
+          "Rozłóżcie siedem kolumn: 1, 2, 3, 4, 5, 6, 7 kart. Górna karta każdej kolumny odkryta.",
+          "Pozostałe karty tworzą stos rezerwowy — odkrywajcie po jednej (lub po trzy) na stos odrzucony.",
+          "Na kolumnach buduj malejąco i naprzemiennie w kolorach. Sekwencję możesz przesunąć w całości. Pustą kolumnę zaczyna król.",
+          "Na fundamentach buduj rosnąco wg koloru, od asa do króla. Zwycięstwo, gdy wszystkie cztery fundamenty pełne."
+        )),
+        setupExample = "Początkowy układ"
+      ),
+      categories = CategoriesOff(
+        printTitle = "Państwa-Miasta — arkusz",
+        categoriesLabel = "Kategoria",
+        lettersLabel = "Litera",
+        scoresLabel = "Punkty",
+        curatedNote = "Trzy rundy, jedna litera na kolumnę. W każdej kategorii wpiszcie słowo zaczynające się na tę literę.",
+        rules = Rules("Jak grać", List(
+          "Każda kolumna ma na górze swoją literę — to litera tej rundy.",
+          "Włączcie czas (około 3 minuty). Każdy stara się wpisać po jednym haśle na kategorię, zaczynającym się na tę literę.",
+          "Po czasie porównajcie: punkt za unikalne hasło; jeśli dwie osoby wpisały to samo, nikt nie dostaje punktu.",
+          "Zagrajcie wszystkie trzy kolumny. Wygrywa największa suma."
+        ))
+      ),
+      checkers = CheckersOff(
+        rules = Rules("Jak grać", List(
+          "Każdy gracz ma 12 pionków na czarnych polach w trzech tylnych rzędach.",
+          "Pionek idzie po skosie do przodu na puste czarne pole. Bije, przeskakując sąsiada na puste pole za nim.",
+          "Bicie jest obowiązkowe; wielokrotne bicia kontynuuj w jednej turze.",
+          "Pionek, który dojdzie do ostatniego rzędu, zostaje damką — porusza się i bije w obie strony.",
+          "Wygrasz, zbijając wszystkie pionki przeciwnika lub blokując mu ruchy."
+        )),
+        lichessLabel = "Otwórz lidraughts"
+      )
     ),
     ticTacToe = TicTacToe(
       name = "Kółko i krzyżyk",
@@ -500,6 +904,7 @@ object Strings:
 
   val es: Strings = Strings(
     appTitle = "Tandu",
+    tagline = "Vuestro tiempo juntos",
     common = Common(
       back = "Atrás",
       playAgain = "Jugar otra vez",
@@ -526,6 +931,146 @@ object Strings:
       open = "Acerca de",
       title = "Acerca de Tandu",
       body = "Tandu es un pequeño ayudante para elegir algo divertido que hacer con los niños. Toca \"Sugerir actividad\" para una idea al azar, o explora la lista. Algunos juegos se juegan en la app, otros son ideas para hacer sin pantalla — perfectos para el coche, el sofá o una tarde lluviosa."
+    ),
+    mode = Mode(
+      choose = "¿Cómo queréis jugar?",
+      inApp = "Jugar en la app",
+      offline = "Jugar sin conexión",
+      lichess = "Jugar online",
+      external = "Abrir online"
+    ),
+    printable = Printable(
+      print = "Imprimir",
+      printMaps = "Imprimir tableros",
+      printRules = "Imprimir reglas"
+    ),
+    timer = Timer(
+      name = "Cronómetro",
+      description = "Elige una duración y haz cuenta atrás con un pitido al final",
+      start = "Empezar",
+      pause = "Pausa",
+      restart = "Reiniciar"
+    ),
+    offline = Offline(
+      materials = Materials(
+        paperPen = "papel + bolígrafo",
+        printer = "impresora",
+        scissors = "tijeras",
+        laminatorOptional = "plastificadora (opcional, para reutilizar)",
+        deck52 = "baraja de 52 cartas",
+        chessBoard = "tablero de ajedrez + piezas",
+        checkersBoard = "tablero de damas + fichas",
+        board = "una superficie plana",
+        none = "nada — solo imaginación"
+      ),
+      battleships = BattleshipsOff(
+        printTitle = "Hundir la flota — tableros para dos",
+        ownLabel = "Mi flota",
+        enemyLabel = "Aguas enemigas",
+        fleetTitle = "Flota (variante)",
+        fleetLine = "1 × 4 casillas · 2 × 3 casillas · 3 × 2 casillas · 4 × 1 casilla",
+        rules = Rules("Cómo se juega", List(
+          "Coloca tu flota en secreto en \"Mi flota\". Los barcos van en horizontal o vertical y no pueden tocarse, ni siquiera en diagonal.",
+          "Por turnos decid coordenadas (letra + número). Marca tocados con × y aguas con · en \"Aguas enemigas\".",
+          "Al tocar di \"tocado\"; cuando cae el barco entero di \"hundido\".",
+          "Gana quien hunda primero toda la flota enemiga."
+        )),
+        modeAsk = "¿Cómo queréis jugar a hundir la flota?"
+      ),
+      memory = MemoryOff(
+        printTitle = "Memoria — recorta las cartas",
+        cutHint = "Imprime la hoja, recorta por las líneas, baraja boca abajo y juega.",
+        materialsHint = "Imprime una hoja y recorta. Una plastificadora hace las cartas reutilizables.",
+        rules = Rules("Cómo se juega", List(
+          "Baraja las cartas y colócalas boca abajo en cuadrícula.",
+          "Por turnos. Da la vuelta a dos cartas: si son iguales, te las quedas y vuelves a jugar; si no, dales la vuelta.",
+          "Gana quien tenga más parejas cuando la mesa quede vacía."
+        ))
+      ),
+      hangman = HangmanOff(
+        keeperTitle = "Palabra para quien tiene el teléfono",
+        keeperHint = "Tienes el teléfono, miras la palabra y la ocultas. Los demás adivinan letras y dibujáis al ahorcado en papel.",
+        reveal = "Mostrar palabra",
+        hide = "Ocultar palabra",
+        tap = "Toca para mostrar",
+        categorySetting = "Categoría",
+        categoryAny = "Cualquier palabra",
+        categoryAnimals = "Animales",
+        categoryFoods = "Comidas",
+        categoryCountries = "Países",
+        drawHint = "Por cada letra fallada, dibuja una parte del ahorcado.",
+        rules = Rules("Cómo se juega", List(
+          "Alguien piensa una palabra (o la sortea el teléfono) y dibuja rayas en papel — una por letra.",
+          "Los demás van diciendo letras. Las acertadas se escriben en las rayas; las falladas se apuntan al lado.",
+          "Cada fallo añade una parte al dibujo.",
+          "Ganas si completas la palabra antes de terminar el dibujo; pierdes si el dibujo se completa."
+        )),
+        gallowsTitle = "Cómo dibujar la horca"
+      ),
+      chess = ChessOff(
+        rules = Rules("Cómo se juega", List(
+          "Dos jugadores. Blancas mueven primero; se alterna una jugada por turno.",
+          "Ganas dando jaque mate al rey rival.",
+          "Un rey atacado está en jaque — la próxima jugada debe salir del jaque.",
+          "Sin jugadas legales y sin estar en jaque: tablas (ahogado)."
+        )),
+        pieces = Rules("Cómo se mueven", List(
+          "Peón: uno hacia adelante; dos desde su casilla inicial. Captura en diagonal una casilla.",
+          "Caballo: en L — dos y uno, salta sobre otras piezas.",
+          "Alfil: cualquier número de casillas en diagonal.",
+          "Torre: cualquier número en línea recta.",
+          "Dama: cualquier número en cualquier dirección.",
+          "Rey: una casilla en cualquier dirección."
+        )),
+        specials = Rules("Movimientos especiales", List(
+          "Enroque: el rey se mueve dos casillas hacia una torre y la torre salta al otro lado. Si ninguno se ha movido, no hay piezas en medio y el rey no cruza por jaque.",
+          "Al paso: un peón que acaba de avanzar dos casillas puede ser capturado por el peón rival contiguo — solo en la jugada siguiente.",
+          "Coronación: un peón que llega al fondo se convierte en dama (o torre/alfil/caballo)."
+        )),
+        printTitle = "Ajedrez — cómo se mueven las piezas",
+        lichessLabel = "Abrir Lichess"
+      ),
+      ticTacToe = TicTacToeOff(
+        rules = Rules("Cómo se juega", List(
+          "Dibujad una cuadrícula 3×3 en papel.",
+          "Por turnos marcad X o O en una casilla vacía.",
+          "El primero que haga tres en raya — horizontal, vertical o diagonal — gana."
+        )),
+        gomokuTipTitle = "¿Lo dominas?",
+        gomokuTip = "Prueba gomoku: cuadrícula mayor, cinco en raya. La misma idea, mucho más interesante."
+      ),
+      solitaire = SolitaireOff(
+        rules = Rules("Klondike — cómo se juega", List(
+          "Reparte siete columnas: 1, 2, 3, 4, 5, 6, 7 cartas. La carta superior boca arriba.",
+          "Las restantes son el mazo; gira una (o tres) al descarte.",
+          "Construye en las columnas hacia abajo y alternando colores. Mueve secuencias enteras. Una columna vacía acepta un rey.",
+          "Construye los cimientos por palo, del as al rey. Ganas cuando los cuatro están completos."
+        )),
+        setupExample = "Disposición inicial"
+      ),
+      categories = CategoriesOff(
+        printTitle = "Hoja de Scattergories",
+        categoriesLabel = "Categoría",
+        lettersLabel = "Letra",
+        scoresLabel = "Puntos",
+        curatedNote = "Tres rondas, una letra por columna. Rellenad una palabra por categoría que empiece por esa letra.",
+        rules = Rules("Cómo se juega", List(
+          "Cada columna tiene una letra arriba — esa es la letra de la ronda.",
+          "Poned un temporizador (unos 3 minutos). Cada uno intenta escribir una palabra por categoría que empiece por esa letra.",
+          "Al acabar el tiempo, comparad: un punto por respuesta única; si dos jugadores pusieron la misma palabra, ninguno puntúa.",
+          "Jugad las tres columnas. Gana quien sume más puntos."
+        ))
+      ),
+      checkers = CheckersOff(
+        rules = Rules("Cómo se juega", List(
+          "Cada jugador tiene 12 fichas en las casillas oscuras de las tres filas traseras.",
+          "Movéis en diagonal hacia adelante a una casilla oscura vacía. Capturáis saltando a un rival adyacente y cayendo en la casilla siguiente.",
+          "Si hay captura disponible es obligatoria; los saltos múltiples siguen en el mismo turno.",
+          "Al llegar al fondo, la ficha se corona — puede moverse y capturar en ambos sentidos.",
+          "Ganáis al capturar todas las fichas o bloquear los movimientos del rival."
+        )),
+        lichessLabel = "Abrir lidraughts"
+      )
     ),
     ticTacToe = TicTacToe(
       name = "Tres en raya",
@@ -652,6 +1197,7 @@ object Strings:
 
   val fr: Strings = Strings(
     appTitle = "Tandu",
+    tagline = "Votre temps ensemble",
     common = Common(
       back = "Retour",
       playAgain = "Rejouer",
@@ -678,6 +1224,146 @@ object Strings:
       open = "À propos",
       title = "À propos de Tandu",
       body = "Tandu est un petit assistant pour choisir une activité amusante avec les enfants. Appuyez sur « Proposer une activité » pour une idée au hasard, ou parcourez la liste. Certains jeux se jouent dans l'application, d'autres sont des idées à faire hors-écran — parfaits pour la voiture, le canapé ou un après-midi pluvieux."
+    ),
+    mode = Mode(
+      choose = "Comment voulez-vous jouer ?",
+      inApp = "Jouer dans l'app",
+      offline = "Jouer hors ligne",
+      lichess = "Jouer en ligne",
+      external = "Ouvrir en ligne"
+    ),
+    printable = Printable(
+      print = "Imprimer",
+      printMaps = "Imprimer les plateaux",
+      printRules = "Imprimer les règles"
+    ),
+    timer = Timer(
+      name = "Minuteur",
+      description = "Choisis une durée et lance le compte à rebours, bip à la fin",
+      start = "Démarrer",
+      pause = "Pause",
+      restart = "Redémarrer"
+    ),
+    offline = Offline(
+      materials = Materials(
+        paperPen = "papier + stylo",
+        printer = "imprimante",
+        scissors = "ciseaux",
+        laminatorOptional = "plastifieuse (optionnel, pour réutiliser)",
+        deck52 = "jeu de 52 cartes",
+        chessBoard = "échiquier + pièces",
+        checkersBoard = "damier + pions",
+        board = "une surface plane",
+        none = "rien — juste de l'imagination"
+      ),
+      battleships = BattleshipsOff(
+        printTitle = "Bataille navale — plateaux pour deux",
+        ownLabel = "Ma flotte",
+        enemyLabel = "Eaux ennemies",
+        fleetTitle = "Flotte (variante)",
+        fleetLine = "1 × 4 cases · 2 × 3 cases · 3 × 2 cases · 4 × 1 case",
+        rules = Rules("Comment jouer", List(
+          "Placez votre flotte en secret sur « Ma flotte ». Les bateaux sont à l'horizontale ou à la verticale ; ils ne doivent pas se toucher, même en diagonale.",
+          "À tour de rôle, annoncez des coordonnées (lettre + chiffre). Notez les touches × et les manqués · sur « Eaux ennemies ».",
+          "Sur une touche, dites « touché » ; quand le bateau entier tombe, dites « coulé ».",
+          "Le premier qui coule toute la flotte adverse gagne."
+        )),
+        modeAsk = "Comment voulez-vous jouer à la bataille navale ?"
+      ),
+      memory = MemoryOff(
+        printTitle = "Memory — découpez les cartes",
+        cutHint = "Imprimez la feuille, découpez le long des lignes, mélangez face cachée et jouez.",
+        materialsHint = "Imprimez une feuille et découpez. Une plastifieuse rend les cartes réutilisables.",
+        rules = Rules("Comment jouer", List(
+          "Mélangez les cartes et étalez-les face cachée en grille.",
+          "Chacun son tour. Retournez deux cartes : si elles sont identiques, gardez-les et rejouez ; sinon, retournez-les.",
+          "Celui qui a le plus de paires quand la table est vide gagne."
+        ))
+      ),
+      hangman = HangmanOff(
+        keeperTitle = "Mot pour celui qui tient le téléphone",
+        keeperHint = "Tu tiens le téléphone, tu regardes le mot puis tu le caches. Les autres devinent des lettres et vous dessinez le pendu sur papier.",
+        reveal = "Voir le mot",
+        hide = "Cacher le mot",
+        tap = "Touche pour voir",
+        categorySetting = "Catégorie",
+        categoryAny = "N'importe quel mot",
+        categoryAnimals = "Animaux",
+        categoryFoods = "Aliments",
+        categoryCountries = "Pays",
+        drawHint = "À chaque lettre fausse, dessine une partie du pendu.",
+        rules = Rules("Comment jouer", List(
+          "Quelqu'un choisit un mot (ou le téléphone) et trace des tirets sur papier — un par lettre.",
+          "Les autres proposent des lettres une par une. Les bonnes vont sur les tirets ; les mauvaises sont notées à côté.",
+          "Chaque mauvaise lettre ajoute une partie au dessin.",
+          "Vous gagnez si vous complétez le mot avant la fin du dessin ; sinon vous perdez."
+        )),
+        gallowsTitle = "Comment dessiner la potence"
+      ),
+      chess = ChessOff(
+        rules = Rules("Comment jouer", List(
+          "Deux joueurs. Les blancs commencent ; un coup chacun à tour de rôle.",
+          "Vous gagnez en faisant échec et mat au roi adverse.",
+          "Un roi attaqué est « en échec » — le coup suivant doit le sortir de l'échec.",
+          "Pas de coup légal et pas d'échec : partie nulle (pat)."
+        )),
+        pieces = Rules("Comment les pièces se déplacent", List(
+          "Pion : une case en avant ; deux depuis sa case de départ. Prend en diagonale une case.",
+          "Cavalier : en L — deux puis une, saute par-dessus.",
+          "Fou : n'importe quel nombre de cases en diagonale.",
+          "Tour : n'importe quel nombre de cases en ligne droite.",
+          "Dame : n'importe quel nombre de cases dans toute direction.",
+          "Roi : une case dans toute direction."
+        )),
+        specials = Rules("Coups spéciaux", List(
+          "Roque : le roi avance de deux cases vers une tour ; la tour saute de l'autre côté. Possible si aucun n'a bougé, aucune pièce entre eux et le roi ne traverse pas l'échec.",
+          "Prise en passant : un pion qui vient d'avancer de deux cases peut être pris par un pion adverse contigu — uniquement au coup suivant.",
+          "Promotion : un pion qui atteint la dernière rangée devient dame (ou tour/fou/cavalier)."
+        )),
+        printTitle = "Échecs — comment les pièces se déplacent",
+        lichessLabel = "Ouvrir Lichess"
+      ),
+      ticTacToe = TicTacToeOff(
+        rules = Rules("Comment jouer", List(
+          "Dessinez une grille 3×3 sur papier.",
+          "À tour de rôle, marquez X ou O sur une case vide.",
+          "Le premier à aligner trois symboles — ligne, colonne ou diagonale — gagne."
+        )),
+        gomokuTipTitle = "Vous maîtrisez ?",
+        gomokuTip = "Essayez gomoku : grille plus grande, cinq en ligne. Même idée, beaucoup plus intéressant."
+      ),
+      solitaire = SolitaireOff(
+        rules = Rules("Klondike — comment jouer", List(
+          "Distribuez sept colonnes : 1, 2, 3, 4, 5, 6, 7 cartes. La carte du haut face visible.",
+          "Le reste forme la pioche ; retournez une (ou trois) carte vers la défausse.",
+          "Construisez sur le tableau en descendant et en couleurs alternées. Déplacez les suites en bloc. Une colonne vide accepte un roi.",
+          "Construisez les fondations par couleur, de l'as au roi. Vous gagnez quand les quatre sont complètes."
+        )),
+        setupExample = "Disposition initiale"
+      ),
+      categories = CategoriesOff(
+        printTitle = "Feuille de Petit Bac",
+        categoriesLabel = "Catégorie",
+        lettersLabel = "Lettre",
+        scoresLabel = "Score",
+        curatedNote = "Trois manches, une lettre par colonne. Remplissez un mot par catégorie qui commence par cette lettre.",
+        rules = Rules("Comment jouer", List(
+          "Chaque colonne a une lettre en haut — c'est la lettre de la manche.",
+          "Lancez un minuteur (environ 3 minutes). Chacun essaie d'écrire un mot par catégorie qui commence par cette lettre.",
+          "À la fin, comparez : un point par réponse unique ; si deux joueurs ont le même mot, personne ne marque.",
+          "Jouez les trois colonnes. Le plus grand total gagne."
+        ))
+      ),
+      checkers = CheckersOff(
+        rules = Rules("Comment jouer", List(
+          "Chaque joueur a 12 pions sur les cases sombres des trois rangées du fond.",
+          "Avancez en diagonale vers une case sombre vide. Capturez en sautant un pion adverse adjacent vers la case vide derrière.",
+          "Si une prise est possible, elle est obligatoire ; les prises multiples continuent dans le même tour.",
+          "Au dernier rang, le pion est couronné — la dame se déplace et capture dans les deux sens.",
+          "Vous gagnez en capturant tous les pions adverses ou en les bloquant."
+        )),
+        lichessLabel = "Ouvrir lidraughts"
+      )
     ),
     ticTacToe = TicTacToe(
       name = "Morpion",
@@ -804,6 +1490,7 @@ object Strings:
 
   val de: Strings = Strings(
     appTitle = "Tandu",
+    tagline = "Eure gemeinsame Zeit",
     common = Common(
       back = "Zurück",
       playAgain = "Nochmal spielen",
@@ -830,6 +1517,146 @@ object Strings:
       open = "Über",
       title = "Über Tandu",
       body = "Tandu ist ein kleiner Helfer, um etwas Lustiges mit den Kindern auszusuchen. Tippe auf „Aktivität vorschlagen\" für eine zufällige Idee oder stöbere in der Liste. Manche Spiele kannst du in der App spielen, andere sind Anregungen für Offline-Spaß — perfekt fürs Auto, das Sofa oder einen verregneten Nachmittag."
+    ),
+    mode = Mode(
+      choose = "Wie möchtet ihr spielen?",
+      inApp = "In der App spielen",
+      offline = "Offline spielen",
+      lichess = "Online spielen",
+      external = "Online öffnen"
+    ),
+    printable = Printable(
+      print = "Drucken",
+      printMaps = "Felder drucken",
+      printRules = "Regeln drucken"
+    ),
+    timer = Timer(
+      name = "Stoppuhr",
+      description = "Wähle eine Dauer und zähle herunter, am Ende ertönt ein Ton",
+      start = "Start",
+      pause = "Pause",
+      restart = "Neustart"
+    ),
+    offline = Offline(
+      materials = Materials(
+        paperPen = "Papier + Stift",
+        printer = "Drucker",
+        scissors = "Schere",
+        laminatorOptional = "Laminiergerät (optional, zur Wiederverwendung)",
+        deck52 = "52er-Kartendeck",
+        chessBoard = "Schachbrett + Figuren",
+        checkersBoard = "Damebrett + Steine",
+        board = "eine ebene Fläche",
+        none = "nichts — nur Fantasie"
+      ),
+      battleships = BattleshipsOff(
+        printTitle = "Schiffe versenken — Bretter für zwei",
+        ownLabel = "Meine Flotte",
+        enemyLabel = "Gegnerische Gewässer",
+        fleetTitle = "Flotte (Variante)",
+        fleetLine = "1 × 4 Felder · 2 × 3 Felder · 3 × 2 Felder · 4 × 1 Feld",
+        rules = Rules("So spielt man", List(
+          "Platziert eure Flotte heimlich auf „Meine Flotte\". Schiffe stehen waagerecht oder senkrecht; sie dürfen sich nicht berühren, auch nicht diagonal.",
+          "Reihum ruft ihr Koordinaten (Buchstabe + Zahl). Markiert Treffer mit × und Fehlschüsse mit · auf „Gegnerische Gewässer\".",
+          "Sag bei einem Treffer „Treffer\"; sobald das ganze Schiff fällt, sag „versenkt\".",
+          "Wer zuerst die gesamte Flotte versenkt, gewinnt."
+        )),
+        modeAsk = "Wie wollt ihr Schiffe versenken spielen?"
+      ),
+      memory = MemoryOff(
+        printTitle = "Memory — Karten ausschneiden",
+        cutHint = "Blatt drucken, an den Linien ausschneiden, verdeckt mischen und spielen.",
+        materialsHint = "Ein Blatt drucken und ausschneiden. Mit einem Laminiergerät werden die Karten wiederverwendbar.",
+        rules = Rules("So spielt man", List(
+          "Karten mischen und verdeckt in einem Raster auslegen.",
+          "Reihum: zwei Karten aufdecken. Passen sie, behalten und noch einmal; sonst wieder umdrehen.",
+          "Wer am Ende die meisten Paare hat, gewinnt."
+        ))
+      ),
+      hangman = HangmanOff(
+        keeperTitle = "Wort für den, der das Handy hält",
+        keeperHint = "Du hältst das Handy, schaust das Wort an und versteckst es. Die anderen raten Buchstaben und ihr zeichnet den Galgen auf Papier.",
+        reveal = "Wort zeigen",
+        hide = "Wort verstecken",
+        tap = "Tippen zum Anzeigen",
+        categorySetting = "Kategorie",
+        categoryAny = "Beliebiges Wort",
+        categoryAnimals = "Tiere",
+        categoryFoods = "Essen",
+        categoryCountries = "Länder",
+        drawHint = "Pro falschem Buchstaben einen Körperteil ergänzen.",
+        rules = Rules("So spielt man", List(
+          "Jemand denkt sich ein Wort aus (oder das Handy wählt eins) und malt Striche auf Papier — einen pro Buchstabe.",
+          "Die anderen raten Buchstaben. Treffer kommen auf die Striche; Fehler an den Rand.",
+          "Jeder Fehler ergänzt einen Körperteil am Galgen.",
+          "Ihr gewinnt, wenn das Wort vor der Figur fertig ist; sonst Niederlage."
+        )),
+        gallowsTitle = "Wie man den Galgen zeichnet"
+      ),
+      chess = ChessOff(
+        rules = Rules("So spielt man", List(
+          "Zwei Spieler. Weiß zieht zuerst; abwechselnd ein Zug.",
+          "Du gewinnst durch Schachmatt am gegnerischen König.",
+          "Ein angegriffener König steht „im Schach\" — der nächste Zug muss das Schach aufheben.",
+          "Keine legalen Züge und kein Schach: Patt (Remis)."
+        )),
+        pieces = Rules("Wie die Figuren ziehen", List(
+          "Bauer: ein Feld vor; zwei vom Startfeld. Schlägt diagonal ein Feld.",
+          "Springer: L-Form — zwei und eins, überspringt Figuren.",
+          "Läufer: beliebig viele Felder diagonal.",
+          "Turm: beliebig viele Felder gerade.",
+          "Dame: beliebig viele Felder in jede Richtung.",
+          "König: ein Feld in jede Richtung."
+        )),
+        specials = Rules("Sonderzüge", List(
+          "Rochade: König zieht zwei Felder zu einem Turm, der Turm springt auf die andere Seite. Erlaubt, wenn keine der Figuren gezogen hat, dazwischen frei ist und der König nicht durch ein Schachfeld läuft.",
+          "En passant: ein Bauer, der gerade zwei Felder gezogen hat, kann von einem benachbarten gegnerischen Bauern geschlagen werden — nur im nächsten Zug.",
+          "Umwandlung: ein Bauer auf der letzten Reihe wird Dame (oder Turm/Läufer/Springer)."
+        )),
+        printTitle = "Schach — wie die Figuren ziehen",
+        lichessLabel = "Lichess öffnen"
+      ),
+      ticTacToe = TicTacToeOff(
+        rules = Rules("So spielt man", List(
+          "Zeichnet ein 3×3-Gitter auf Papier.",
+          "Reihum X oder O in ein leeres Feld setzen.",
+          "Wer zuerst drei in einer Reihe hat — waagerecht, senkrecht oder diagonal — gewinnt."
+        )),
+        gomokuTipTitle = "Schon zu einfach?",
+        gomokuTip = "Probiert Gomoku: größeres Gitter, fünf in einer Reihe. Gleiche Idee, viel spannender."
+      ),
+      solitaire = SolitaireOff(
+        rules = Rules("Klondike — so spielt man", List(
+          "Sieben Tableau-Spalten austeilen: 1, 2, 3, 4, 5, 6, 7 Karten. Oberste Karte offen.",
+          "Der Rest ist der Stock; eine (oder drei) Karte auf den Talon umdrehen.",
+          "Auf dem Tableau absteigend in wechselnden Farben aufbauen. Sequenzen am Stück bewegen. Leere Spalten beginnt ein König.",
+          "Die Fundamente pro Farbe aufsteigend vom Ass bis König. Gewonnen, wenn alle vier voll sind."
+        )),
+        setupExample = "Anfangsaufstellung"
+      ),
+      categories = CategoriesOff(
+        printTitle = "Stadt-Land-Fluss — Blatt",
+        categoriesLabel = "Kategorie",
+        lettersLabel = "Buchstabe",
+        scoresLabel = "Punkte",
+        curatedNote = "Drei Runden, ein Buchstabe pro Spalte. Tragt in jede Kategorie ein Wort ein, das mit diesem Buchstaben beginnt.",
+        rules = Rules("So spielt man", List(
+          "Jede Spalte hat oben einen Buchstaben — das ist der Buchstabe der Runde.",
+          "Stellt einen Timer (etwa 3 Minuten). Jeder versucht, pro Kategorie ein Wort mit diesem Buchstaben zu schreiben.",
+          "Wenn die Zeit um ist, vergleicht: ein Punkt pro einzigartiger Antwort; haben zwei Spieler dasselbe geschrieben, gibt es keinen Punkt.",
+          "Spielt alle drei Spalten. Wer am meisten Punkte hat, gewinnt."
+        ))
+      ),
+      checkers = CheckersOff(
+        rules = Rules("So spielt man", List(
+          "Jeder Spieler hat 12 Steine auf den dunklen Feldern der hintersten drei Reihen.",
+          "Bewegt diagonal nach vorn auf ein leeres dunkles Feld. Schlagt, indem ihr über einen benachbarten Gegner auf das leere Feld dahinter springt.",
+          "Schlagzwang; mehrfache Sprünge gehören zum gleichen Zug.",
+          "Auf der Grundlinie wird der Stein zur Dame — sie zieht und schlägt in beide Richtungen.",
+          "Gewonnen, wenn alle gegnerischen Steine geschlagen sind oder der Gegner nicht ziehen kann."
+        )),
+        lichessLabel = "lidraughts öffnen"
+      )
     ),
     ticTacToe = TicTacToe(
       name = "Tic-Tac-Toe",

@@ -296,6 +296,14 @@ select { font-family: inherit; font-size: inherit; }
 
 /* Chess */
 .chess-board { max-width: 480px; width: 100%; margin-left: auto; margin-right: auto; }
+.chess-showcase {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+.chess-showcase .chess-board { max-width: 100%; }
+.chess-showcase .chess-piece { font-size: clamp(16px, 4vw, 28px); }
+.chess-showcase .chess-cell { cursor: default; }
 .chess-cell { position: relative; }
 .chess-cell--light { background: #f0d9b5; }
 .chess-cell--dark  { background: #b58863; }
@@ -487,6 +495,21 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .cg-round > .wa-card--phrase { font-size: 26px; min-height: 0; }
 .cg-round > .wa-card--letter { font-size: 96px; min-height: 0; }
 
+/* Offline mode: compact letter helper above the timer. */
+.cg-letter-helper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+.cg-letter-helper__card {
+  font-size: 72px;
+  min-height: 0;
+  padding: var(--space-3) var(--space-5);
+  min-width: 120px;
+}
+
 .wyr-prefix {
   font-size: 18px;
   font-weight: 600;
@@ -608,6 +631,13 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 }
 
 .sol-table { user-select: none; touch-action: manipulation; }
+
+.sol--readonly .sol-card,
+.sol--readonly .sol-slot,
+.sol--readonly .sol-col-base,
+.sol--readonly .sol-stock,
+.sol--readonly .sol-waste { cursor: default; }
+
 
 /* Stock/waste/foundations live in the same 7-column grid as the
    tableau so they line up. Stock+waste on the left, gap cell in the
@@ -810,12 +840,262 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   color: #991b1b;
 }
 
+/* Mode chooser / materials / rules card / printable wrapper */
+.mode-chooser {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.mode-chooser__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+.mode-chooser__options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+@media (min-width: 480px) {
+  .mode-chooser__options { grid-template-columns: 1fr 1fr; }
+}
+.mode-option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.mode-option:active { transform: scale(0.99); }
+.mode-option.is-active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+.mode-option__label { font-weight: 700; font-size: 17px; }
+.mode-option__materials { color: var(--color-muted); font-size: 13px; }
+.mode-option__hint { color: var(--color-muted); font-size: 13px; }
+
+.mode-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.mode-bar__label { font-size: 13px; color: var(--color-muted); }
+.mode-bar__current { font-weight: 700; font-size: 14px; }
+.mode-bar__change { font-size: 13px; }
+
+.materials-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.materials-bar__item {
+  padding: 2px var(--space-2);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  border-radius: var(--radius-sm);
+}
+
+.rules-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+.rules-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 var(--space-2) 0;
+}
+.rules-list {
+  margin: 0 0 var(--space-3) 0;
+  padding-left: var(--space-4);
+}
+.rules-list li { margin-bottom: var(--space-1); line-height: 1.4; }
+
+/* Printable A4 wrapper */
+.printable {
+  background: white;
+  color: black;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  margin-top: var(--space-4);
+}
+.printable__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid #ccc;
+}
+.printable__title { font-size: 22px; font-weight: 700; margin: 0; }
+.printable__brand { font-size: 13px; color: #666; letter-spacing: 1px; text-transform: uppercase; }
+.printable__body { font-size: 14px; }
+.printable__footer { margin-top: var(--space-4); font-size: 11px; text-align: center; border-top: 1px solid #ddd; padding-top: var(--space-2); }
+
+/* Battleships printable — both players on one A4 page; parent cuts in half */
+.bs-print-sheet { display: flex; flex-direction: column; gap: var(--space-3); }
+.bs-print-player { display: flex; flex-direction: column; gap: var(--space-2); }
+.bs-print-player__title { font-size: 18px; font-weight: 700; margin: 0; }
+.bs-print-fleet { font-size: 12px; }
+.bs-print-grids {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+.bs-print-grid { display: flex; flex-direction: column; gap: var(--space-2); }
+.bs-print-grid__label { font-size: 13px; font-weight: 700; text-align: center; }
+.bs-print-grid__table {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 0;
+  border: 1px solid black;
+}
+.bs-print-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  border: 0.5px solid #888;
+  background: white;
+  color: black;
+}
+.bs-print-cell--header { background: #eee; font-weight: 700; }
+.bs-print-cutline {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #666;
+  padding: var(--space-2) 0;
+}
+
+/* Memory printable sheet */
+.mem-print-sheet {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  border: 1px solid black;
+}
+/* Hangman keeper card */
+.hangman-keeper-word {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  padding: var(--space-4);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+}
+
+/* Categories printable sheet */
+.cg-print-sheet { font-size: 12px; }
+.cg-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.cg-print-th, .cg-print-td {
+  border: 1px solid #888;
+  padding: var(--space-2);
+  text-align: center;
+  height: 36px;
+}
+.cg-print-th { background: #eee; font-weight: 700; font-size: 13px; }
+.cg-print-th--cat, .cg-print-td--cat { text-align: left; width: 22%; }
+.cg-print-th--score, .cg-print-td--score { width: 12%; }
+
+.mem-print-card {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  border: 1px dashed #888;
+  background: white;
+}
+
+/* Timer */
+.timer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.timer__display {
+  --pct: 100%;
+  position: relative;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-primary) 18%, var(--color-surface)) var(--pct),
+    var(--color-surface) var(--pct)
+  );
+  text-align: center;
+  border: 2px solid var(--color-border);
+  transition: background 200ms linear;
+}
+.timer__display.is-running { border-color: var(--color-primary); }
+.timer__display.is-done { border-color: var(--color-hit); background: color-mix(in srgb, var(--color-hit) 18%, var(--color-surface)); }
+.timer__value { font-size: 56px; font-weight: 800; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+.timer__controls { display: flex; gap: var(--space-2); }
+.timer__presets { display: flex; gap: var(--space-2); }
+.timer__presets .btn.is-active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.header__titles { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.header__tagline { margin: 2px 0 0 0; font-size: 12px; letter-spacing: 0.2px; }
+
+.print-only { display: none; }
+
+@page { margin: 10mm; }
+
 @media print {
+  html, body { margin: 0; padding: 0; }
   .no-print { display: none !important; }
-  .app { max-width: none; padding: 0; }
+  .print-only { display: block; }
+  .app { max-width: none; padding: 0; margin: 0; }
+  .printable { margin: 0; }
+  .printable__header { margin-bottom: var(--space-2); padding-bottom: var(--space-1); }
   .board { background: black; border-color: black; gap: 1px; }
   .cell { background: white !important; color: black !important; border: none; }
   .cell--ship { background: #ddd !important; }
   .card { border: 1px solid black; box-shadow: none; }
   .page-break { page-break-after: always; }
+  .printable { border: none; padding: 0; }
+  .printable + .printable { page-break-before: always; }
+  .bs-print-player { page-break-inside: avoid; }
+  .bs-print-cell { border: 1px solid black; }
+  .rules-card { border: 1px solid black; box-shadow: none; }
+  .mode-chooser, .mode-bar { display: none !important; }
+  .stack-lg > * + * { margin-top: 0; }
+  .stack > * + * { margin-top: 0; }
+  .printable {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(297mm - 20mm);
+  }
+  .printable__footer { margin-top: auto; }
 }

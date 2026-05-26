@@ -180,6 +180,42 @@ object CategoryBank:
     case Lang.Fr => fr
     case Lang.De => de
 
+  // Broad, canonical Scattergories-style columns for the printable sheet.
+  // Every entry must be answerable for almost any starting letter, otherwise
+  // the round becomes a guessing game.
+  val plCore: Vector[String] = Vector(
+    "Zwierzę", "Roślina", "Państwo", "Miasto",
+    "Jedzenie", "Napój", "Imię", "Rzecz w domu",
+    "Sport", "Zawód"
+  )
+  val enCore: Vector[String] = Vector(
+    "Animal", "Plant or tree", "Country", "City",
+    "Food", "Drink", "First name", "Object at home",
+    "Sport", "Profession"
+  )
+  val esCore: Vector[String] = Vector(
+    "Animal", "Planta o árbol", "País", "Ciudad",
+    "Comida", "Bebida", "Nombre", "Cosa en casa",
+    "Deporte", "Profesión"
+  )
+  val frCore: Vector[String] = Vector(
+    "Animal", "Plante ou arbre", "Pays", "Ville",
+    "Nourriture", "Boisson", "Prénom", "Objet à la maison",
+    "Sport", "Métier"
+  )
+  val deCore: Vector[String] = Vector(
+    "Tier", "Pflanze oder Baum", "Land", "Stadt",
+    "Essen", "Getränk", "Vorname", "Ding im Haus",
+    "Sportart", "Beruf"
+  )
+
+  def coreCategoriesFor(lang: Lang): Vector[String] = lang match
+    case Lang.Pl => plCore
+    case Lang.En => enCore
+    case Lang.Es => esCore
+    case Lang.Fr => frCore
+    case Lang.De => deCore
+
   def lettersFor(lang: Lang): Vector[Char] = lang match
     case Lang.Pl => plLetters
     case Lang.En => enLetters

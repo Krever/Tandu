@@ -3,7 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
-import tandu.ui.Components
+import tandu.ui.{Components, Mode, ModeChooser, RulesCard}
 import tandu.ui.Components.s
 
 object TicTacToe extends Activity:
@@ -71,6 +71,36 @@ object TicTacToe extends Activity:
     winning.headOption.getOrElse((None, Set.empty))
 
   def render(): HtmlElement =
+    ModeChooser.render(id, List(
+      Mode(
+        id = "in-app",
+        label = _.mode.inApp,
+        render = () => renderPlay()
+      ),
+      Mode(
+        id = "paper",
+        label = _.mode.offline,
+        materials = List(_.offline.materials.paperPen),
+        render = () => renderOffline()
+      )
+    ))
+
+  private def renderOffline(): HtmlElement =
+    div(
+      cls := "stack-lg",
+      RulesCard.render(List(
+        RulesCard.Section(
+          _.offline.ticTacToe.rules.title,
+          (0 until 3).toList.map(i => (s: Strings) => s.offline.ticTacToe.rules.lines(i))
+        ),
+        RulesCard.Section(
+          _.offline.ticTacToe.gomokuTipTitle,
+          List(_.offline.ticTacToe.gomokuTip)
+        )
+      ))
+    )
+
+  private def renderPlay(): HtmlElement =
     val variant: Var[Option[Variant]] = Var(None)
     div(
       cls := "stack-lg",

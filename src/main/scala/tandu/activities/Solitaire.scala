@@ -3,7 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
-import tandu.ui.Components
+import tandu.ui.{Components, Mode, ModeChooser, RulesCard}
 import tandu.ui.Components.s
 
 import scala.util.Random
@@ -228,6 +228,38 @@ object Solitaire extends Activity:
     case Spot.TableauSpot(c, _)    => Some(Target.Tableau(c))
 
   def render(): HtmlElement =
+    ModeChooser.render(id, List(
+      Mode(
+        id = "in-app",
+        label = _.mode.inApp,
+        render = () => renderPlay()
+      ),
+      Mode(
+        id = "deck",
+        label = _.mode.offline,
+        materials = List(_.offline.materials.deck52),
+        render = () => renderRules()
+      )
+    ))
+
+  private def renderRules(): HtmlElement =
+    val example = Val(deal(new Random(1)))
+    div(
+      cls := "stack-lg",
+      RulesCard.render(List(
+        RulesCard.Section(
+          _.offline.solitaire.rules.title,
+          (0 until 4).toList.map(i => (s: Strings) => s.offline.solitaire.rules.lines(i))
+        )
+      )),
+      div(
+        cls := "sol sol--readonly stack",
+        h3(cls := "h2 center", child.text <-- s(_.offline.solitaire.setupExample)),
+        tableView(example, Val(None), _ => ())
+      )
+    )
+
+  private def renderPlay(): HtmlElement =
     val state     = Var(deal())
     val selection = Var(Option.empty[Source])
     val history   = Var(List.empty[GameState])

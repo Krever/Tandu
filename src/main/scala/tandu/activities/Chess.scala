@@ -3,7 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
-import tandu.ui.Components
+import tandu.ui.{Components, Mode, ModeChooser, RulesCard}
 import tandu.ui.Components.s
 
 object Chess extends Activity:
@@ -292,29 +292,179 @@ object Chess extends Activity:
     nextState.copy(outcome = outcome)
 
   def render(): HtmlElement =
+    ModeChooser.render(id, List(
+      Mode(
+        id = "in-app",
+        label = _.mode.inApp,
+        render = () => renderPlay()
+      ),
+      Mode(
+        id = "board",
+        label = _.mode.offline,
+        materials = List(_.offline.materials.chessBoard),
+        render = () => renderRules()
+      ),
+      Mode(
+        id = "lichess",
+        label = _.mode.lichess,
+        render = () => renderLichess()
+      )
+    ))
+
+  private def chessRulesSections: List[RulesCard.Section] = List(
+    RulesCard.Section(
+      _.offline.chess.rules.title,
+      (0 until 4).toList.map(i => (s: Strings) => s.offline.chess.rules.lines(i))
+    ),
+    RulesCard.Section(
+      _.offline.chess.pieces.title,
+      (0 until 6).toList.map(i => (s: Strings) => s.offline.chess.pieces.lines(i))
+    ),
+    RulesCard.Section(
+      _.offline.chess.specials.title,
+      (0 until 3).toList.map(i => (s: Strings) => s.offline.chess.specials.lines(i))
+    )
+  )
+
+  private def renderRules(): HtmlElement =
+    div(
+      cls := "stack-lg",
+      RulesCard.render(chessRulesSections),
+      div(
+        cls := "chess-showcase",
+        Kind.values.toList.map(pieceShowcase)
+      )
+    )
+
+  private def showcaseState(kind: Kind): State =
+    val owner  = Player.P1
+    val demoSq = kind match
+      case Kind.Pawn => idx(3, 6) // starting rank — shows push, double-step and captures
+      case _         => idx(3, 4)
+    val enemies: List[Int] = kind match
+      case Kind.Pawn   => List(idx(2, 5), idx(4, 5))
+      case Kind.Knight => List(idx(5, 5))
+      case Kind.Bishop => List(idx(6, 1))
+      case Kind.Rook   => List(idx(3, 1))
+      case Kind.Queen  => List(idx(6, 1))
+      case Kind.King   => List(idx(2, 5))
+
+    var pieces = Map.empty[Int, Piece]
+    pieces += demoSq -> Piece(owner, kind)
+    enemies.foreach(i => pieces += i -> Piece(owner.other, Kind.Pawn))
+
+    val board = Vector.tabulate(Size * Size)(pieces.get)
+    State(
+      board     = board,
+      turn      = owner,
+      selected  = Some(demoSq),
+      castling  = CastlingRights(false, false, false, false),
+      enPassant = None,
+      lastMove  = None,
+      outcome   = Outcome.Ongoing
+    )
+
+  private def pieceShowcase(kind: Kind): HtmlElement =
+    val state = Val(showcaseState(kind))
+    val nameKey: Strings => String = kind match
+      case Kind.Pawn   => _.offline.chess.pieces.lines(0)
+      case Kind.Knight => _.offline.chess.pieces.lines(1)
+      case Kind.Bishop => _.offline.chess.pieces.lines(2)
+      case Kind.Rook   => _.offline.chess.pieces.lines(3)
+      case Kind.Queen  => _.offline.chess.pieces.lines(4)
+      case Kind.King   => _.offline.chess.pieces.lines(5)
+    div(
+      cls := "card stack",
+      h3(cls := "h3 center", child.text <-- AppState.strings.map(nameKey)),
+      boardView(state, _ => ())
+    )
+
+  private def renderLichess(): HtmlElement =
+    div(
+      cls := "stack-lg",
+      RulesCard.render(chessRulesSections),
+      div(
+        cls := "center",
+        a(
+          cls := "btn btn--lg",
+          href := "https://lichess.org",
+          target := "_blank",
+          child.text <-- s(_.offline.chess.lichessLabel)
+        )
+      )
+    )
+
+  private def applyTap(state: State, i: Int): State =
+    if state.outcome != Outcome.Ongoing then state
+    else
+      state.board(i) match
+        case Some(p) if p.owner == state.turn =>
+          state.copy(selected = Some(i))
+        case _ =>
+          state.selected.flatMap(from => legalMovesFrom(state, from).find(_.to == i)) match
+            case Some(m) => applyMove(state, m)
+            case None    => state
+
+  private def activePlayerOf(st: State): Option[Player] = st.outcome match
+    case Outcome.Checkmate(w) => Some(w)
+    case Outcome.Stalemate    => None
+    case Outcome.Ongoing      => Some(st.turn)
+
+  private def hintsOf(st: State): Hints = st.selected match
+    case None       => Hints(Set.empty, Set.empty)
+    case Some(from) =>
+      val moves = legalMovesFrom(st, from)
+      val (caps, tgts) = moves.partition(_.capture.isDefined)
+      Hints(tgts.map(_.to).toSet, caps.map(_.to).toSet)
+
+  private def checkedKingOf(st: State): Option[Int] = st.outcome match
+    case Outcome.Checkmate(w) => findKing(st.board, w.other)
+    case Outcome.Stalemate    => None
+    case Outcome.Ongoing      => Option.when(isInCheck(st.board, st.turn))(findKing(st.board, st.turn)).flatten
+
+  private def boardView(stateSig: Signal[State], onTap: Int => Unit): HtmlElement =
+    val hints         = stateSig.map(hintsOf).distinct
+    val checkedKingSq = stateSig.map(checkedKingOf).distinct
+    div(
+      cls := "board chess-board",
+      styleAttr := s"grid-template-columns: repeat($Size, 1fr);",
+      (0 until Size * Size).map { i =>
+        val (x, y) = xy(i)
+        val dark = (x + y) % 2 == 1
+        val cellSig    = stateSig.map(_.board(i)).distinct
+        val isSelected = stateSig.map(_.selected.contains(i)).distinct
+        val isTarget   = hints.map(_.targets.contains(i)).distinct
+        val isCapture  = hints.map(_.captures.contains(i)).distinct
+        val isLast     = stateSig.map(_.lastMove.exists((f, t) => f == i || t == i)).distinct
+        val isCheck    = checkedKingSq.map(_.contains(i)).distinct
+        div(
+          cls := "cell chess-cell cell--btn",
+          cls("chess-cell--dark") := dark,
+          cls("chess-cell--light") := !dark,
+          cls("chess-cell--selected") <-- isSelected,
+          cls("chess-cell--target")   <-- isTarget,
+          cls("chess-cell--capture")  <-- isCapture,
+          cls("chess-cell--last")     <-- isLast,
+          cls("chess-cell--check")    <-- isCheck,
+          child <-- cellSig.map {
+            case None    => emptyNode
+            case Some(p) =>
+              div(
+                cls := s"chess-piece chess-piece--p${p.owner.num}",
+                p.kind.glyph
+              )
+          },
+          onClick --> (_ => onTap(i))
+        )
+      }
+    )
+
+  private def renderPlay(): HtmlElement =
     val state = Var(initial)
-
-    def tap(i: Int): Unit =
-      val cur = state.now()
-      if cur.outcome != Outcome.Ongoing then ()
-      else
-        cur.board(i) match
-          case Some(p) if p.owner == cur.turn =>
-            state.set(cur.copy(selected = Some(i)))
-          case _ =>
-            for
-              from <- cur.selected
-              m    <- legalMovesFrom(cur, from).find(_.to == i)
-            do state.set(applyMove(cur, m))
-
     def reset(): Unit = state.set(initial)
+    def onTap(i: Int): Unit = state.set(applyTap(state.now(), i))
 
-    val activePlayer: Signal[Option[Player]] = state.signal.map { st =>
-      st.outcome match
-        case Outcome.Checkmate(w) => Some(w)
-        case Outcome.Stalemate    => None
-        case Outcome.Ongoing      => Some(st.turn)
-    }
+    val activePlayer = state.signal.map(activePlayerOf).distinct
 
     val statusSignal: Signal[String] =
       state.signal.combineWith(AppState.strings).map { (st, str) =>
@@ -326,63 +476,15 @@ object Chess extends Activity:
             if isInCheck(st.board, st.turn) then s"$base — ${str.chess.check}" else base
       }.distinct
 
-    val hints: Signal[Hints] = state.signal.map { st =>
-      st.selected match
-        case None => Hints(Set.empty, Set.empty)
-        case Some(from) =>
-          val moves = legalMovesFrom(st, from)
-          val (caps, tgts) = moves.partition(_.capture.isDefined)
-          Hints(tgts.map(_.to).toSet, caps.map(_.to).toSet)
-    }.distinct
-
-    val checkedKingSq: Signal[Option[Int]] = state.signal.map { st =>
-      st.outcome match
-        case Outcome.Checkmate(w) => findKing(st.board, w.other)
-        case Outcome.Stalemate    => None
-        case Outcome.Ongoing      => Option.when(isInCheck(st.board, st.turn))(findKing(st.board, st.turn)).flatten
-    }.distinct
-
     div(
       cls := "player-page stack-lg",
-      cls("player-page--p1") <-- activePlayer.map(_.contains(Player.P1)).distinct,
-      cls("player-page--p2") <-- activePlayer.map(_.contains(Player.P2)).distinct,
+      cls("player-page--p1") <-- activePlayer.map(_.contains(Player.P1)),
+      cls("player-page--p2") <-- activePlayer.map(_.contains(Player.P2)),
       div(
         cls := "center",
         div(cls := "player-badge", child.text <-- statusSignal)
       ),
-      div(
-        cls := "board chess-board",
-        styleAttr := s"grid-template-columns: repeat($Size, 1fr);",
-        (0 until Size * Size).map { i =>
-          val (x, y) = xy(i)
-          val dark = (x + y) % 2 == 1
-          val cellSig    = state.signal.map(_.board(i)).distinct
-          val isSelected = state.signal.map(_.selected.contains(i)).distinct
-          val isTarget   = hints.map(_.targets.contains(i)).distinct
-          val isCapture  = hints.map(_.captures.contains(i)).distinct
-          val isLast     = state.signal.map(_.lastMove.exists((f, t) => f == i || t == i)).distinct
-          val isCheck    = checkedKingSq.map(_.contains(i)).distinct
-          div(
-            cls := "cell chess-cell cell--btn",
-            cls("chess-cell--dark") := dark,
-            cls("chess-cell--light") := !dark,
-            cls("chess-cell--selected") <-- isSelected,
-            cls("chess-cell--target") <-- isTarget,
-            cls("chess-cell--capture") <-- isCapture,
-            cls("chess-cell--last") <-- isLast,
-            cls("chess-cell--check") <-- isCheck,
-            child <-- cellSig.map {
-              case None => emptyNode
-              case Some(p) =>
-                div(
-                  cls := s"chess-piece chess-piece--p${p.owner.num}",
-                  p.kind.glyph
-                )
-            },
-            onClick --> (_ => tap(i))
-          )
-        }
-      ),
+      boardView(state.signal, onTap),
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",

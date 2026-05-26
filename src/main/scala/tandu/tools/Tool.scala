@@ -10,5 +10,5 @@ trait Tool:
   def render(): HtmlElement
 
 object Tools:
-  val all: List[Tool] = List(Dice)
+  val all: List[Tool] = List(Dice, Timer)
   def byId(id: String): Option[Tool] = all.find(_.id == id)

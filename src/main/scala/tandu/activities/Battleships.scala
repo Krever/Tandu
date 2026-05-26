@@ -3,10 +3,12 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
-import tandu.ui.Components
+import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
+import org.scalajs.dom
 
 import scala.annotation.tailrec
+import scala.scalajs.js
 import scala.util.Random
 
 object Battleships extends Activity:
@@ -94,7 +96,125 @@ object Battleships extends Activity:
 
   // ---------- rendering ----------
 
-  def render(): HtmlElement = renderPlay()
+  def render(): HtmlElement =
+    ModeChooser.render(id, List(
+      Mode(
+        id = "in-app",
+        label = _.mode.inApp,
+        render = () => renderPlay()
+      ),
+      Mode(
+        id = "print",
+        label = _.mode.offline,
+        materials = List(_.offline.materials.printer, _.offline.materials.paperPen),
+        hint = Some(_.offline.battleships.rules.title),
+        render = () => renderOffline()
+      )
+    ))
+
+  private def renderOffline(): HtmlElement =
+    val printing: Var[Option[String]] = Var(None)
+
+    def doPrint(what: String): Unit =
+      printing.set(Some(what))
+      js.timers.setTimeout(50) {
+        dom.window.print()
+        printing.set(None)
+      }
+
+    div(
+      cls := "stack-lg",
+      div(
+        cls := "no-print",
+        RulesCard.render(List(
+          RulesCard.Section(_.offline.battleships.rules.title, rulesLines),
+          RulesCard.Section(_.offline.battleships.fleetTitle, List(_.offline.battleships.fleetLine))
+        ))
+      ),
+      div(
+        cls := "row no-print",
+        styleAttr := "justify-content: center; flex-wrap: wrap;",
+        button(
+          cls := "btn btn--lg",
+          child.text <-- s(_.printable.printMaps),
+          onClick --> (_ => doPrint("maps"))
+        ),
+        button(
+          cls := "btn btn--lg btn--ghost",
+          child.text <-- s(_.printable.printRules),
+          onClick --> (_ => doPrint("rules"))
+        )
+      ),
+      div(
+        cls := "print-only",
+        child <-- printing.signal.map {
+          case Some("maps")  => printableMaps()
+          case Some("rules") => printableRules()
+          case _             => emptyNode
+        }
+      )
+    )
+
+  private val rulesLines: List[Strings => String] = List(
+    s => s.offline.battleships.rules.lines(0),
+    s => s.offline.battleships.rules.lines(1),
+    s => s.offline.battleships.rules.lines(2),
+    s => s.offline.battleships.rules.lines(3)
+  )
+
+  private def printableMaps(): HtmlElement =
+    Printable.render(
+      title = _.offline.battleships.printTitle,
+      body = div(
+        cls := "bs-print-sheet",
+        printPlayerGrids(playerNum = 1),
+        printPlayerGrids(playerNum = 2)
+      )
+    )
+
+  private def printableRules(): HtmlElement =
+    Printable.render(
+      title = _.offline.battleships.rules.title,
+      body = RulesCard.render(List(
+        RulesCard.Section(_.offline.battleships.rules.title, rulesLines),
+        RulesCard.Section(_.offline.battleships.fleetTitle, List(_.offline.battleships.fleetLine))
+      ))
+    )
+
+  private def printPlayerGrids(playerNum: Int): HtmlElement =
+    div(
+      cls := s"bs-print-player bs-print-player--p$playerNum stack",
+      h3(cls := "bs-print-player__title",
+        child.text <-- AppState.strings.map(str => s"${str.common.player1.takeWhile(_ != ' ')} $playerNum")
+      ),
+      div(
+        cls := "bs-print-fleet muted",
+        child.text <-- AppState.strings.map(_.offline.battleships.fleetLine)
+      ),
+      div(
+        cls := "bs-print-grids",
+        printGrid(_.offline.battleships.ownLabel, withShipMarks = false),
+        printGrid(_.offline.battleships.enemyLabel, withShipMarks = false)
+      )
+    )
+
+  private def printGrid(label: Strings => String, withShipMarks: Boolean): HtmlElement =
+    val letters = "ABCDEFGHIJ".toVector
+    div(
+      cls := "bs-print-grid",
+      div(cls := "bs-print-grid__label", child.text <-- AppState.strings.map(label)),
+      div(
+        cls := "bs-print-grid__table",
+        // header row
+        div(cls := "bs-print-cell bs-print-cell--header", ""),
+        letters.map(c => div(cls := "bs-print-cell bs-print-cell--header", c.toString)),
+        // each row
+        (1 to Size).flatMap { row =>
+          div(cls := "bs-print-cell bs-print-cell--header", row.toString) ::
+          (0 until Size).map(_ => div(cls := "bs-print-cell")).toList
+        }
+      )
+    )
 
   private def renderPlay(): HtmlElement =
     val game = Var(freshGame())
@@ -152,16 +272,7 @@ object Battleships extends Activity:
         case Phase.AwaitingShot(p)       => playerPage(p, turnView(p, game, fire, showMyBoard))
         case Phase.ShotResolved(p, t, r) => playerPage(p, resolvedView(p, t, r, game, endTurn, showMyBoard))
         case Phase.GameOver(w)           => playerPage(w, gameOverView(w, restart))
-      },
-      div(
-        cls := "center no-print",
-        // Print mode is not implemented yet — see DESIGN.md (printable board).
-        button(
-          cls := "btn btn--ghost",
-          disabled := true,
-          child.text <-- s(_.battleships.print)
-        )
-      )
+      }
     )
 
   private def playerPage(p: Player, content: HtmlElement): HtmlElement =

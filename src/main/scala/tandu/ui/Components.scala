@@ -10,7 +10,8 @@ object Components:
       title: Signal[String],
       back: Option[Page] = Some(Page.Home),
       showLang: Boolean = true,
-      onInfo: Option[() => Unit] = None
+      onInfo: Option[() => Unit] = None,
+      subtitle: Option[Signal[String]] = None
   ): HtmlElement =
     div(
       cls := "header no-print",
@@ -23,7 +24,11 @@ object Components:
           )
         case None => div()
       ,
-      h1(child.text <-- title),
+      div(
+        cls := "header__titles",
+        h1(child.text <-- title),
+        subtitle.map(sub => p(cls := "header__tagline muted", child.text <-- sub))
+      ),
       div(
         cls := "header__actions",
         child <-- Pwa.available.map {

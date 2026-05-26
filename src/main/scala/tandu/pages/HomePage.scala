@@ -19,7 +19,8 @@ object HomePage:
       Components.header(
         s(_.appTitle),
         back = None,
-        onInfo = Some(() => aboutOpen.set(true))
+        onInfo = Some(() => aboutOpen.set(true)),
+        subtitle = Some(s(_.tagline))
       ),
       Components.modal(
         aboutOpen,

@@ -3,8 +3,10 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
-import tandu.ui.Components
+import tandu.ui.{Components, Mode, ModeChooser, RulesCard}
 import tandu.ui.Components.s
+
+import scala.scalajs.js
 
 object Checkers extends Activity:
   val id = "checkers"
@@ -99,6 +101,17 @@ object Checkers extends Activity:
       case _ =>
         allMoves(state.board, state.turn).filter(_.from == from)
 
+  private def applyTap(state: State, i: Int): State =
+    if state.winner.isDefined then state
+    else
+      state.board(i) match
+        case Some(p) if p.owner == state.turn && !state.selection.exists(_.locked) =>
+          state.copy(selection = Some(Selection(i, locked = false)))
+        case _ =>
+          state.selection.flatMap(sel => legalMovesFor(state, sel.at).find(_.to == i)) match
+            case Some(m) => applyMove(state, m)
+            case None    => state
+
   private def applyMove(state: State, m: Move): State =
     val piece = state.board(m.from).get
     val (_, ty) = xy(m.to)
@@ -122,48 +135,134 @@ object Checkers extends Activity:
       state.copy(board = newBoard, turn = nextTurn, selection = None, winner = winner)
 
   def render(): HtmlElement =
+    ModeChooser.render(id, List(
+      Mode(
+        id = "in-app",
+        label = _.mode.inApp,
+        render = () => renderPlay()
+      ),
+      Mode(
+        id = "board",
+        label = _.mode.offline,
+        materials = List(_.offline.materials.checkersBoard),
+        render = () => renderRules()
+      ),
+      Mode(
+        id = "lichess",
+        label = _.mode.lichess,
+        render = () => renderLichess()
+      )
+    ))
+
+  private def checkersRulesSections: List[RulesCard.Section] = List(
+    RulesCard.Section(
+      _.offline.checkers.rules.title,
+      (0 until 5).toList.map(i => (s: Strings) => s.offline.checkers.rules.lines(i))
+    )
+  )
+
+  // Replays a real player flow: each entry is a cell tap (select source, then destination).
+  private val DemoTaps: Vector[Int] = Vector(
+    idx(4, 5), idx(3, 4),                    // P1 advances
+    idx(1, 2), idx(0, 3),                    // P2 advances
+    idx(2, 5), idx(1, 4),                    // P1 advances
+    idx(0, 3), idx(2, 5),                    // P2 captures
+    idx(3, 6), idx(1, 4)                     // P1 captures back
+  )
+  private val DemoTapMs     = 1000
+  private val DemoRestartMs = 2500
+
+  private def renderRules(): HtmlElement =
+    val example = Var(initial)
+    var step = 0
+    var handle: Option[js.timers.SetTimeoutHandle] = None
+
+    def schedule(delay: Int): Unit =
+      handle = Some(js.timers.setTimeout(delay) {
+        if step >= DemoTaps.length then
+          example.set(initial)
+          step = 0
+          schedule(DemoTapMs)
+        else
+          example.set(applyTap(example.now(), DemoTaps(step)))
+          step += 1
+          schedule(if step >= DemoTaps.length then DemoRestartMs else DemoTapMs)
+      })
+
+    schedule(DemoTapMs)
+
+    div(
+      cls := "stack-lg",
+      onUnmountCallback(_ => handle.foreach(js.timers.clearTimeout)),
+      styleAttr <-- activePlayerSig(example.signal).map(playerColorVar),
+      RulesCard.render(checkersRulesSections),
+      gameView(example.signal, _ => ())
+    )
+
+  private def activePlayerSig(stateSig: Signal[State]): Signal[Option[Player]] =
+    stateSig.map(st => st.winner.orElse(Some(st.turn))).distinct
+
+  private def playerColorVar(p: Option[Player]): String = p match
+    case Some(Player.P1) => "--player-color: var(--color-p1);"
+    case Some(Player.P2) => "--player-color: var(--color-p2);"
+    case None            => ""
+
+  private def renderLichess(): HtmlElement =
+    div(
+      cls := "stack-lg",
+      RulesCard.render(checkersRulesSections),
+      div(
+        cls := "center",
+        a(
+          cls := "btn btn--lg",
+          href := "https://lidraughts.org",
+          target := "_blank",
+          child.text <-- s(_.offline.checkers.lichessLabel)
+        )
+      )
+    )
+
+  private def renderPlay(): HtmlElement =
     val state = Var(initial)
-
-    def tap(i: Int): Unit =
-      val cur = state.now()
-      if cur.winner.isDefined then ()
-      else
-        cur.board(i) match
-          case Some(p) if p.owner == cur.turn && !cur.selection.exists(_.locked) =>
-            state.set(cur.copy(selection = Some(Selection(i, locked = false))))
-          case _ =>
-            for
-              sel <- cur.selection
-              m   <- legalMovesFor(cur, sel.at).find(_.to == i)
-            do state.set(applyMove(cur, m))
-
     def reset(): Unit = state.set(initial)
+    def onTap(i: Int): Unit = state.set(applyTap(state.now(), i))
+    val active = activePlayerSig(state.signal)
 
-    val activePlayer = state.signal.map(st => st.winner.orElse(Some(st.turn)))
+    div(
+      cls := "player-page stack-lg",
+      cls("player-page--p1") <-- active.map(_.contains(Player.P1)),
+      cls("player-page--p2") <-- active.map(_.contains(Player.P2)),
+      gameView(state.signal, onTap),
+      div(
+        cls := "row no-print",
+        styleAttr := "justify-content: center;",
+        Components.replayButton(s(_.common.playAgain), reset(), state.signal.map(_.winner.isDefined))
+      )
+    )
 
+  private def hintsOf(st: State): Hints =
+    if st.winner.isDefined then Hints(Set.empty, Set.empty)
+    else
+      val targets = st.selection.map(sel => legalMovesFor(st, sel.at).map(_.to).toSet).getOrElse(Set.empty)
+      val capturing =
+        if st.selection.exists(_.locked) then Set.empty
+        else
+          val caps = allMoves(st.board, st.turn).filter(_.isCapture)
+          if caps.isEmpty then Set.empty else caps.map(_.from).toSet
+      Hints(targets, capturing)
+
+  private def gameView(stateSig: Signal[State], onTap: Int => Unit): HtmlElement =
     val statusSignal: Signal[String] =
-      state.signal.combineWith(AppState.strings).map { (st, str) =>
+      stateSig.combineWith(AppState.strings).map { (st, str) =>
         st.winner match
           case Some(w) => s"${w.labelKey(str)} — ${str.common.youWin}"
           case None    => s"${st.turn.labelKey(str)} — ${str.checkers.turn}"
       }
 
-    val hints: Signal[Hints] = state.signal.map { st =>
-      if st.winner.isDefined then Hints(Set.empty, Set.empty)
-      else
-        val targets = st.selection.map(sel => legalMovesFor(st, sel.at).map(_.to).toSet).getOrElse(Set.empty)
-        val capturing =
-          if st.selection.exists(_.locked) then Set.empty
-          else
-            val caps = allMoves(st.board, st.turn).filter(_.isCapture)
-            if caps.isEmpty then Set.empty else caps.map(_.from).toSet
-        Hints(targets, capturing)
-    }.distinct
+    val hints: Signal[Hints] = stateSig.map(hintsOf).distinct
 
     div(
-      cls := "player-page stack-lg",
-      cls("player-page--p1") <-- activePlayer.map(_.contains(Player.P1)).distinct,
-      cls("player-page--p2") <-- activePlayer.map(_.contains(Player.P2)).distinct,
+      cls := "stack",
       div(
         cls := "center",
         div(cls := "player-badge", child.text <-- statusSignal)
@@ -174,9 +273,9 @@ object Checkers extends Activity:
         (0 until Size * Size).map { i =>
           val (x, y) = xy(i)
           val dark = (x + y) % 2 == 1
-          val cellSig = state.signal.map(_.board(i)).distinct
-          val isSelected = state.signal.map(_.selection.exists(_.at == i)).distinct
-          val isTarget = hints.map(_.targets.contains(i)).distinct
+          val cellSig    = stateSig.map(_.board(i)).distinct
+          val isSelected = stateSig.map(_.selection.exists(_.at == i)).distinct
+          val isTarget   = hints.map(_.targets.contains(i)).distinct
           val canCapture = hints.map(_.capturing.contains(i)).distinct
           div(
             cls := "cell ck-cell",
@@ -184,23 +283,18 @@ object Checkers extends Activity:
             cls("ck-cell--light") := !dark,
             cls("cell--btn") := dark,
             cls("ck-cell--selected") <-- isSelected,
-            cls("ck-cell--target") <-- isTarget,
-            cls("ck-cell--hint") <-- canCapture,
+            cls("ck-cell--target")   <-- isTarget,
+            cls("ck-cell--hint")     <-- canCapture,
             child <-- cellSig.map {
-              case None => emptyNode
+              case None    => emptyNode
               case Some(p) =>
                 div(
                   cls := s"ck-piece ck-piece--p${p.owner.num}",
                   cls("ck-piece--king") := p.isKing
                 )
             },
-            onClick --> (_ => if dark then tap(i))
+            onClick --> (_ => if dark then onTap(i))
           )
         }
-      ),
-      div(
-        cls := "row no-print",
-        styleAttr := "justify-content: center;",
-        Components.replayButton(s(_.common.playAgain), reset(), state.signal.map(_.winner.isDefined))
       )
     )

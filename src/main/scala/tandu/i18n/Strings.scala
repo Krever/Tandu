@@ -112,7 +112,6 @@ object Strings:
   final case class MemoryOff(
       printTitle: String,
       cutHint: String,
-      materialsHint: String,
       rules: Rules
   )
 
@@ -394,7 +393,6 @@ object Strings:
       memory = MemoryOff(
         printTitle = "Memory — cut out the cards",
         cutHint = "Print the sheet, cut along the lines, shuffle face-down and play.",
-        materialsHint = "Print one sheet, cut along the lines. A laminator makes the cards reusable.",
         rules = Rules("How to play", List(
           "Shuffle the cards and lay them face-down in a grid.",
           "Take turns. Flip two cards: keep them if they match and go again; otherwise turn them back over.",
@@ -687,7 +685,6 @@ object Strings:
       memory = MemoryOff(
         printTitle = "Memory — karty do wycięcia",
         cutHint = "Wydrukujcie kartkę, wytnijcie po liniach, potasujcie odwrócone i grajcie.",
-        materialsHint = "Wydrukujcie jedną stronę, wytnijcie po liniach. Laminator sprawi, że karty będą wielokrotnego użytku.",
         rules = Rules("Jak grać", List(
           "Potasujcie karty i ułóżcie zakryte w siatce.",
           "Na zmianę: odkryj dwie karty. Jeśli pasują — zatrzymujesz parę i grasz dalej; jeśli nie — odwracasz z powrotem.",
@@ -980,7 +977,6 @@ object Strings:
       memory = MemoryOff(
         printTitle = "Memoria — recorta las cartas",
         cutHint = "Imprime la hoja, recorta por las líneas, baraja boca abajo y juega.",
-        materialsHint = "Imprime una hoja y recorta. Una plastificadora hace las cartas reutilizables.",
         rules = Rules("Cómo se juega", List(
           "Baraja las cartas y colócalas boca abajo en cuadrícula.",
           "Por turnos. Da la vuelta a dos cartas: si son iguales, te las quedas y vuelves a jugar; si no, dales la vuelta.",
@@ -1273,7 +1269,6 @@ object Strings:
       memory = MemoryOff(
         printTitle = "Memory — découpez les cartes",
         cutHint = "Imprimez la feuille, découpez le long des lignes, mélangez face cachée et jouez.",
-        materialsHint = "Imprimez une feuille et découpez. Une plastifieuse rend les cartes réutilisables.",
         rules = Rules("Comment jouer", List(
           "Mélangez les cartes et étalez-les face cachée en grille.",
           "Chacun son tour. Retournez deux cartes : si elles sont identiques, gardez-les et rejouez ; sinon, retournez-les.",
@@ -1566,7 +1561,6 @@ object Strings:
       memory = MemoryOff(
         printTitle = "Memory — Karten ausschneiden",
         cutHint = "Blatt drucken, an den Linien ausschneiden, verdeckt mischen und spielen.",
-        materialsHint = "Ein Blatt drucken und ausschneiden. Mit einem Laminiergerät werden die Karten wiederverwendbar.",
         rules = Rules("So spielt man", List(
           "Karten mischen und verdeckt in einem Raster auslegen.",
           "Reihum: zwei Karten aufdecken. Passen sie, behalten und noch einmal; sonst wieder umdrehen.",

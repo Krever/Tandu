@@ -311,19 +311,10 @@ object Chess extends Activity:
       )
     ))
 
-  private def chessRulesSections: List[RulesCard.Section] = List(
-    RulesCard.Section(
-      _.offline.chess.rules.title,
-      (0 until 4).toList.map(i => (s: Strings) => s.offline.chess.rules.lines(i))
-    ),
-    RulesCard.Section(
-      _.offline.chess.pieces.title,
-      (0 until 6).toList.map(i => (s: Strings) => s.offline.chess.pieces.lines(i))
-    ),
-    RulesCard.Section(
-      _.offline.chess.specials.title,
-      (0 until 3).toList.map(i => (s: Strings) => s.offline.chess.specials.lines(i))
-    )
+  private val chessRulesSections: List[RulesCard.Section] = List(
+    RulesCard.fromRules(_.offline.chess.rules),
+    RulesCard.fromRules(_.offline.chess.pieces),
+    RulesCard.fromRules(_.offline.chess.specials)
   )
 
   private def renderRules(): HtmlElement =
@@ -366,16 +357,9 @@ object Chess extends Activity:
 
   private def pieceShowcase(kind: Kind): HtmlElement =
     val state = Val(showcaseState(kind))
-    val nameKey: Strings => String = kind match
-      case Kind.Pawn   => _.offline.chess.pieces.lines(0)
-      case Kind.Knight => _.offline.chess.pieces.lines(1)
-      case Kind.Bishop => _.offline.chess.pieces.lines(2)
-      case Kind.Rook   => _.offline.chess.pieces.lines(3)
-      case Kind.Queen  => _.offline.chess.pieces.lines(4)
-      case Kind.King   => _.offline.chess.pieces.lines(5)
     div(
       cls := "card stack",
-      h3(cls := "h3 center", child.text <-- AppState.strings.map(nameKey)),
+      h3(cls := "h3 center", child.text <-- AppState.strings.map(_.offline.chess.pieces.lines(kind.ordinal))),
       boardView(state, _ => ())
     )
 

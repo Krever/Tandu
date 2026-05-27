@@ -246,12 +246,7 @@ object Solitaire extends Activity:
     val example = Val(deal(new Random(1)))
     div(
       cls := "stack-lg",
-      RulesCard.render(List(
-        RulesCard.Section(
-          _.offline.solitaire.rules.title,
-          (0 until 4).toList.map(i => (s: Strings) => s.offline.solitaire.rules.lines(i))
-        )
-      )),
+      RulesCard.render(List(RulesCard.fromRules(_.offline.solitaire.rules))),
       div(
         cls := "sol sol--readonly stack",
         h3(cls := "h2 center", child.text <-- s(_.offline.solitaire.setupExample)),

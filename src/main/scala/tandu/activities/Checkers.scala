@@ -154,12 +154,8 @@ object Checkers extends Activity:
       )
     ))
 
-  private def checkersRulesSections: List[RulesCard.Section] = List(
-    RulesCard.Section(
-      _.offline.checkers.rules.title,
-      (0 until 5).toList.map(i => (s: Strings) => s.offline.checkers.rules.lines(i))
-    )
-  )
+  private val checkersRulesSections: List[RulesCard.Section] =
+    List(RulesCard.fromRules(_.offline.checkers.rules))
 
   // Replays a real player flow: each entry is a cell tap (select source, then destination).
   private val DemoTaps: Vector[Int] = Vector(

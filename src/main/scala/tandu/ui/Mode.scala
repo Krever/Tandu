@@ -3,7 +3,6 @@ package tandu.ui
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.Strings
-import org.scalajs.dom
 
 /** A way to play an activity. Each activity can expose one or more modes;
   * if more than one, the user gets a chooser screen before the body. */
@@ -74,7 +73,3 @@ object ModeChooser:
       ,
       m.render()
     )
-
-  /** Open the browser print dialog. The pages are rendered as the current
-    * activity body; print CSS hides the chrome. */
-  def print(): Unit = dom.window.print()

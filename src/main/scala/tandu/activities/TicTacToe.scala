@@ -89,14 +89,8 @@ object TicTacToe extends Activity:
     div(
       cls := "stack-lg",
       RulesCard.render(List(
-        RulesCard.Section(
-          _.offline.ticTacToe.rules.title,
-          (0 until 3).toList.map(i => (s: Strings) => s.offline.ticTacToe.rules.lines(i))
-        ),
-        RulesCard.Section(
-          _.offline.ticTacToe.gomokuTipTitle,
-          List(_.offline.ticTacToe.gomokuTip)
-        )
+        RulesCard.fromRules(_.offline.ticTacToe.rules),
+        RulesCard.Section(_.offline.ticTacToe.gomokuTipTitle, s => List(s.offline.ticTacToe.gomokuTip))
       ))
     )
 

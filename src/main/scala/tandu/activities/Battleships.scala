@@ -5,10 +5,8 @@ import tandu.AppState
 import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
-import org.scalajs.dom
 
 import scala.annotation.tailrec
-import scala.scalajs.js
 import scala.util.Random
 
 object Battleships extends Activity:
@@ -112,24 +110,21 @@ object Battleships extends Activity:
       )
     ))
 
+  private val battleshipsRulesSections: List[RulesCard.Section] = List(
+    RulesCard.fromRules(_.offline.battleships.rules),
+    RulesCard.Section(_.offline.battleships.fleetTitle, s => List(s.offline.battleships.fleetLine))
+  )
+
+  private enum PrintKind:
+    case Maps, Rules
+
   private def renderOffline(): HtmlElement =
-    val printing: Var[Option[String]] = Var(None)
-
-    def doPrint(what: String): Unit =
-      printing.set(Some(what))
-      js.timers.setTimeout(50) {
-        dom.window.print()
-        printing.set(None)
-      }
-
+    val slot = Printable.printSlot[PrintKind]()
     div(
       cls := "stack-lg",
       div(
         cls := "no-print",
-        RulesCard.render(List(
-          RulesCard.Section(_.offline.battleships.rules.title, rulesLines),
-          RulesCard.Section(_.offline.battleships.fleetTitle, List(_.offline.battleships.fleetLine))
-        ))
+        RulesCard.render(battleshipsRulesSections)
       ),
       div(
         cls := "row no-print",
@@ -137,30 +132,19 @@ object Battleships extends Activity:
         button(
           cls := "btn btn--lg",
           child.text <-- s(_.printable.printMaps),
-          onClick --> (_ => doPrint("maps"))
+          onClick --> (_ => slot.trigger(PrintKind.Maps))
         ),
         button(
           cls := "btn btn--lg btn--ghost",
           child.text <-- s(_.printable.printRules),
-          onClick --> (_ => doPrint("rules"))
+          onClick --> (_ => slot.trigger(PrintKind.Rules))
         )
       ),
-      div(
-        cls := "print-only",
-        child <-- printing.signal.map {
-          case Some("maps")  => printableMaps()
-          case Some("rules") => printableRules()
-          case _             => emptyNode
-        }
-      )
+      slot.mount {
+        case PrintKind.Maps  => printableMaps()
+        case PrintKind.Rules => printableRules()
+      }
     )
-
-  private val rulesLines: List[Strings => String] = List(
-    s => s.offline.battleships.rules.lines(0),
-    s => s.offline.battleships.rules.lines(1),
-    s => s.offline.battleships.rules.lines(2),
-    s => s.offline.battleships.rules.lines(3)
-  )
 
   private def printableMaps(): HtmlElement =
     Printable.render(
@@ -175,17 +159,16 @@ object Battleships extends Activity:
   private def printableRules(): HtmlElement =
     Printable.render(
       title = _.offline.battleships.rules.title,
-      body = RulesCard.render(List(
-        RulesCard.Section(_.offline.battleships.rules.title, rulesLines),
-        RulesCard.Section(_.offline.battleships.fleetTitle, List(_.offline.battleships.fleetLine))
-      ))
+      body = RulesCard.render(battleshipsRulesSections)
     )
+
+  private val PrintColumnLetters: Vector[Char] = "ABCDEFGHIJ".toVector
 
   private def printPlayerGrids(playerNum: Int): HtmlElement =
     div(
       cls := s"bs-print-player bs-print-player--p$playerNum stack",
       h3(cls := "bs-print-player__title",
-        child.text <-- AppState.strings.map(str => s"${str.common.player1.takeWhile(_ != ' ')} $playerNum")
+        child.text <-- AppState.strings.map(Player.labelOf(playerNum, _))
       ),
       div(
         cls := "bs-print-fleet muted",
@@ -193,22 +176,19 @@ object Battleships extends Activity:
       ),
       div(
         cls := "bs-print-grids",
-        printGrid(_.offline.battleships.ownLabel, withShipMarks = false),
-        printGrid(_.offline.battleships.enemyLabel, withShipMarks = false)
+        printGrid(_.offline.battleships.ownLabel),
+        printGrid(_.offline.battleships.enemyLabel)
       )
     )
 
-  private def printGrid(label: Strings => String, withShipMarks: Boolean): HtmlElement =
-    val letters = "ABCDEFGHIJ".toVector
+  private def printGrid(label: Strings => String): HtmlElement =
     div(
       cls := "bs-print-grid",
       div(cls := "bs-print-grid__label", child.text <-- AppState.strings.map(label)),
       div(
         cls := "bs-print-grid__table",
-        // header row
         div(cls := "bs-print-cell bs-print-cell--header", ""),
-        letters.map(c => div(cls := "bs-print-cell bs-print-cell--header", c.toString)),
-        // each row
+        PrintColumnLetters.map(c => div(cls := "bs-print-cell bs-print-cell--header", c.toString)),
         (1 to Size).flatMap { row =>
           div(cls := "bs-print-cell bs-print-cell--header", row.toString) ::
           (0 until Size).map(_ => div(cls := "bs-print-cell")).toList

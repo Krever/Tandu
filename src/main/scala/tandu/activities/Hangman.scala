@@ -51,13 +51,6 @@ object Hangman extends Activity:
       )
     ))
 
-  private val rulesLines: List[Strings => String] = List(
-    s => s.offline.hangman.rules.lines(0),
-    s => s.offline.hangman.rules.lines(1),
-    s => s.offline.hangman.rules.lines(2),
-    s => s.offline.hangman.rules.lines(3)
-  )
-
   private def renderKeeper(): HtmlElement =
     val word    = Var(Picker.pickAvoiding(HangmanBank.wordsFor(AppState.lang.now()), None))
     val shown   = Var(false)
@@ -76,8 +69,8 @@ object Hangman extends Activity:
       cls := "stack-lg",
       langChange,
       RulesCard.render(List(
-        RulesCard.Section(_.offline.hangman.rules.title, rulesLines),
-        RulesCard.Section(_.offline.hangman.gallowsTitle, List(_.offline.hangman.drawHint))
+        RulesCard.fromRules(_.offline.hangman.rules),
+        RulesCard.Section(_.offline.hangman.gallowsTitle, s => List(s.offline.hangman.drawHint))
       )),
       div(
         cls := "center",
@@ -223,8 +216,6 @@ object Hangman extends Activity:
       span(cls := "hangman-lives__value", remaining.toString)
     )
 
-  /** SVG gallows. 10 stages revealed in order: base, pole, beam, rope,
-    * head, body, left arm, right arm, left leg, right leg. */
   private def gallowsView(stagesSig: Signal[Int]): SvgElement =
     import com.raquo.laminar.api.L.svg as S
     def at(n: Int) = S.display <-- stagesSig.map(s => if s >= n then "inline" else "none")

@@ -6,7 +6,6 @@ import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
 
-import org.scalajs.dom
 import scala.scalajs.js
 import scala.util.Random
 
@@ -92,48 +91,18 @@ object Memory extends Activity:
     ))
 
   private def renderOffline(): HtmlElement =
-    val printing: Var[Boolean] = Var(false)
-    def doPrint(): Unit =
-      printing.set(true)
-      js.timers.setTimeout(50) {
-        dom.window.print()
-        printing.set(false)
-      }
     div(
       cls := "stack-lg",
       div(
         cls := "no-print",
-        RulesCard.render(List(
-          RulesCard.Section(_.offline.memory.rules.title, rulesLines)
-        ))
+        RulesCard.render(List(RulesCard.fromRules(_.offline.memory.rules)))
       ),
-      div(
-        cls := "row no-print",
-        styleAttr := "justify-content: center;",
-        button(
-          cls := "btn btn--lg",
-          child.text <-- s(_.printable.print),
-          onClick --> (_ => doPrint())
-        )
-      ),
-      div(
-        cls := "print-only",
-        child <-- printing.signal.map {
-          case true  => printableSheet()
-          case false => emptyNode
-        }
-      )
+      Printable.printButton(),
+      div(cls := "print-only", printableSheet())
     )
 
-  private val rulesLines: List[Strings => String] = List(
-    s => s.offline.memory.rules.lines(0),
-    s => s.offline.memory.rules.lines(1),
-    s => s.offline.memory.rules.lines(2)
-  )
-
   private def printableSheet(): HtmlElement =
-    // 24 pairs = 48 cards, 6 cols × 8 rows. Pairs sit next to each other;
-    // the parent shuffles after cutting.
+    // Pairs sit next to each other on the sheet; the parent shuffles after cutting.
     val pairs = 24
     val deck  = Emojis.take(pairs).flatMap(e => List(e, e))
     Printable.render(

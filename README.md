@@ -16,3 +16,4 @@ TODO:
   * online/offline
 * README.md
 * review translations
+* games state persistance

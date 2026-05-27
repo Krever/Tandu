@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Keep in sync with tandu.activities.Registry.all and tandu.tools.Tools.all. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tandu.app/</loc></url>
+  <url><loc>https://tandu.app/activity/battleships</loc></url>
+  <url><loc>https://tandu.app/activity/solitaire</loc></url>
+  <url><loc>https://tandu.app/activity/tic-tac-toe</loc></url>
+  <url><loc>https://tandu.app/activity/memory</loc></url>
+  <url><loc>https://tandu.app/activity/hangman</loc></url>
+  <url><loc>https://tandu.app/activity/checkers</loc></url>
+  <url><loc>https://tandu.app/activity/chess</loc></url>
+  <url><loc>https://tandu.app/activity/word-association</loc></url>
+  <url><loc>https://tandu.app/activity/categories</loc></url>
+  <url><loc>https://tandu.app/activity/twenty-questions</loc></url>
+  <url><loc>https://tandu.app/activity/story-building</loc></url>
+  <url><loc>https://tandu.app/activity/last-letter</loc></url>
+  <url><loc>https://tandu.app/activity/would-you-rather</loc></url>
+  <url><loc>https://tandu.app/tool/dice</loc></url>
+  <url><loc>https://tandu.app/tool/timer</loc></url>
+</urlset>

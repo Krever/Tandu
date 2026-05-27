@@ -9,5 +9,9 @@ object AppState:
 
   val strings: Signal[Strings] = lang.signal.map(Strings.of)
 
-  // Persist language whenever it changes.
-  lang.signal.foreach(l => Storage.saveLangCode(l.code))(unsafeWindowOwner)
+  // Persist language whenever it changes, and reflect it on the root <html>
+  // element so crawlers and assistive tech see the active document language.
+  lang.signal.foreach { l =>
+    Storage.saveLangCode(l.code)
+    org.scalajs.dom.document.documentElement.setAttribute("lang", l.code)
+  }(unsafeWindowOwner)

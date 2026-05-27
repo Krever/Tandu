@@ -3,6 +3,9 @@ package tandu
 import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L.*
 import com.raquo.waypoint.*
+import tandu.activities.Registry
+import tandu.i18n.Strings
+import tandu.tools.Tools
 
 enum Page:
   case Home
@@ -51,3 +54,13 @@ object Routing:
 
   def go(page: Page): Unit = router.pushState(page)
   def replace(page: Page): Unit = router.replaceState(page)
+
+  /** Document title for a page in the current language. Used by the
+    * Main subscription so the browser tab and shared-link previews
+    * reflect the activity/tool the user is on. */
+  def title(page: Page, s: Strings): String = page match
+    case Page.Home         => s.appTitle
+    case Page.Activity(id) =>
+      Registry.byId(id).map(a => s"${a.name(s)} — ${s.appTitle}").getOrElse(s.appTitle)
+    case Page.Tool(id)     =>
+      Tools.byId(id).map(t => s"${t.name(s)} — ${s.appTitle}").getOrElse(s.appTitle)

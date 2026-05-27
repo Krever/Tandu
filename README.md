@@ -15,8 +15,4 @@ TODO:
   * num of player
   * online/offline
 * README.md
-* analytics
-* mode selection: 
-  * offline where possible
-  * lichess for chess
 * review translations

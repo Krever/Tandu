@@ -1,19 +1,17 @@
+# Tandu
 
-See DESIGN.md
+A tiny app for picking an activity to do with the kids. Comes with a curated list of activities and provides support for
+both online and offline play.
 
-TODO:
+## Develop
 
-* e2e tests
-* printing
-  * battleships
-  * memory
-* url routing
-* scalafmt, linter
-* CI/CD
-* P2P cooperation
-* filtering
-  * num of player
-  * online/offline
-* README.md
-* review translations
-* games state persistance
+```sh
+npm install
+npm run dev
+```
+
+## Build
+
+```sh
+npm run build
+```

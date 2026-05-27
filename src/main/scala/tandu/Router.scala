@@ -14,8 +14,13 @@ enum Page:
 
 object Routing:
 
+  // Use staticPartial (value-equality match) rather than static. With Scala 3
+  // enum cases, ClassTag[Page.Home.type].runtimeClass is the erased enum class
+  // (Page), so a Total route's `case p: Page.Home.type` matches every Page —
+  // making routeHome swallow Activity/Tool pages during encode and pushState
+  // would always set the URL to "/".
   private val routeHome: Route[Page.Home.type, Unit] =
-    Route.static(Page.Home, root / endOfSegments)
+    Route.staticPartial(Page.Home, root / endOfSegments)
 
   private val routeActivity: Route[Page.Activity, String] =
     Route[Page.Activity, String](

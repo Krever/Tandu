@@ -25,7 +25,9 @@ final case class Strings(
     storyBuilding: Strings.StoryBuilding,
     lastLetter: Strings.LastLetter,
     wouldYouRather: Strings.WouldYouRather,
-    dice: Strings.Dice
+    dice: Strings.Dice,
+    sudoku: Strings.Sudoku,
+    minesweeper: Strings.Minesweeper
 )
 
 object Strings:
@@ -174,6 +176,12 @@ object Strings:
       lichessLabel: String
   )
 
+  final case class SudokuOff(
+      printTitle: String,
+      sheetHint: String,
+      rules: Rules
+  )
+
   final case class Offline(
       materials: Materials,
       battleships: BattleshipsOff,
@@ -183,7 +191,8 @@ object Strings:
       ticTacToe: TicTacToeOff,
       solitaire: SolitaireOff,
       categories: CategoriesOff,
-      checkers: CheckersOff
+      checkers: CheckersOff,
+      sudoku: SudokuOff
   )
 
   final case class TttVariant(name: String, description: String)
@@ -341,6 +350,39 @@ object Strings:
       sides: String,
       lastRolls: String,
       total: String
+  )
+
+  final case class SudokuVariant(name: String, description: String)
+
+  final case class Sudoku(
+      name: String,
+      description: String,
+      chooseVariant: String,
+      changeVariant: String,
+      newGame: String,
+      undo: String,
+      pencil: String,
+      easy: SudokuVariant,
+      medium: SudokuVariant,
+      hard: SudokuVariant
+  )
+
+  final case class MinesweeperVariant(name: String, description: String)
+
+  final case class Minesweeper(
+      name: String,
+      description: String,
+      chooseVariant: String,
+      changeVariant: String,
+      newGame: String,
+      playing: String,
+      youWon: String,
+      youLost: String,
+      revealMode: String,
+      flagMode: String,
+      easy: MinesweeperVariant,
+      medium: MinesweeperVariant,
+      hard: MinesweeperVariant
   )
 
   val en: Strings = Strings(
@@ -518,6 +560,15 @@ object Strings:
           "Win by capturing all enemy pieces or blocking them so they can't move."
         )),
         lichessLabel = "Open lidraughts"
+      ),
+      sudoku = SudokuOff(
+        printTitle = "Sudoku — six puzzles",
+        sheetHint = "Print the sheet, grab a pen, and solve. No solutions included — that's part of the fun.",
+        rules = Rules("How to play", List(
+          "Fill the grid so every row, every column, and every 3×3 box contains each digit 1–9 exactly once.",
+          "The given numbers can't change. Use small pencil marks for candidates when you're unsure.",
+          "Work by elimination: if a cell can only hold one digit, that's the answer."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -656,6 +707,33 @@ object Strings:
       sides = "Sides",
       lastRolls = "Last rolls",
       total = "Total"
+    ),
+    sudoku = Sudoku(
+      name = "Sudoku",
+      description = "Fill the 9×9 grid so every row, column and box has 1–9.",
+      chooseVariant = "Choose difficulty",
+      changeVariant = "Change difficulty",
+      newGame = "New game",
+      undo = "Undo",
+      pencil = "Pencil",
+      easy = SudokuVariant("Easy", "More clues — a friendly start."),
+      medium = SudokuVariant("Medium", "Fewer clues — a real challenge."),
+      hard = SudokuVariant("Hard", "Sparse clues — for sharp solvers.")
+    ),
+    minesweeper = Minesweeper(
+      name = "Minesweeper",
+      description = "Clear the board without stepping on a mine.",
+      chooseVariant = "Choose size",
+      changeVariant = "Change size",
+      newGame = "New game",
+      playing = "Watch your step…",
+      youWon = "Cleared!",
+      youLost = "Boom!",
+      revealMode = "Reveal",
+      flagMode = "Flag",
+      easy = MinesweeperVariant("Easy", "9×9 with 10 mines."),
+      medium = MinesweeperVariant("Medium", "12×12 with 25 mines."),
+      hard = MinesweeperVariant("Hard", "16×12 with 40 mines.")
     )
   )
 
@@ -834,6 +912,15 @@ object Strings:
           "Wygrasz, zbijając wszystkie pionki przeciwnika lub blokując mu ruchy."
         )),
         lichessLabel = "Otwórz lidraughts"
+      ),
+      sudoku = SudokuOff(
+        printTitle = "Sudoku — sześć zagadek",
+        sheetHint = "Wydrukuj kartkę, weź długopis i rozwiązuj. Bez rozwiązań — taka zabawa.",
+        rules = Rules("Jak grać", List(
+          "Wypełnij planszę tak, by w każdym wierszu, każdej kolumnie i każdym kwadracie 3×3 znalazła się każda cyfra od 1 do 9 dokładnie raz.",
+          "Podane cyfry są niezmienne. Używaj małych notatek przy niepewnych polach.",
+          "Działaj przez eliminację: jeśli w polu pasuje tylko jedna cyfra — to jest rozwiązanie."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -972,6 +1059,33 @@ object Strings:
       sides = "Ścianki",
       lastRolls = "Ostatnie rzuty",
       total = "Suma"
+    ),
+    sudoku = Sudoku(
+      name = "Sudoku",
+      description = "Wypełnij siatkę 9×9 tak, by każdy wiersz, kolumna i kwadrat miał 1–9.",
+      chooseVariant = "Wybierz poziom",
+      changeVariant = "Zmień poziom",
+      newGame = "Nowa gra",
+      undo = "Cofnij",
+      pencil = "Notatka",
+      easy = SudokuVariant("Łatwe", "Więcej podpowiedzi — przyjazny start."),
+      medium = SudokuVariant("Średnie", "Mniej podpowiedzi — prawdziwe wyzwanie."),
+      hard = SudokuVariant("Trudne", "Mało podpowiedzi — dla wytrawnych.")
+    ),
+    minesweeper = Minesweeper(
+      name = "Saper",
+      description = "Odkryj planszę, nie wchodząc na minę.",
+      chooseVariant = "Wybierz rozmiar",
+      changeVariant = "Zmień rozmiar",
+      newGame = "Nowa gra",
+      playing = "Uważaj na miny…",
+      youWon = "Czysto!",
+      youLost = "Bum!",
+      revealMode = "Odkryj",
+      flagMode = "Flaga",
+      easy = MinesweeperVariant("Łatwy", "9×9 z 10 minami."),
+      medium = MinesweeperVariant("Średni", "12×12 z 25 minami."),
+      hard = MinesweeperVariant("Trudny", "16×12 z 40 minami.")
     )
   )
 
@@ -1150,6 +1264,15 @@ object Strings:
           "Ganáis al capturar todas las fichas o bloquear los movimientos del rival."
         )),
         lichessLabel = "Abrir lidraughts"
+      ),
+      sudoku = SudokuOff(
+        printTitle = "Sudoku — seis enigmas",
+        sheetHint = "Imprime la hoja, coge un lápiz y a resolver. Sin soluciones — esa es la gracia.",
+        rules = Rules("Cómo jugar", List(
+          "Rellena la cuadrícula de modo que cada fila, cada columna y cada caja 3×3 contenga los dígitos del 1 al 9 exactamente una vez.",
+          "Los números dados no cambian. Usa pequeñas anotaciones para los candidatos.",
+          "Trabaja por eliminación: si una casilla solo admite un dígito, ese es la respuesta."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1288,6 +1411,33 @@ object Strings:
       sides = "Caras",
       lastRolls = "Últimas tiradas",
       total = "Total"
+    ),
+    sudoku = Sudoku(
+      name = "Sudoku",
+      description = "Rellena la cuadrícula 9×9 con 1–9 en cada fila, columna y caja.",
+      chooseVariant = "Elige dificultad",
+      changeVariant = "Cambiar dificultad",
+      newGame = "Nueva partida",
+      undo = "Deshacer",
+      pencil = "Lápiz",
+      easy = SudokuVariant("Fácil", "Más pistas — un buen comienzo."),
+      medium = SudokuVariant("Medio", "Menos pistas — un reto real."),
+      hard = SudokuVariant("Difícil", "Pocas pistas — para expertos.")
+    ),
+    minesweeper = Minesweeper(
+      name = "Buscaminas",
+      description = "Despeja el tablero sin pisar una mina.",
+      chooseVariant = "Elige tamaño",
+      changeVariant = "Cambiar tamaño",
+      newGame = "Nueva partida",
+      playing = "Cuidado dónde pisas…",
+      youWon = "¡Despejado!",
+      youLost = "¡Bum!",
+      revealMode = "Descubrir",
+      flagMode = "Bandera",
+      easy = MinesweeperVariant("Fácil", "9×9 con 10 minas."),
+      medium = MinesweeperVariant("Medio", "12×12 con 25 minas."),
+      hard = MinesweeperVariant("Difícil", "16×12 con 40 minas.")
     )
   )
 
@@ -1466,6 +1616,15 @@ object Strings:
           "Vous gagnez en capturant tous les pions adverses ou en les bloquant."
         )),
         lichessLabel = "Ouvrir lidraughts"
+      ),
+      sudoku = SudokuOff(
+        printTitle = "Sudoku — six grilles",
+        sheetHint = "Imprimez la feuille, prenez un stylo et résolvez. Pas de solutions — ça fait partie du jeu.",
+        rules = Rules("Comment jouer", List(
+          "Remplissez la grille pour que chaque ligne, chaque colonne et chaque carré 3×3 contienne chaque chiffre de 1 à 9 exactement une fois.",
+          "Les chiffres donnés ne changent pas. Notez les candidats en petit quand vous hésitez.",
+          "Procédez par élimination : si une case n'accepte qu'un seul chiffre, c'est la réponse."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1604,6 +1763,33 @@ object Strings:
       sides = "Faces",
       lastRolls = "Derniers lancers",
       total = "Total"
+    ),
+    sudoku = Sudoku(
+      name = "Sudoku",
+      description = "Remplissez la grille 9×9 avec 1–9 sur chaque ligne, colonne et carré.",
+      chooseVariant = "Choisir la difficulté",
+      changeVariant = "Changer la difficulté",
+      newGame = "Nouvelle partie",
+      undo = "Annuler",
+      pencil = "Crayon",
+      easy = SudokuVariant("Facile", "Plus d'indices — un démarrage doux."),
+      medium = SudokuVariant("Moyen", "Moins d'indices — un vrai défi."),
+      hard = SudokuVariant("Difficile", "Peu d'indices — pour les experts.")
+    ),
+    minesweeper = Minesweeper(
+      name = "Démineur",
+      description = "Découvrez le plateau sans toucher de mine.",
+      chooseVariant = "Choisir la taille",
+      changeVariant = "Changer la taille",
+      newGame = "Nouvelle partie",
+      playing = "Attention aux mines…",
+      youWon = "Déminé !",
+      youLost = "Boum !",
+      revealMode = "Révéler",
+      flagMode = "Drapeau",
+      easy = MinesweeperVariant("Facile", "9×9 avec 10 mines."),
+      medium = MinesweeperVariant("Moyen", "12×12 avec 25 mines."),
+      hard = MinesweeperVariant("Difficile", "16×12 avec 40 mines.")
     )
   )
 
@@ -1782,6 +1968,15 @@ object Strings:
           "Gewonnen, wenn alle gegnerischen Steine geschlagen sind oder der Gegner nicht ziehen kann."
         )),
         lichessLabel = "lidraughts öffnen"
+      ),
+      sudoku = SudokuOff(
+        printTitle = "Sudoku — sechs Rätsel",
+        sheetHint = "Druckt das Blatt aus, schnappt euch einen Stift und löst los. Keine Lösungen — das gehört zum Spaß.",
+        rules = Rules("So wird gespielt", List(
+          "Füllt das Gitter so aus, dass jede Reihe, jede Spalte und jeder 3×3-Block die Ziffern 1–9 jeweils genau einmal enthält.",
+          "Die vorgegebenen Zahlen sind fest. Tragt kleine Kandidatennotizen ein, wenn ihr unsicher seid.",
+          "Arbeitet per Ausschluss: passt nur eine Ziffer in ein Feld, ist sie die Lösung."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1920,6 +2115,33 @@ object Strings:
       sides = "Seiten",
       lastRolls = "Letzte Würfe",
       total = "Summe"
+    ),
+    sudoku = Sudoku(
+      name = "Sudoku",
+      description = "Füllt das 9×9-Gitter so, dass jede Reihe, Spalte und Box 1–9 enthält.",
+      chooseVariant = "Schwierigkeit wählen",
+      changeVariant = "Schwierigkeit ändern",
+      newGame = "Neues Spiel",
+      undo = "Rückgängig",
+      pencil = "Notiz",
+      easy = SudokuVariant("Leicht", "Mehr Hinweise — sanfter Einstieg."),
+      medium = SudokuVariant("Mittel", "Weniger Hinweise — echte Herausforderung."),
+      hard = SudokuVariant("Schwer", "Wenige Hinweise — für Profis.")
+    ),
+    minesweeper = Minesweeper(
+      name = "Minesweeper",
+      description = "Räume das Feld, ohne auf eine Mine zu treten.",
+      chooseVariant = "Größe wählen",
+      changeVariant = "Größe ändern",
+      newGame = "Neues Spiel",
+      playing = "Pass auf, wohin du trittst…",
+      youWon = "Geschafft!",
+      youLost = "Bumm!",
+      revealMode = "Aufdecken",
+      flagMode = "Flagge",
+      easy = MinesweeperVariant("Leicht", "9×9 mit 10 Minen."),
+      medium = MinesweeperVariant("Mittel", "12×12 mit 25 Minen."),
+      hard = MinesweeperVariant("Schwer", "16×12 mit 40 Minen.")
     )
   )
 

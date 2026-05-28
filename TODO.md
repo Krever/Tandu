@@ -7,7 +7,4 @@ TODO:
 * scalafmt
 * CI/CD
 * P2P cooperation
-* filtering
-  * num of player
-  * online/offline
-* games state persistancew
+* games state persistance

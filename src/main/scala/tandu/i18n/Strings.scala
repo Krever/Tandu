@@ -65,7 +65,8 @@ object Strings:
       inApp: String,
       offline: String,
       lichess: String,
-      external: String
+      external: String,
+      p2p: String
   )
 
   final case class Printable(
@@ -189,6 +190,23 @@ object Strings:
       gomoku: TttVariant
   )
 
+  final case class BattleshipsP2P(
+      title: String,
+      intro: String,
+      create: String,
+      join: String,
+      connect: String,
+      shareCode: String,
+      enterCode: String,
+      waiting: String,
+      yourTurn: String,
+      opponentTurn: String,
+      waitingShot: String,
+      waitingResolve: String,
+      youWin: String,
+      youLose: String
+  )
+
   final case class Battleships(
       name: String,
       description: String,
@@ -202,7 +220,8 @@ object Strings:
       hideMyBoard: String,
       enemyBoard: String,
       print: String,
-      endTurn: String
+      endTurn: String,
+      p2p: BattleshipsP2P
   )
 
   final case class WordAssociation(
@@ -350,7 +369,8 @@ object Strings:
       inApp = "Play in app",
       offline = "Play offline",
       lichess = "Play online",
-      external = "Open online"
+      external = "Open online",
+      p2p = "Play on two devices"
     ),
     printable = Printable(
       print = "Print",
@@ -507,7 +527,23 @@ object Strings:
       hideMyBoard = "Hide my board",
       enemyBoard = "Enemy waters",
       print = "Print boards",
-      endTurn = "End turn"
+      endTurn = "End turn",
+      p2p = BattleshipsP2P(
+        title = "Two-device play",
+        intro = "Connect two phones to play with hidden boards. One device creates a game, the other joins with the same code.",
+        create = "Create game",
+        join = "Join game",
+        connect = "Connect",
+        shareCode = "Share this code with the other device",
+        enterCode = "Enter the code from the other device",
+        waiting = "Waiting for the other device…",
+        yourTurn = "Your turn",
+        opponentTurn = "Opponent's turn",
+        waitingShot = "Waiting for their shot…",
+        waitingResolve = "Waiting for the result…",
+        youWin = "You win!",
+        youLose = "You lose."
+      )
     ),
     wordAssociation = WordAssociation(
       name = "Word association",
@@ -641,6 +677,7 @@ object Strings:
       choose = "Jak chcecie grać?",
       inApp = "Gra w aplikacji",
       offline = "Gra offline",
+      p2p = "Gra na dwóch urządzeniach",
       lichess = "Zagraj online",
       external = "Otwórz online"
     ),
@@ -799,7 +836,23 @@ object Strings:
       hideMyBoard = "Ukryj moją planszę",
       enemyBoard = "Wody przeciwnika",
       print = "Drukuj plansze",
-      endTurn = "Zakończ turę"
+      endTurn = "Zakończ turę",
+      p2p = BattleshipsP2P(
+        title = "Gra na dwóch urządzeniach",
+        intro = "Połącz dwa telefony, żeby zagrać z ukrytymi planszami. Jedno urządzenie tworzy grę, drugie dołącza tym samym kodem.",
+        create = "Utwórz grę",
+        join = "Dołącz",
+        connect = "Połącz",
+        shareCode = "Podaj ten kod drugiemu urządzeniu",
+        enterCode = "Wpisz kod z drugiego urządzenia",
+        waiting = "Czekam na drugie urządzenie…",
+        yourTurn = "Twoja tura",
+        opponentTurn = "Tura przeciwnika",
+        waitingShot = "Czekam na strzał przeciwnika…",
+        waitingResolve = "Czekam na wynik…",
+        youWin = "Wygrywasz!",
+        youLose = "Przegrywasz."
+      )
     ),
     wordAssociation = WordAssociation(
       name = "Skojarzenia",
@@ -934,7 +987,8 @@ object Strings:
       inApp = "Jugar en la app",
       offline = "Jugar sin conexión",
       lichess = "Jugar online",
-      external = "Abrir online"
+      external = "Abrir online",
+      p2p = "Jugar en dos dispositivos"
     ),
     printable = Printable(
       print = "Imprimir",
@@ -1091,7 +1145,23 @@ object Strings:
       hideMyBoard = "Ocultar mi tablero",
       enemyBoard = "Aguas enemigas",
       print = "Imprimir tableros",
-      endTurn = "Fin del turno"
+      endTurn = "Fin del turno",
+      p2p = BattleshipsP2P(
+        title = "Jugar en dos dispositivos",
+        intro = "Conecta dos teléfonos para jugar con tableros ocultos. Un dispositivo crea la partida y el otro se une con el mismo código.",
+        create = "Crear partida",
+        join = "Unirse",
+        connect = "Conectar",
+        shareCode = "Comparte este código con el otro dispositivo",
+        enterCode = "Introduce el código del otro dispositivo",
+        waiting = "Esperando al otro dispositivo…",
+        yourTurn = "Tu turno",
+        opponentTurn = "Turno del rival",
+        waitingShot = "Esperando su disparo…",
+        waitingResolve = "Esperando el resultado…",
+        youWin = "¡Ganaste!",
+        youLose = "Perdiste."
+      )
     ),
     wordAssociation = WordAssociation(
       name = "Asociación de palabras",
@@ -1226,7 +1296,8 @@ object Strings:
       inApp = "Jouer dans l'app",
       offline = "Jouer hors ligne",
       lichess = "Jouer en ligne",
-      external = "Ouvrir en ligne"
+      external = "Ouvrir en ligne",
+      p2p = "Jouer à deux appareils"
     ),
     printable = Printable(
       print = "Imprimer",
@@ -1383,7 +1454,23 @@ object Strings:
       hideMyBoard = "Cacher mon plateau",
       enemyBoard = "Eaux ennemies",
       print = "Imprimer les plateaux",
-      endTurn = "Fin du tour"
+      endTurn = "Fin du tour",
+      p2p = BattleshipsP2P(
+        title = "Jouer à deux appareils",
+        intro = "Connectez deux téléphones pour jouer avec des plateaux cachés. Un appareil crée la partie, l'autre rejoint avec le même code.",
+        create = "Créer une partie",
+        join = "Rejoindre",
+        connect = "Connecter",
+        shareCode = "Partagez ce code avec l'autre appareil",
+        enterCode = "Saisissez le code de l'autre appareil",
+        waiting = "En attente de l'autre appareil…",
+        yourTurn = "Votre tour",
+        opponentTurn = "Tour de l'adversaire",
+        waitingShot = "En attente de son tir…",
+        waitingResolve = "En attente du résultat…",
+        youWin = "Vous gagnez !",
+        youLose = "Vous perdez."
+      )
     ),
     wordAssociation = WordAssociation(
       name = "Association de mots",
@@ -1518,7 +1605,8 @@ object Strings:
       inApp = "In der App spielen",
       offline = "Offline spielen",
       lichess = "Online spielen",
-      external = "Online öffnen"
+      external = "Online öffnen",
+      p2p = "Auf zwei Geräten spielen"
     ),
     printable = Printable(
       print = "Drucken",
@@ -1675,7 +1763,23 @@ object Strings:
       hideMyBoard = "Mein Brett verbergen",
       enemyBoard = "Gegnerisches Gewässer",
       print = "Bretter drucken",
-      endTurn = "Zug beenden"
+      endTurn = "Zug beenden",
+      p2p = BattleshipsP2P(
+        title = "Auf zwei Geräten spielen",
+        intro = "Verbindet zwei Handys, um mit verborgenen Brettern zu spielen. Ein Gerät erstellt das Spiel, das andere tritt mit demselben Code bei.",
+        create = "Spiel erstellen",
+        join = "Beitreten",
+        connect = "Verbinden",
+        shareCode = "Diesen Code mit dem anderen Gerät teilen",
+        enterCode = "Code vom anderen Gerät eingeben",
+        waiting = "Warte auf das andere Gerät…",
+        yourTurn = "Du bist dran",
+        opponentTurn = "Gegner ist dran",
+        waitingShot = "Warte auf seinen Schuss…",
+        waitingResolve = "Warte auf das Ergebnis…",
+        youWin = "Du gewinnst!",
+        youLose = "Du verlierst."
+      )
     ),
     wordAssociation = WordAssociation(
       name = "Wortassoziation",

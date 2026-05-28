@@ -157,6 +157,8 @@ Settled, not up for debate at this stage:
 - **Laminar** for UI, **Waypoint** for routing.
 - **Vite** for dev server / bundling, **vite-plugin-pwa** for manifest +
   service worker.
-- **scalatest** for logic, **Selenium** for e2e.
+- **scalatest** for logic, **Playwright (TypeScript)** for e2e — chosen
+  over Selenium for its first-class multi-context support (needed for
+  device-to-device P2P testing) and built-in trace/video debugging.
 - If a backend ever appears, it will be Scala sharing models via a
   `shared/` cross-project.

@@ -42,3 +42,9 @@ node_modules/
 dist/
 dev-dist/
 *.log
+
+### Playwright ###
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

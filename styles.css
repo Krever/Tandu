@@ -1099,3 +1099,33 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   }
   .printable__footer { margin-top: auto; }
 }
+
+/* ---- P2P lobby ---- */
+.p2p-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 3rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2, #f3f4f6);
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.p2p-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+  padding: var(--space-3) var(--space-4);
+  width: 8ch;
+  min-height: 64px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius-md);
+  background: var(--surface-2, #f3f4f6);
+}
+.p2p-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

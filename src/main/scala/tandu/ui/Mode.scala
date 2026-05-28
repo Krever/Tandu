@@ -51,6 +51,8 @@ object ModeChooser:
           }
           button(
             cls := "tile",
+            // Stable hook for e2e tests — avoids matching on translated label text.
+            dataAttr("testid") := s"mode-${m.id}",
             div(
               cls := "stack",
               div(cls := "tile__name", child.text <-- AppState.strings.map(m.label)),

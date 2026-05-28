@@ -7,7 +7,9 @@ trait Activity:
   def id: String
   def name(s: Strings): String
   def description(s: Strings): String
-  def categories: Set[Category]
+  def minPlayers: Int
+  def maxPlayers: Int
+  def handsFree: Boolean
 
   /** The page body shown after Suggest. Rendered fresh on each navigation. */
   def render(): HtmlElement

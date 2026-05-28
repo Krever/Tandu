@@ -12,7 +12,9 @@ object Battleships extends Activity:
   val id = "battleships"
   def name(s: Strings): String = s.battleships.name
   def description(s: Strings): String = s.battleships.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = 2
+  val handsFree: Boolean = false
 
   // ---------- pass-and-play state ----------
 

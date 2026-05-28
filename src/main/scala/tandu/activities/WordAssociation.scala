@@ -9,7 +9,9 @@ object WordAssociation extends Activity:
   val id = "word-association"
   def name(s: Strings): String = s.wordAssociation.name
   def description(s: Strings): String = s.wordAssociation.description
-  val categories: Set[Category] = Set(Category.Car)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = true
 
   private def pickWord(lang: Lang, avoid: Option[String]): String =
     Picker.pickAvoiding(WordBank.forLang(lang), avoid)

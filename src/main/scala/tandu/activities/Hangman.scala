@@ -10,7 +10,9 @@ object Hangman extends Activity:
   val id = "hangman"
   def name(s: Strings): String = s.hangman.name
   def description(s: Strings): String = s.hangman.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 1
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = false
 
   val DefaultLives: Int = 6
   private val LivesOptions: List[Int] = List(4, 6, 8, 10)

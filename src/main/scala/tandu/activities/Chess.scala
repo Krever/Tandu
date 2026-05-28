@@ -10,7 +10,9 @@ object Chess extends Activity:
   val id = "chess"
   def name(s: Strings): String = s.chess.name
   def description(s: Strings): String = s.chess.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = 2
+  val handsFree: Boolean = false
 
   private val Size = 8
 

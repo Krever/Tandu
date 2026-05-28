@@ -8,7 +8,9 @@ object StoryBuilding extends Activity:
   val id = "story-building"
   def name(s: Strings): String = s.storyBuilding.name
   def description(s: Strings): String = s.storyBuilding.description
-  val categories: Set[Category] = Set(Category.Car)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = true
 
   def render(): HtmlElement =
     div(

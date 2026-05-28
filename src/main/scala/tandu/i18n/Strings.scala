@@ -5,7 +5,7 @@ final case class Strings(
     tagline: String,
     common: Strings.Common,
     home: Strings.Home,
-    category: Strings.CategoryLabels,
+    filters: Strings.Filters,
     about: Strings.About,
     menu: Strings.Menu,
     mode: Strings.Mode,
@@ -49,10 +49,12 @@ object Strings:
       installApp: String
   )
 
-  final case class CategoryLabels(
+  final case class Filters(
       all: String,
-      tabletop: String,
-      car: String
+      solo: String,
+      two: String,
+      group: String,
+      handsFree: String
   )
 
   final case class About(
@@ -361,10 +363,12 @@ object Strings:
       activities = "Activities",
       installApp = "Install app"
     ),
-    category = CategoryLabels(
+    filters = Filters(
       all = "All",
-      tabletop = "At home",
-      car = "In the car"
+      solo = "Solo",
+      two = "Two",
+      group = "3+",
+      handsFree = "Hands-free"
     ),
     about = About(
       open = "About",
@@ -675,10 +679,12 @@ object Strings:
       activities = "Zabawy",
       installApp = "Zainstaluj aplikację"
     ),
-    category = CategoryLabels(
+    filters = Filters(
       all = "Wszystkie",
-      tabletop = "W domu",
-      car = "W aucie"
+      solo = "Solo",
+      two = "Dwóch",
+      group = "3+",
+      handsFree = "Bez rąk"
     ),
     about = About(
       open = "O aplikacji",
@@ -989,10 +995,12 @@ object Strings:
       activities = "Actividades",
       installApp = "Instalar app"
     ),
-    category = CategoryLabels(
+    filters = Filters(
       all = "Todas",
-      tabletop = "En casa",
-      car = "En el coche"
+      solo = "Solo",
+      two = "Dos",
+      group = "3+",
+      handsFree = "Manos libres"
     ),
     about = About(
       open = "Acerca de",
@@ -1303,10 +1311,12 @@ object Strings:
       activities = "Activités",
       installApp = "Installer l'app"
     ),
-    category = CategoryLabels(
+    filters = Filters(
       all = "Toutes",
-      tabletop = "À la maison",
-      car = "En voiture"
+      solo = "Solo",
+      two = "Deux",
+      group = "3+",
+      handsFree = "Mains libres"
     ),
     about = About(
       open = "À propos",
@@ -1617,10 +1627,12 @@ object Strings:
       activities = "Aktivitäten",
       installApp = "App installieren"
     ),
-    category = CategoryLabels(
+    filters = Filters(
       all = "Alle",
-      tabletop = "Zu Hause",
-      car = "Im Auto"
+      solo = "Solo",
+      two = "Zwei",
+      group = "3+",
+      handsFree = "Ohne Hände"
     ),
     about = About(
       open = "Über",

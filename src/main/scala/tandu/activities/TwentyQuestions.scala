@@ -10,7 +10,9 @@ object TwentyQuestions extends Activity:
   val id = "twenty-questions"
   def name(s: Strings): String = s.twentyQuestions.name
   def description(s: Strings): String = s.twentyQuestions.description
-  val categories: Set[Category] = Set(Category.Car)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = true
 
   val MaxQuestions: Int = 20
 

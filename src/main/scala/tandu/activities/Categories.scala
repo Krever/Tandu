@@ -11,7 +11,9 @@ object Categories extends Activity:
   val id = "categories"
   def name(s: Strings): String = s.categoriesGame.name
   def description(s: Strings): String = s.categoriesGame.description
-  val categories: Set[Category] = Set(Category.Car)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = true
 
   final case class Round(prompt: String, letter: Char)
 

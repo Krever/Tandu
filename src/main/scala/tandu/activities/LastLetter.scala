@@ -9,7 +9,9 @@ object LastLetter extends Activity:
   val id = "last-letter"
   def name(s: Strings): String = s.lastLetter.name
   def description(s: Strings): String = s.lastLetter.description
-  val categories: Set[Category] = Set(Category.Car)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = true
 
   private def pickLetter(lang: Lang, avoid: Option[Char]): Char =
     Picker.pickAvoiding(CategoryBank.lettersFor(lang), avoid)

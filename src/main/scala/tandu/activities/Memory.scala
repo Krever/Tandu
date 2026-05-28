@@ -13,7 +13,9 @@ object Memory extends Activity:
   val id = "memory"
   def name(s: Strings): String = s.memory.name
   def description(s: Strings): String = s.memory.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 1
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = false
 
   private val Emojis: Vector[String] = Vector(
     "🐶", "🐱", "🦊", "🐻", "🐼", "🐯", "🦁", "🐮",

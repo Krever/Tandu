@@ -10,7 +10,9 @@ object TicTacToe extends Activity:
   val id = "tic-tac-toe"
   def name(s: Strings): String = s.ticTacToe.name
   def description(s: Strings): String = s.ticTacToe.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = 2
+  val handsFree: Boolean = false
 
   enum Mark:
     case X, O

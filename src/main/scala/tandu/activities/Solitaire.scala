@@ -11,7 +11,9 @@ object Solitaire extends Activity:
   val id = "solitaire"
   def name(s: Strings): String = s.solitaire.name
   def description(s: Strings): String = s.solitaire.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 1
+  val maxPlayers: Int = 1
+  val handsFree: Boolean = false
 
   // ---------- model ----------
 

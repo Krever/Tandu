@@ -10,7 +10,9 @@ object WouldYouRather extends Activity:
   val id = "would-you-rather"
   def name(s: Strings): String = s.wouldYouRather.name
   def description(s: Strings): String = s.wouldYouRather.description
-  val categories: Set[Category] = Set(Category.Car)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = Int.MaxValue
+  val handsFree: Boolean = true
 
   // Avoid the previous pair's items so consecutive dilemmas don't share
   // an option — repeats feel like bugs even when the pool is large.

@@ -12,7 +12,9 @@ object Checkers extends Activity:
   val id = "checkers"
   def name(s: Strings): String = s.checkers.name
   def description(s: Strings): String = s.checkers.description
-  val categories: Set[Category] = Set(Category.Tabletop)
+  val minPlayers: Int = 2
+  val maxPlayers: Int = 2
+  val handsFree: Boolean = false
 
   private val Size = 8
 

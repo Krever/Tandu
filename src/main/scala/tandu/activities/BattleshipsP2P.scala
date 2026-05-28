@@ -24,8 +24,9 @@ object BattleshipsP2P:
     val y: Int
 
   private object WireCell:
-    def fromCell(c: Cell): WireCell =
-      js.Dynamic.literal(x = c.x, y = c.y).asInstanceOf[WireCell]
+    def fromCell(c: Cell): WireCell = new WireCell:
+      val x = c.x
+      val y = c.y
     def toCell(w: WireCell): Cell = Cell(w.x, w.y)
 
   private trait WireShot extends js.Object:
@@ -39,9 +40,12 @@ object BattleshipsP2P:
     val sunkCells: js.UndefOr[js.Array[WireCell]]
     val gameOver: Boolean
 
+  private trait WireEnd extends js.Object
+
   private object Wire:
-    def encodeShot(c: Cell): WireShot =
-      js.Dynamic.literal(x = c.x, y = c.y).asInstanceOf[WireShot]
+    def encodeShot(c: Cell): WireShot = new WireShot:
+      val x = c.x
+      val y = c.y
 
     def decodeShot(w: WireShot): Cell = Cell(w.x, w.y)
 
@@ -53,13 +57,14 @@ object BattleshipsP2P:
       val sunkArr: js.UndefOr[js.Array[WireCell]] =
         if r.sunkCells.isEmpty then js.undefined
         else js.Array(r.sunkCells.toSeq.map(WireCell.fromCell)*)
-      js.Dynamic.literal(
-        x         = r.target.x,
-        y         = r.target.y,
-        result    = resultStr,
-        sunkCells = sunkArr,
-        gameOver  = r.gameOver
-      ).asInstanceOf[WireResolution]
+      new WireResolution:
+        val x         = r.target.x
+        val y         = r.target.y
+        val result    = resultStr
+        val sunkCells = sunkArr
+        val gameOver  = r.gameOver
+
+    val end: WireEnd = new WireEnd {}
 
     def decodeResolution(w: WireResolution): Resolution =
       val target = Cell(w.x, w.y)
@@ -84,8 +89,8 @@ object BattleshipsP2P:
       onShot:      (WireShot => Unit) => Unit,
       sendResolve: WireResolution => Unit,
       onResolve:   (WireResolution => Unit) => Unit,
-      sendEnd:     js.Object => Unit,
-      onEnd:       (js.Object => Unit) => Unit,
+      sendEnd:     WireEnd => Unit,
+      onEnd:       (WireEnd => Unit) => Unit,
       leave:       () => Unit,
       strategy:    Trystero.Strategy
   )
@@ -94,7 +99,7 @@ object BattleshipsP2P:
     def from(room: Trystero.Room): Channels =
       val (sShot, oShot)       = room.makeAction[WireShot]("shot")
       val (sResolve, oResolve) = room.makeAction[WireResolution]("resolve")
-      val (sEnd, oEnd)         = room.makeAction[js.Object]("endTurn")
+      val (sEnd, oEnd)         = room.makeAction[WireEnd]("endTurn")
       Channels(sShot, oShot, sResolve, oResolve, sEnd, oEnd, () => room.leave(), room.strategy)
 
   // ---------- net session (torrent + nostr fallback) ----------
@@ -356,7 +361,7 @@ object BattleshipsP2P:
     net.onResolve { wire =>
       val res = Wire.decodeResolution(wire)
       if !res.gameOver then
-        net.sendEnd(js.Dynamic.literal().asInstanceOf[js.Object])
+        net.sendEnd(Wire.end)
       game.update { g =>
         g.copy(
           enemyView = g.enemyView.apply(res),

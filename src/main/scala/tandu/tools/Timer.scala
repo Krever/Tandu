@@ -1,6 +1,7 @@
 package tandu.tools
 
 import com.raquo.laminar.api.L.*
+import org.scalajs.dom
 import tandu.AppState
 import tandu.i18n.Strings
 import tandu.ui.Components.s
@@ -116,9 +117,7 @@ object Timer extends Tool:
 
   private def playBeep(): Unit =
     try
-      val ctxCls = js.Dynamic.global.AudioContext
-      if js.isUndefined(ctxCls) then return
-      val ctx = js.Dynamic.newInstance(ctxCls)()
+      val ctx = new dom.AudioContext()
       val osc = ctx.createOscillator()
       val gain = ctx.createGain()
       osc.`type` = "sine"
@@ -126,7 +125,7 @@ object Timer extends Tool:
       gain.gain.value = 0.0001
       osc.connect(gain)
       gain.connect(ctx.destination)
-      val t = ctx.currentTime.asInstanceOf[Double]
+      val t = ctx.currentTime
       gain.gain.exponentialRampToValueAtTime(0.2, t + 0.02)
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4)
       osc.start(t)

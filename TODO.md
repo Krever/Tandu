@@ -10,5 +10,4 @@ TODO:
 * filtering
   * num of player
   * online/offline
-* review translations
 * games state persistancew

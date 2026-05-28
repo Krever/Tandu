@@ -7,6 +7,7 @@ final case class Strings(
     home: Strings.Home,
     category: Strings.CategoryLabels,
     about: Strings.About,
+    menu: Strings.Menu,
     mode: Strings.Mode,
     printable: Strings.Printable,
     timer: Strings.Timer,
@@ -58,6 +59,12 @@ object Strings:
       open: String,
       title: String,
       body: String
+  )
+
+  final case class Menu(
+      open: String,
+      feedback: String,
+      language: String
   )
 
   final case class Mode(
@@ -363,6 +370,11 @@ object Strings:
       open = "About",
       title = "About Tandu",
       body = "Tandu is a little helper for picking something fun to do with the kids. Tap \"Suggest activity\" for a random idea, or browse the list. Some games are playable in the app, others are prompts for things you do offline — perfect for the car, the couch, or a rainy afternoon."
+    ),
+    menu = Menu(
+      open = "Menu",
+      feedback = "Send feedback",
+      language = "Language"
     ),
     mode = Mode(
       choose = "How do you want to play?",
@@ -673,6 +685,11 @@ object Strings:
       title = "O Tandu",
       body = "Tandu to mały pomocnik, gdy szukacie pomysłu na zabawę z dziećmi. Stuknij „Zaproponuj zabawę\", żeby wylosować coś na chybił trafił, albo przeglądaj listę. Część gier zagrasz w aplikacji, inne to pomysły do zabawy offline — idealne do auta, na kanapę albo deszczowe popołudnie."
     ),
+    menu = Menu(
+      open = "Menu",
+      feedback = "Prześlij opinię",
+      language = "Język"
+    ),
     mode = Mode(
       choose = "Jak chcecie grać?",
       inApp = "Gra w aplikacji",
@@ -981,6 +998,11 @@ object Strings:
       open = "Acerca de",
       title = "Acerca de Tandu",
       body = "Tandu es un pequeño ayudante para elegir algo divertido que hacer con los niños. Toca \"Sugerir actividad\" para una idea al azar, o explora la lista. Algunos juegos se juegan en la app, otros son ideas para hacer sin pantalla — perfectos para el coche, el sofá o una tarde lluviosa."
+    ),
+    menu = Menu(
+      open = "Menú",
+      feedback = "Enviar comentarios",
+      language = "Idioma"
     ),
     mode = Mode(
       choose = "¿Cómo queréis jugar?",
@@ -1291,6 +1313,11 @@ object Strings:
       title = "À propos de Tandu",
       body = "Tandu est un petit assistant pour choisir une activité amusante avec les enfants. Appuyez sur « Proposer une activité » pour une idée au hasard, ou parcourez la liste. Certains jeux se jouent dans l'application, d'autres sont des idées à faire hors-écran — parfaits pour la voiture, le canapé ou un après-midi pluvieux."
     ),
+    menu = Menu(
+      open = "Menu",
+      feedback = "Envoyer un avis",
+      language = "Langue"
+    ),
     mode = Mode(
       choose = "Comment voulez-vous jouer ?",
       inApp = "Jouer dans l'app",
@@ -1599,6 +1626,11 @@ object Strings:
       open = "Über",
       title = "Über Tandu",
       body = "Tandu ist ein kleiner Helfer, um etwas Lustiges mit den Kindern auszusuchen. Tippe auf „Aktivität vorschlagen\" für eine zufällige Idee oder stöbere in der Liste. Manche Spiele kannst du in der App spielen, andere sind Anregungen für Offline-Spaß — perfekt fürs Auto, das Sofa oder einen verregneten Nachmittag."
+    ),
+    menu = Menu(
+      open = "Menü",
+      feedback = "Feedback senden",
+      language = "Sprache"
     ),
     mode = Mode(
       choose = "Wie möchtet ihr spielen?",

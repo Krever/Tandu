@@ -9,8 +9,6 @@ object Components:
   def header(
       title: Signal[String],
       back: Option[Page] = Some(Page.Home),
-      showLang: Boolean = true,
-      onInfo: Option[() => Unit] = None,
       subtitle: Option[Signal[String]] = None
   ): HtmlElement =
     div(
@@ -31,35 +29,81 @@ object Components:
       ),
       div(
         cls := "header__actions",
-        child <-- Pwa.available.map {
-          case true =>
-            button(
-              cls := "btn btn--ghost btn--icon",
-              aria.label <-- s(_.home.installApp),
-              "⤓",
-              onClick --> (_ => Pwa.prompt())
-            )
-          case false => emptyNode
-        },
-        onInfo.map: cb =>
-          button(
-            cls := "btn btn--ghost btn--icon",
-            "ⓘ",
-            onClick --> (_ => cb())
-          )
-        ,
-        if showLang then langToggle() else emptyNode
+        cornerMenu()
       )
     )
 
-  def langToggle(): HtmlElement =
-    select(
-      cls := "lang-select",
-      value <-- AppState.lang.signal.map(_.code),
-      onChange.mapToValue --> { code =>
-        Lang.fromCode(code).foreach(AppState.lang.set)
-      },
-      Lang.values.toList.map(l => option(value := l.code, l.flag))
+  def cornerMenu(): HtmlElement =
+    val open: Var[Boolean] = Var(false)
+    val aboutOpen: Var[Boolean] = Var(false)
+
+    def closeAnd(action: => Unit): Unit =
+      action
+      open.set(false)
+
+    div(
+      cls := "corner-menu",
+      cls("is-open") <-- open.signal,
+      button(
+        cls := "btn btn--ghost btn--icon",
+        aria.label <-- s(_.menu.open),
+        "⋯",
+        onClick.stopPropagation --> (_ => open.update(!_))
+      ),
+      div(
+        cls := "corner-menu__backdrop",
+        onClick --> (_ => open.set(false))
+      ),
+      div(
+        cls := "corner-menu__panel",
+        onClick.stopPropagation --> (_ => ()),
+        div(
+          cls := "corner-menu__langs",
+          Lang.values.toList.map: l =>
+            button(
+              cls := "corner-menu__lang",
+              cls("is-active") <-- AppState.lang.signal.map(_ == l),
+              aria.label := l.display,
+              l.flag,
+              onClick --> (_ => closeAnd(AppState.lang.set(l)))
+            )
+        ),
+        div(cls := "corner-menu__divider"),
+        child <-- Pwa.available.map {
+          case true =>
+            button(
+              cls := "corner-menu__item",
+              span(child.text <-- s(_.home.installApp)),
+              span(cls := "corner-menu__item-icon", "⤓"),
+              onClick --> (_ => closeAnd(Pwa.prompt()))
+            )
+          case false => emptyNode
+        },
+        button(
+          cls := "corner-menu__item",
+          span(child.text <-- s(_.about.open)),
+          onClick --> (_ => closeAnd(aboutOpen.set(true)))
+        ),
+        a(
+          cls := "corner-menu__item",
+          href := "mailto:feedback@tandu.app?subject=Tandu%20feedback",
+          target := "_blank",
+          rel := "noopener noreferrer",
+          span(child.text <-- s(_.menu.feedback)),
+          span(cls := "corner-menu__item-icon", "✉"),
+          onClick --> (_ => open.set(false))
+        ),
+        a(
+          cls := "corner-menu__item",
+          href := "https://github.com/Krever/Tandu",
+          target := "_blank",
+          rel := "noopener noreferrer",
+          span("GitHub"),
+          span(cls := "corner-menu__item-icon", "↗"),
+          onClick --> (_ => open.set(false))
+        )
+      ),
+      modal(aboutOpen, s(_.about.title), s(_.about.body))
     )
 
   def segmentedToggle[A](

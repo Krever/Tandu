@@ -23,7 +23,7 @@ object ModeChooser:
   /** Render an activity given its supported modes. With a single mode the
     * chooser collapses away; with multiple, the user picks a mode each
     * time they open the activity. */
-  def render(activityId: String, modes: List[Mode]): HtmlElement =
+  def render(modes: List[Mode]): HtmlElement =
     modes match
       case Nil => div(cls := "card", "No modes available.")
       case single :: Nil => bodyOnly(single)

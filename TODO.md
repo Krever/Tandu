@@ -4,7 +4,7 @@ See DESIGN.md
 TODO:
 
 * e2e tests
-* scalafmt, linter
+* scalafmt
 * CI/CD
 * P2P cooperation
 * filtering

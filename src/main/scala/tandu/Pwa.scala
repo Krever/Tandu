@@ -48,7 +48,7 @@ object Pwa:
 
   def prompt(): Unit =
     deferred.now().foreach: e =>
-      e.prompt()
+      val _ = e.prompt()
       e.userChoice.`then`((_: UserChoiceResult) => deferred.set(None))
 
   private def isStandalone: Boolean =

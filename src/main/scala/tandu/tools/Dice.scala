@@ -1,7 +1,6 @@
 package tandu.tools
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
 import tandu.i18n.Strings
 import tandu.ui.Components
 import tandu.ui.Components.s
@@ -27,7 +26,7 @@ object Dice extends Tool:
       val st = state.now()
       val newFaces = Vector.fill(st.count)(Random.nextInt(st.sides) + 1)
       state.set(st.copy(faces = newFaces, rolling = true, history = (newFaces :: st.history).take(5)))
-      org.scalajs.dom.window.setTimeout(
+      val _ = org.scalajs.dom.window.setTimeout(
         () => state.update(s => s.copy(rolling = false)),
         500
       )
@@ -50,7 +49,7 @@ object Dice extends Tool:
             select(
               CountOptions.map(n => option(value := n.toString, n.toString)),
               value <-- state.signal.map(_.count.toString),
-              onChange.mapToValue.map(_.toInt) --> setCount _
+              onChange.mapToValue.map(_.toInt) --> setCount
             )
           ),
           label(
@@ -59,7 +58,7 @@ object Dice extends Tool:
             select(
               SidesOptions.map(n => option(value := n.toString, s"d$n")),
               value <-- state.signal.map(_.sides.toString),
-              onChange.mapToValue.map(_.toInt) --> setSides _
+              onChange.mapToValue.map(_.toInt) --> setSides
             )
           )
         )

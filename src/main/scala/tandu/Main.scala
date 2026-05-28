@@ -10,10 +10,10 @@ import tandu.pages.{ActivityPage, HomePage, ToolPage}
   // Drive document.title from (route × language) so deep links and lang
   // switches both update the tab — Waypoint's getPageTitle only fires on
   // route changes.
-  Routing.router.currentPageSignal
+  val _ = Routing.router.currentPageSignal
     .combineWith(AppState.strings)
     .map((p, s) => Routing.title(p, s))
-    .foreach(t => dom.document.title = t)(unsafeWindowOwner)
+    .foreach(t => dom.document.title = t)(using unsafeWindowOwner)
 
   val container = dom.document.getElementById("app")
   val app = div(
@@ -23,4 +23,4 @@ import tandu.pages.{ActivityPage, HomePage, ToolPage}
       case Page.Tool(id)      => ToolPage.render(id)
     }
   )
-  render(container, app)
+  val _ = render(container, app)

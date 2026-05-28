@@ -63,7 +63,7 @@ object Printable:
     // window.print() snapshots the DOM — without it the preview is blank.
     def trigger(key: K): Unit =
       current.set(Some(key))
-      js.timers.setTimeout(50) {
+      val _ = js.timers.setTimeout(50) {
         print()
         current.set(None)
       }

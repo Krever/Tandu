@@ -62,7 +62,7 @@ object Trystero:
       val tuple  = raw.makeAction[A](namespace)
       val sendFn = tuple._1
       val recvFn = tuple._2
-      val send: A => Unit = (a: A) => { sendFn(a); () }
+      val send: A => Unit = (a: A) => { val _ = sendFn(a) }
       val onRecv: (A => Unit) => Unit = handler =>
         recvFn((data: A, _: String) => handler(data))
       (send, onRecv)

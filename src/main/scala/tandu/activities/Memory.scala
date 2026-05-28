@@ -75,7 +75,7 @@ object Memory extends Activity:
     )
 
   def render(): HtmlElement =
-    ModeChooser.render(id, List(
+    ModeChooser.render(List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,

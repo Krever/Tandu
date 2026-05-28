@@ -3,7 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import scala.util.Random
 import tandu.AppState
-import tandu.i18n.{Lang, Strings}
+import tandu.i18n.Strings
 import tandu.ui.Components.s
 
 object WouldYouRather extends Activity:

@@ -42,7 +42,7 @@ object Battleships extends Activity:
   // ---------- mode chooser ----------
 
   def render(): HtmlElement =
-    ModeChooser.render(id, List(
+    ModeChooser.render(List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,

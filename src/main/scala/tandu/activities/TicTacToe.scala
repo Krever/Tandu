@@ -71,7 +71,7 @@ object TicTacToe extends Activity:
     winning.headOption.getOrElse((None, Set.empty))
 
   def render(): HtmlElement =
-    ModeChooser.render(id, List(
+    ModeChooser.render(List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,

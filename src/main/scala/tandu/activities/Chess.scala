@@ -292,7 +292,7 @@ object Chess extends Activity:
     nextState.copy(outcome = outcome)
 
   def render(): HtmlElement =
-    ModeChooser.render(id, List(
+    ModeChooser.render(List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,

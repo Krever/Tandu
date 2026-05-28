@@ -135,7 +135,7 @@ object Checkers extends Activity:
       state.copy(board = newBoard, turn = nextTurn, selection = None, winner = winner)
 
   def render(): HtmlElement =
-    ModeChooser.render(id, List(
+    ModeChooser.render(List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,

@@ -27,7 +27,8 @@ final case class Strings(
     wouldYouRather: Strings.WouldYouRather,
     dice: Strings.Dice,
     sudoku: Strings.Sudoku,
-    minesweeper: Strings.Minesweeper
+    minesweeper: Strings.Minesweeper,
+    wordBuilder: Strings.WordBuilder
 )
 
 object Strings:
@@ -53,6 +54,8 @@ object Strings:
 
   final case class Filters(
       all: String,
+      games: String,
+      learn: String,
       solo: String,
       two: String,
       group: String,
@@ -369,6 +372,21 @@ object Strings:
       hard: SudokuVariant
   )
 
+  final case class WordBuilderLevel(name: String, description: String)
+
+  final case class WordBuilder(
+      name: String,
+      description: String,
+      easy: WordBuilderLevel,
+      medium: WordBuilderLevel,
+      hard: WordBuilderLevel,
+      correct: String,
+      nextWord: String,
+      skip: String,
+      printTitle: String,
+      printHint: String
+  )
+
   final case class MinesweeperVariant(name: String, description: String)
 
   final case class Minesweeper(
@@ -409,6 +427,8 @@ object Strings:
     ),
     filters = Filters(
       all = "All",
+      games = "Games",
+      learn = "Learn",
       solo = "Solo",
       two = "Two",
       group = "3+",
@@ -738,6 +758,18 @@ object Strings:
       easy = MinesweeperVariant("Easy", "9×9 with 10 mines."),
       medium = MinesweeperVariant("Medium", "12×12 with 25 mines."),
       hard = MinesweeperVariant("Hard", "16×12 with 40 mines.")
+    ),
+    wordBuilder = WordBuilder(
+      name = "Word Builder",
+      description = "Spell the word that matches the picture.",
+      easy = WordBuilderLevel("Easy", "Short words, no extra letters."),
+      medium = WordBuilderLevel("Medium", "Longer words, a few extra letters."),
+      hard = WordBuilderLevel("Hard", "Long words with extra letters."),
+      correct = "Well done!",
+      nextWord = "Next word",
+      skip = "Skip",
+      printTitle = "Word Builder — worksheet",
+      printHint = "Pick a level, then print a sheet."
     )
   )
 
@@ -763,6 +795,8 @@ object Strings:
     ),
     filters = Filters(
       all = "Wszystkie",
+      games = "Gry",
+      learn = "Nauka",
       solo = "Solo",
       two = "Dwóch",
       group = "3+",
@@ -1092,6 +1126,18 @@ object Strings:
       easy = MinesweeperVariant("Łatwy", "9×9 z 10 minami."),
       medium = MinesweeperVariant("Średni", "12×12 z 25 minami."),
       hard = MinesweeperVariant("Trudny", "16×12 z 40 minami.")
+    ),
+    wordBuilder = WordBuilder(
+      name = "Układanka słów",
+      description = "Ułóż słowo pasujące do obrazka.",
+      easy = WordBuilderLevel("Łatwy", "Krótkie słowa, bez dodatkowych liter."),
+      medium = WordBuilderLevel("Średni", "Dłuższe słowa, kilka dodatkowych liter."),
+      hard = WordBuilderLevel("Trudny", "Długie słowa z dodatkowymi literami."),
+      correct = "Super!",
+      nextWord = "Następne słowo",
+      skip = "Pomiń",
+      printTitle = "Układanka słów — karta do druku",
+      printHint = "Wybierz poziom i wydrukuj kartę."
     )
   )
 
@@ -1117,6 +1163,8 @@ object Strings:
     ),
     filters = Filters(
       all = "Todas",
+      games = "Juegos",
+      learn = "Aprender",
       solo = "Solo",
       two = "Dos",
       group = "3+",
@@ -1446,6 +1494,18 @@ object Strings:
       easy = MinesweeperVariant("Fácil", "9×9 con 10 minas."),
       medium = MinesweeperVariant("Medio", "12×12 con 25 minas."),
       hard = MinesweeperVariant("Difícil", "16×12 con 40 minas.")
+    ),
+    wordBuilder = WordBuilder(
+      name = "Constructor de palabras",
+      description = "Forma la palabra que coincide con la imagen.",
+      easy = WordBuilderLevel("Fácil", "Palabras cortas, sin letras extra."),
+      medium = WordBuilderLevel("Medio", "Palabras más largas, algunas letras extra."),
+      hard = WordBuilderLevel("Difícil", "Palabras largas con letras extra."),
+      correct = "¡Muy bien!",
+      nextWord = "Siguiente palabra",
+      skip = "Saltar",
+      printTitle = "Constructor de palabras — hoja",
+      printHint = "Elige un nivel e imprime una hoja."
     )
   )
 
@@ -1471,6 +1531,8 @@ object Strings:
     ),
     filters = Filters(
       all = "Toutes",
+      games = "Jeux",
+      learn = "Apprendre",
       solo = "Solo",
       two = "Deux",
       group = "3+",
@@ -1800,6 +1862,18 @@ object Strings:
       easy = MinesweeperVariant("Facile", "9×9 avec 10 mines."),
       medium = MinesweeperVariant("Moyen", "12×12 avec 25 mines."),
       hard = MinesweeperVariant("Difficile", "16×12 avec 40 mines.")
+    ),
+    wordBuilder = WordBuilder(
+      name = "Construis le mot",
+      description = "Forme le mot qui correspond à l'image.",
+      easy = WordBuilderLevel("Facile", "Mots courts, pas de lettres en plus."),
+      medium = WordBuilderLevel("Moyen", "Mots plus longs, quelques lettres en plus."),
+      hard = WordBuilderLevel("Difficile", "Mots longs avec lettres en plus."),
+      correct = "Bravo !",
+      nextWord = "Mot suivant",
+      skip = "Passer",
+      printTitle = "Construis le mot — fiche",
+      printHint = "Choisis un niveau et imprime une fiche."
     )
   )
 
@@ -1825,6 +1899,8 @@ object Strings:
     ),
     filters = Filters(
       all = "Alle",
+      games = "Spiele",
+      learn = "Lernen",
       solo = "Solo",
       two = "Zwei",
       group = "3+",
@@ -2154,6 +2230,18 @@ object Strings:
       easy = MinesweeperVariant("Leicht", "9×9 mit 10 Minen."),
       medium = MinesweeperVariant("Mittel", "12×12 mit 25 Minen."),
       hard = MinesweeperVariant("Schwer", "16×12 mit 40 Minen.")
+    ),
+    wordBuilder = WordBuilder(
+      name = "Wortbaukasten",
+      description = "Bilde das Wort, das zum Bild passt.",
+      easy = WordBuilderLevel("Leicht", "Kurze Wörter, keine zusätzlichen Buchstaben."),
+      medium = WordBuilderLevel("Mittel", "Längere Wörter, ein paar zusätzliche Buchstaben."),
+      hard = WordBuilderLevel("Schwer", "Lange Wörter mit zusätzlichen Buchstaben."),
+      correct = "Super!",
+      nextWord = "Nächstes Wort",
+      skip = "Überspringen",
+      printTitle = "Wortbaukasten — Arbeitsblatt",
+      printHint = "Stufe wählen und Blatt drucken."
     )
   )
 

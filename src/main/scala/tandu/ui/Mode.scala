@@ -20,38 +20,51 @@ final case class Mode(
 
 object ModeChooser:
 
-  /** Render a chooser that consumes one path segment.
-    *
-    * `prefix` is the path consumed by outer choosers; the chooser reads
-    * `path(prefix.length)` for selection and pushes `prefix :+ pick.id` on
-    * click. With a single mode the chooser collapses to the body. */
+  /** Render a chooser for an Activity page. */
   def render(
       activityId: String,
       modes: List[Mode],
       prefix: List[String] = Nil,
       heading: Strings => String = _.mode.choose
   ): HtmlElement =
+    renderFor(
+      modes,
+      pageOf = path => Page.Activity(activityId, path),
+      currentPath = Routing.router.currentPageSignal.map {
+        case Page.Activity(id, p) if id == activityId => p
+        case _ => Nil
+      },
+      prefix,
+      heading
+    )
+
+  /** Generic core. `pageOf` builds the page to push when a mode is selected;
+    * `currentPath` reflects the URL's path segments for this activity. With a
+    * single mode the chooser collapses to the body. */
+  private def renderFor(
+      modes: List[Mode],
+      pageOf: List[String] => Page,
+      currentPath: Signal[List[String]],
+      prefix: List[String],
+      heading: Strings => String
+  ): HtmlElement =
     modes match
       case Nil           => div(cls := "card", "No options available.")
       case single :: Nil => bodyOnly(single)
       case _ =>
         val current: Signal[Option[Mode]] =
-          Routing.router.currentPageSignal.map {
-            case Page.Activity(id, path) if id == activityId =>
-              path.lift(prefix.length).flatMap(s => modes.find(_.id == s))
-            case _ => None
-          }.distinct
+          currentPath.map(p => p.lift(prefix.length).flatMap(s => modes.find(_.id == s))).distinct
         div(
           cls := "stack-lg",
           child <-- current.map {
-            case None    => chooser(activityId, modes, prefix, heading)
+            case None    => chooser(modes, pageOf, prefix, heading)
             case Some(m) => bodyOnly(m)
           }
         )
 
   private def chooser(
-      activityId: String,
       modes: List[Mode],
+      pageOf: List[String] => Page,
       prefix: List[String],
       heading: Strings => String
   ): HtmlElement =
@@ -85,7 +98,7 @@ object ModeChooser:
               )
             ),
             div(cls := "tile__chev", "›"),
-            onClick --> (_ => Routing.go(Page.Activity(activityId, prefix :+ m.id)))
+            onClick --> (_ => Routing.go(pageOf(prefix :+ m.id)))
           )
         }
       )

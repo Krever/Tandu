@@ -42,7 +42,7 @@ object ActivityPage:
       cls := "btn btn--ghost btn--stacked",
       onClick --> (_ =>
         Routing.replace(Page.Activity(
-          Registry.pickRandom(AppState.playersFilter.now(), AppState.handsFreeOnly.now()).id
+          Registry.pickRandom(AppState.playersFilter.now(), AppState.handsFreeOnly.now(), AppState.kindFilter.now()).id
         ))
       ),
       span(cls := "btn__label", child.text <-- s(_.home.suggestAnother)),

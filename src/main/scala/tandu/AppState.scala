@@ -10,6 +10,8 @@ object AppState:
 
   val playersFilter: Var[Option[Players]] = Var(None)
   val handsFreeOnly: Var[Boolean]         = Var(false)
+  val kindFilter: Var[Kind] =
+    Var(Storage.loadKind().flatMap(Kind.fromString).getOrElse(Kind.All))
 
   val strings: Signal[Strings] = lang.signal.map(Strings.of)
 
@@ -19,3 +21,5 @@ object AppState:
     Storage.saveLangCode(l.code)
     org.scalajs.dom.document.documentElement.setAttribute("lang", l.code)
   }(using unsafeWindowOwner)
+
+  val _ = kindFilter.signal.foreach(k => Storage.saveKind(k.toString))(using unsafeWindowOwner)

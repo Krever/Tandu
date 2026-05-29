@@ -351,6 +351,25 @@ select { font-family: inherit; font-size: inherit; }
   gap: var(--space-3);
   margin-top: var(--space-5);
 }
+.activity-grid__divider {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.activity-grid__divider::before,
+.activity-grid__divider::after {
+  content: "";
+  flex: 1;
+  height: 1.5px;
+  background: var(--color-border);
+}
+.activity-grid__divider-label { white-space: nowrap; }
 .activity-card {
   position: relative;
   /* Two-row grid: glyph+name share row 1 (horizontal), desc spans row 2
@@ -1589,4 +1608,128 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .p2p-input:focus {
   outline: none;
   border-color: var(--color-primary);
+}
+
+/* ---------- Word Builder ---------- */
+
+.wb { display: flex; flex-direction: column; align-items: stretch; }
+
+.wb-picture {
+  font-size: 96px;
+  line-height: 1;
+  text-align: center;
+  padding: var(--space-3) 0;
+  user-select: none;
+}
+
+.wb-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+.wb-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 56px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  border: 2px dashed var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: default;
+}
+.wb-slot--empty { border-style: dashed; background: var(--color-bg-2); }
+.wb-slot--filled {
+  border-style: solid;
+  border-color: var(--color-border-strong);
+  cursor: pointer;
+  box-shadow: var(--shadow-stamp-sm);
+}
+.wb-slot--filled:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--color-border-strong); }
+.wb-slots--correct .wb-slot {
+  border-color: #065f46;
+  background: color-mix(in srgb, #065f46 10%, var(--color-surface));
+}
+.wb-slots--wrong { animation: wb-shake 0.4s ease-in-out 1; }
+.wb-slots--wrong .wb-slot--filled {
+  border-color: var(--color-hit);
+  background: color-mix(in srgb, var(--color-hit) 10%, var(--color-surface));
+}
+@keyframes wb-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-3px); }
+}
+
+.wb-pool {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  margin-top: var(--space-3);
+  border-top: 1px dashed var(--color-border);
+}
+.wb-tile {
+  min-width: 48px;
+  min-height: 56px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-stamp-sm);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.1s ease;
+}
+.wb-tile:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--color-border-strong); }
+.wb-tile--used {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Print worksheet */
+.wb-print-sheet { display: flex; flex-direction: column; gap: 16px; }
+.wb-print-row {
+  display: grid;
+  grid-template-columns: 64px auto auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px dashed #999;
+}
+.wb-print-emoji { font-size: 44px; line-height: 1; text-align: center; }
+.wb-print-pool { display: flex; gap: 6px; flex-wrap: wrap; }
+.wb-print-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: 700;
+  border: 1.5px solid #333;
+  border-radius: 4px;
+}
+.wb-print-arrow { font-size: 22px; color: #555; }
+.wb-print-slots { display: flex; gap: 6px; flex-wrap: wrap; }
+.wb-print-slot {
+  display: inline-block;
+  width: 28px;
+  height: 32px;
+  border: 1.5px dashed #333;
+  border-radius: 4px;
 }

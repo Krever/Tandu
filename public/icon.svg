@@ -1,14 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Full-bleed background so the icon also works as a maskable icon -->
-  <rect width="512" height="512" fill="#2563eb"/>
-  <!-- Die face, centered, sized to stay within the maskable safe zone (~80% inner area) -->
-  <rect x="116" y="116" width="280" height="280" rx="56" ry="56" fill="#ffffff"/>
-  <!-- Pips: classic "5" face (random / suggest activity) -->
-  <g fill="#2563eb">
-    <circle cx="176" cy="176" r="28"/>
-    <circle cx="336" cy="176" r="28"/>
-    <circle cx="256" cy="256" r="28"/>
-    <circle cx="176" cy="336" r="28"/>
-    <circle cx="336" cy="336" r="28"/>
-  </g>
+  <!-- Full-bleed cream background so the icon also works as a maskable icon -->
+  <rect width="512" height="512" fill="#f4ead8"/>
+  <!-- Inner stamp: cream paper with strong border, sized within maskable safe zone (~80%) -->
+  <rect x="56" y="56" width="400" height="400" rx="72" ry="72"
+        fill="#fbf4e2" stroke="#1a1410" stroke-width="14"/>
+  <!-- Wordmark "Ta" — dark T + italic vermilion a, the brand signature -->
+  <text x="256" y="356" text-anchor="middle"
+        font-family="Fraunces, Georgia, 'Times New Roman', serif"
+        font-weight="900" font-size="280">
+    <tspan fill="#1a1410">T</tspan><tspan fill="#d94f2a" font-style="italic">a</tspan>
+  </text>
 </svg>

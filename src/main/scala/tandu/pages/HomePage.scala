@@ -2,7 +2,7 @@ package tandu.pages
 
 import com.raquo.laminar.api.L.*
 import tandu.{Page, Routing}
-import tandu.activities.{Players, Registry}
+import tandu.activities.{ActivityVisual, Players, Registry}
 import tandu.tools.Tools
 import tandu.ui.Components
 import tandu.ui.Components.s
@@ -22,7 +22,8 @@ object HomePage:
       Components.header(
         s(_.appTitle),
         back = None,
-        subtitle = Some(s(_.tagline))
+        subtitle = Some(s(_.tagline)),
+        brand = true
       ),
       sectionTag(
         cls := "stack",
@@ -45,10 +46,13 @@ object HomePage:
           cls := "activity-grid",
           children <-- visible.map { activities =>
             activities.map { a =>
+              val v = ActivityVisual.get(a.id)
               Components.activityCard(
                 s(a.name),
                 s(a.description),
-                Routing.go(Page.Activity(a.id))
+                Routing.go(Page.Activity(a.id)),
+                glyph = v.glyph,
+                tint = v.tint
               )
             }
           }
@@ -60,10 +64,15 @@ object HomePage:
         div(
           cls := "stack",
           Tools.all.map: t =>
+            val glyph = t.id match
+              case "dice"  => "⚀"
+              case "timer" => "⏱"
+              case _       => "✦"
             Components.tile(
               s(t.name),
               s(t.description),
-              Routing.go(Page.Tool(t.id))
+              Routing.go(Page.Tool(t.id)),
+              glyph = glyph
             )
         )
       )

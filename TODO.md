@@ -8,3 +8,4 @@ TODO:
 * CI/CD
 * P2P cooperation
 * games state persistance
+* reading help?

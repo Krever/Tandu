@@ -1,7 +1,7 @@
 package tandu.pages
 
 import com.raquo.laminar.api.L.*
-import tandu.{Page, Routing}
+import tandu.{AppState, Page, Routing}
 import tandu.activities.{Activity, Registry}
 import tandu.ui.Components
 import tandu.ui.Components.s
@@ -25,9 +25,30 @@ object ActivityPage:
       a.render(),
       div(
         cls := "no-print",
-        Components.ghost(
-          s(_.home.suggestAnother),
-          Routing.replace(Page.Activity(Registry.pickRandom(None, handsFreeOnly = false).id))
-        )
+        suggestAnotherButton()
+      )
+    )
+
+  private def suggestAnotherButton(): HtmlElement =
+    val filtersLabel: Signal[String] =
+      AppState.playersFilter.signal
+        .combineWith(AppState.handsFreeOnly.signal)
+        .combineWith(AppState.strings)
+        .map { case (p, hf, str) =>
+          val parts = List(p.map(_.label(str)), Option.when(hf)(str.filters.handsFree)).flatten
+          parts.mkString(" · ")
+        }
+    button(
+      cls := "btn btn--ghost btn--stacked",
+      onClick --> (_ =>
+        Routing.replace(Page.Activity(
+          Registry.pickRandom(AppState.playersFilter.now(), AppState.handsFreeOnly.now()).id
+        ))
+      ),
+      span(cls := "btn__label", child.text <-- s(_.home.suggestAnother)),
+      span(
+        cls := "btn__sub muted",
+        cls("is-hidden") <-- filtersLabel.map(_.isEmpty),
+        child.text <-- filtersLabel
       )
     )

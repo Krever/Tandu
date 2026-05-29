@@ -149,7 +149,7 @@ object Components:
 
   def primaryBig(label: Signal[String], onTap: => Unit): HtmlElement =
     button(
-      cls := "btn btn--lg btn--block",
+      cls := "btn btn--hero btn--block",
       child.text <-- label,
       onClick --> (_ => onTap)
     )

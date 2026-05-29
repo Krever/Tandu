@@ -28,8 +28,8 @@
   --radius-md: 14px;
   --radius-lg: 22px;
 
-  --font-display: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
-  --font-stack: "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+  --font-stack: "Outfit Variable", "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   --shadow-sm: 0 1px 2px rgba(26, 20, 16, 0.06);
   --shadow-md: 0 6px 18px rgba(26, 20, 16, 0.10);
@@ -126,23 +126,44 @@ select { font-family: inherit; font-size: inherit; }
   color: var(--color-text);
   border: 1.5px solid var(--color-border-strong);
 }
-.btn--lg {
+/* Hero CTA — the one-of-a-kind stamped showpiece (home "Suggest activity",
+   Dice "Roll"). Heavy display serif, italic, oversized. Reserved for
+   primaryBig — do not reach for this on in-game screens. */
+.btn--hero {
   font-family: var(--font-display);
   font-style: italic;
-  font-weight: 900;
+  font-weight: 800;
   font-size: 32px;
   line-height: 1;
   letter-spacing: -0.01em;
   min-height: 84px;
   padding: var(--space-5) var(--space-5);
   border-radius: 26px;
-  box-shadow: var(--shadow-stamp), var(--shadow-stamp);
   box-shadow: 6px 6px 0 var(--color-border-strong);
   border-width: 2px;
 }
-.btn--lg:active { transform: translate(3px, 3px); box-shadow: 3px 3px 0 var(--color-border-strong); }
+.btn--hero:active { transform: translate(3px, 3px); box-shadow: 3px 3px 0 var(--color-border-strong); }
+
+/* Primary in-game action — bigger touch target than .btn, but readable
+   sans at conversational weight. Used by "New round", "Asked!", "New word",
+   replay/print actions. Inherits Outfit from body. */
+.btn--lg {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  line-height: 1.15;
+  min-height: 64px;
+  padding: var(--space-4) var(--space-5);
+  border-radius: 18px;
+  box-shadow: 4px 4px 0 var(--color-border-strong);
+  border-width: 2px;
+}
+.btn--lg:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--color-border-strong); }
 .btn--block { width: 100%; }
 .btn--icon { padding: var(--space-2) var(--space-3); min-height: 40px; }
+.btn--stacked { flex-direction: column; gap: 2px; }
+.btn__sub { font-size: 13px; font-weight: 500; }
+.btn__sub.is-hidden { display: none; }
 .corner-menu__toggle svg { width: 22px; height: 22px; display: block; }
 
 .card {

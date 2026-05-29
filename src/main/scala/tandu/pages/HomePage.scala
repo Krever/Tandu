@@ -1,7 +1,7 @@
 package tandu.pages
 
 import com.raquo.laminar.api.L.*
-import tandu.{Page, Routing}
+import tandu.{AppState, Page, Routing}
 import tandu.activities.{ActivityVisual, Players, Registry}
 import tandu.tools.Tools
 import tandu.ui.Components
@@ -10,8 +10,8 @@ import tandu.ui.Components.s
 object HomePage:
 
   def render(): HtmlElement =
-    val playersFilter: Var[Option[Players]] = Var(None)
-    val handsFreeOnly: Var[Boolean]         = Var(false)
+    val playersFilter = AppState.playersFilter
+    val handsFreeOnly = AppState.handsFreeOnly
 
     val visible = playersFilter.signal.combineWith(handsFreeOnly.signal).map { (p, hf) =>
       Registry.filtered(p, hf)

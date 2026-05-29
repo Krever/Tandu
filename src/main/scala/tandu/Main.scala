@@ -17,10 +17,19 @@ import tandu.pages.{ActivityPage, HomePage, ToolPage}
 
   val container = dom.document.getElementById("app")
   val app = div(
-    child <-- Routing.router.currentPageSignal.map {
-      case Page.Home          => HomePage.render()
-      case Page.Activity(id)  => ActivityPage.render(id)
-      case Page.Tool(id)      => ToolPage.render(id)
-    }
+    // Drop the path before .distinct so navigating within an activity doesn't
+    // remount its body — sub-choosers subscribe to the path themselves.
+    child <-- Routing.router.currentPageSignal
+      .map {
+        case Page.Home            => Page.Home
+        case Page.Activity(id, _) => Page.Activity(id, Nil)
+        case t @ Page.Tool(_)     => t
+      }
+      .distinct
+      .map {
+        case Page.Home            => HomePage.render()
+        case Page.Activity(id, _) => ActivityPage.render(id)
+        case Page.Tool(id)        => ToolPage.render(id)
+      }
   )
   val _ = render(container, app)

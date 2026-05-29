@@ -1,7 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
+import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
 import tandu.ui.{Mode, ModeChooser}
 import tandu.ui.Components.s
@@ -162,7 +162,7 @@ object Minesweeper extends Activity:
   // ---------- UI ----------
 
   def render(): HtmlElement =
-    ModeChooser.render(List(
+    ModeChooser.render(id, List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,
@@ -170,14 +170,24 @@ object Minesweeper extends Activity:
       )
     ))
 
-  private def renderPlay(): HtmlElement =
-    val variant = Var(variants(0)) // default easy
-    val state   = Var(initial(variant.now()))
-    val tapMode = Var(TapMode.Reveal)
+  // First variant is the implicit default when the URL has no variant segment.
+  private val variantSignal: Signal[Variant] =
+    Routing.router.currentPageSignal.map {
+      case Page.Activity(`id`, path) =>
+        path.headOption.flatMap(s => variants.find(_.id == s)).getOrElse(variants(0))
+      case _ => variants(0)
+    }.distinct
 
-    def setVariant(v: Variant): Unit =
-      variant.set(v)
-      state.set(initial(v))
+  private def renderPlay(): HtmlElement =
+    div(
+      cls := "ms stack-lg",
+      variantPill(),
+      child <-- variantSignal.map(playForVariant)
+    )
+
+  private def playForVariant(v: Variant): HtmlElement =
+    val state   = Var(initial(v))
+    val tapMode = Var(TapMode.Reveal)
 
     def onCellTap(r: Int, c: Int): Unit =
       tapMode.now() match
@@ -187,11 +197,10 @@ object Minesweeper extends Activity:
     def onCellFlag(r: Int, c: Int): Unit =
       state.update(toggleFlag(_, r, c))
 
-    def reset(): Unit = state.set(initial(variant.now()))
+    def reset(): Unit = state.set(initial(v))
 
     div(
-      cls := "ms stack-lg",
-      variantPill(variant, setVariant),
+      cls := "stack-lg",
       div(
         cls := "ms-status",
         div(
@@ -215,7 +224,7 @@ object Minesweeper extends Activity:
         )
       ),
       tapModePill(tapMode),
-      child <-- variant.signal.map(v => boardView(v, state.signal, onCellTap, onCellFlag))
+      boardView(v, state.signal, onCellTap, onCellFlag)
     )
 
   private def tapModePill(tapMode: Var[TapMode]): HtmlElement =
@@ -240,7 +249,7 @@ object Minesweeper extends Activity:
       )
     )
 
-  private def variantPill(variant: Var[Variant], onPick: Variant => Unit): HtmlElement =
+  private def variantPill(): HtmlElement =
     div(
       cls := "center no-print",
       div(
@@ -248,9 +257,9 @@ object Minesweeper extends Activity:
         variants.map { v =>
           button(
             cls := "pill-btn",
-            cls("is-active") <-- variant.signal.map(_.id == v.id),
+            cls("is-active") <-- variantSignal.map(_.id == v.id),
             child.text <-- AppState.strings.map(v.nameKey),
-            onClick --> (_ => onPick(v))
+            onClick --> (_ => Routing.go(Page.Activity(id, List(v.id))))
           )
         }
       )

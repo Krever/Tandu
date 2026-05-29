@@ -229,7 +229,7 @@ object Solitaire extends Activity:
     case Spot.TableauSpot(c, _)    => Some(Target.Tableau(c))
 
   def render(): HtmlElement =
-    ModeChooser.render(List(
+    ModeChooser.render(id, List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,

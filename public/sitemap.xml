@@ -1,20 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Keep in sync with tandu.activities.Registry.all and tandu.tools.Tools.all. -->
+<!-- Keep in sync with tandu.activities.Registry.all, tandu.tools.Tools.all, and the
+     Mode + variant lists inside each activity. URLs use the path-based router:
+     /activity/<id>[/<mode>][/<variant>]. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://tandu.app/</loc></url>
+
   <url><loc>https://tandu.app/activity/battleships</loc></url>
+  <url><loc>https://tandu.app/activity/battleships/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/battleships/p2p</loc></url>
+  <url><loc>https://tandu.app/activity/battleships/print</loc></url>
+
   <url><loc>https://tandu.app/activity/solitaire</loc></url>
+  <url><loc>https://tandu.app/activity/solitaire/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/solitaire/deck</loc></url>
+
   <url><loc>https://tandu.app/activity/tic-tac-toe</loc></url>
+  <url><loc>https://tandu.app/activity/tic-tac-toe/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/tic-tac-toe/in-app/classic</loc></url>
+  <url><loc>https://tandu.app/activity/tic-tac-toe/in-app/gomoku</loc></url>
+  <url><loc>https://tandu.app/activity/tic-tac-toe/paper</loc></url>
+
   <url><loc>https://tandu.app/activity/memory</loc></url>
+  <url><loc>https://tandu.app/activity/memory/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/memory/in-app/easy</loc></url>
+  <url><loc>https://tandu.app/activity/memory/in-app/medium</loc></url>
+  <url><loc>https://tandu.app/activity/memory/in-app/hard</loc></url>
+  <url><loc>https://tandu.app/activity/memory/print</loc></url>
+
   <url><loc>https://tandu.app/activity/hangman</loc></url>
+  <url><loc>https://tandu.app/activity/hangman/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/hangman/word-picker</loc></url>
+
   <url><loc>https://tandu.app/activity/checkers</loc></url>
+  <url><loc>https://tandu.app/activity/checkers/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/checkers/board</loc></url>
+  <url><loc>https://tandu.app/activity/checkers/lichess</loc></url>
+
   <url><loc>https://tandu.app/activity/chess</loc></url>
+  <url><loc>https://tandu.app/activity/chess/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/chess/board</loc></url>
+  <url><loc>https://tandu.app/activity/chess/lichess</loc></url>
+
+  <url><loc>https://tandu.app/activity/sudoku</loc></url>
+  <url><loc>https://tandu.app/activity/sudoku/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/sudoku/in-app/easy</loc></url>
+  <url><loc>https://tandu.app/activity/sudoku/in-app/medium</loc></url>
+  <url><loc>https://tandu.app/activity/sudoku/in-app/hard</loc></url>
+  <url><loc>https://tandu.app/activity/sudoku/print</loc></url>
+
+  <url><loc>https://tandu.app/activity/minesweeper</loc></url>
+  <url><loc>https://tandu.app/activity/minesweeper/easy</loc></url>
+  <url><loc>https://tandu.app/activity/minesweeper/medium</loc></url>
+  <url><loc>https://tandu.app/activity/minesweeper/hard</loc></url>
+
   <url><loc>https://tandu.app/activity/word-association</loc></url>
+
   <url><loc>https://tandu.app/activity/categories</loc></url>
+  <url><loc>https://tandu.app/activity/categories/in-app</loc></url>
+  <url><loc>https://tandu.app/activity/categories/print</loc></url>
+
   <url><loc>https://tandu.app/activity/twenty-questions</loc></url>
   <url><loc>https://tandu.app/activity/story-building</loc></url>
   <url><loc>https://tandu.app/activity/last-letter</loc></url>
   <url><loc>https://tandu.app/activity/would-you-rather</loc></url>
+
   <url><loc>https://tandu.app/tool/dice</loc></url>
   <url><loc>https://tandu.app/tool/timer</loc></url>
 </urlset>

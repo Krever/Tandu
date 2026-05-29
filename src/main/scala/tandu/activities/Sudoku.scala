@@ -1,7 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
+import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
@@ -174,7 +174,7 @@ object Sudoku extends Activity:
   // ---------- UI ----------
 
   def render(): HtmlElement =
-    ModeChooser.render(List(
+    ModeChooser.render(id, List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,
@@ -240,13 +240,25 @@ object Sudoku extends Activity:
       }
     )
 
-  private def renderPlay(): HtmlElement =
-    val variant = Var(variants(1)) // default medium
-    val state   = Var(newState(variant.now()))
+  // Second variant ("medium") is the implicit default when the URL has no
+  // variant segment after the in-app mode.
+  private val DefaultVariant = variants(1)
+  private val variantSignal: Signal[Variant] =
+    Routing.router.currentPageSignal.map {
+      case Page.Activity(`id`, _ :: vId :: _) =>
+        variants.find(_.id == vId).getOrElse(DefaultVariant)
+      case _ => DefaultVariant
+    }.distinct
 
-    def setVariant(v: Variant): Unit =
-      variant.set(v)
-      state.set(newState(v))
+  private def renderPlay(): HtmlElement =
+    div(
+      cls := "sudoku stack-lg",
+      variantPill(),
+      child <-- variantSignal.map(playForVariant)
+    )
+
+  private def playForVariant(v: Variant): HtmlElement =
+    val state = Var(newState(v))
 
     def pushHistory(): Unit =
       state.update(st => st.copy(history = st.board :: st.history.take(99)))
@@ -283,11 +295,10 @@ object Sudoku extends Activity:
     def togglePencil(): Unit =
       state.update(st => st.copy(pencilMode = !st.pencilMode))
 
-    def reset(): Unit = state.set(newState(variant.now()))
+    def reset(): Unit = state.set(newState(v))
 
     div(
-      cls := "sudoku stack-lg",
-      variantPill(variant, setVariant),
+      cls := "stack-lg",
       child <-- state.signal.map(_.isWon).distinct.map {
         case true  => wonView(reset)
         case false => playView(state, selectCell, enterNumber)
@@ -309,7 +320,7 @@ object Sudoku extends Activity:
       )
     )
 
-  private def variantPill(variant: Var[Variant], onPick: Variant => Unit): HtmlElement =
+  private def variantPill(): HtmlElement =
     div(
       cls := "center no-print",
       div(
@@ -317,9 +328,9 @@ object Sudoku extends Activity:
         variants.map { v =>
           button(
             cls := "pill-btn",
-            cls("is-active") <-- variant.signal.map(_.id == v.id),
+            cls("is-active") <-- variantSignal.map(_.id == v.id),
             child.text <-- AppState.strings.map(v.nameKey),
-            onClick --> (_ => onPick(v))
+            onClick --> (_ => Routing.go(Page.Activity(id, List("in-app", v.id))))
           )
         }
       )

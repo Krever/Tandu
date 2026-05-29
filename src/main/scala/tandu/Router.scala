@@ -9,7 +9,7 @@ import tandu.tools.Tools
 
 enum Page:
   case Home
-  case Activity(id: String)
+  case Activity(id: String, path: List[String] = Nil)
   case Tool(id: String)
 
 object Routing:
@@ -22,11 +22,11 @@ object Routing:
   private val routeHome: Route[Page.Home.type, Unit] =
     Route.staticPartial(Page.Home, root / endOfSegments)
 
-  private val routeActivity: Route[Page.Activity, String] =
-    Route[Page.Activity, String](
-      encode = _.id,
-      decode = id => Page.Activity(id),
-      pattern = root / "activity" / segment[String] / endOfSegments
+  private val routeActivity: Route[Page.Activity, (String, List[String])] =
+    Route[Page.Activity, (String, List[String])](
+      encode = a => (a.id, a.path),
+      decode = (id, path) => Page.Activity(id, path),
+      pattern = root / "activity" / segment[String] / remainingSegments
     )
 
   private val routeTool: Route[Page.Tool, String] =
@@ -37,13 +37,18 @@ object Routing:
     )
 
   private def serialize(page: Page): String = page match
-    case Page.Home        => "h"
-    case Page.Activity(i) => s"a:$i"
-    case Page.Tool(i)     => s"t:$i"
+    case Page.Home               => "h"
+    case Page.Activity(i, Nil)   => s"a:$i"
+    case Page.Activity(i, path)  => s"a:$i/${path.mkString("/")}"
+    case Page.Tool(i)            => s"t:$i"
 
   private def deserialize(s: String): Page =
     if s == "h" then Page.Home
-    else if s.startsWith("a:") then Page.Activity(s.drop(2))
+    else if s.startsWith("a:") then
+      val parts = s.drop(2).split("/").toList
+      parts match
+        case Nil       => Page.Home
+        case id :: tail => Page.Activity(id, tail)
     else if s.startsWith("t:") then Page.Tool(s.drop(2))
     else Page.Home
 
@@ -64,8 +69,8 @@ object Routing:
     * Main subscription so the browser tab and shared-link previews
     * reflect the activity/tool the user is on. */
   def title(page: Page, s: Strings): String = page match
-    case Page.Home         => s.appTitle
-    case Page.Activity(id) =>
+    case Page.Home            => s.appTitle
+    case Page.Activity(id, _) =>
       Registry.byId(id).map(a => s"${a.name(s)} — ${s.appTitle}").getOrElse(s.appTitle)
-    case Page.Tool(id)     =>
+    case Page.Tool(id)        =>
       Tools.byId(id).map(t => s"${t.name(s)} — ${s.appTitle}").getOrElse(s.appTitle)

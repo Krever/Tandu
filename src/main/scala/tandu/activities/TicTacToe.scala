@@ -1,7 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
+import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser, RulesCard}
 import tandu.ui.Components.s
@@ -73,7 +73,7 @@ object TicTacToe extends Activity:
     winning.headOption.getOrElse((None, Set.empty))
 
   def render(): HtmlElement =
-    ModeChooser.render(List(
+    ModeChooser.render(id, List(
       Mode(
         id = "in-app",
         label = _.mode.inApp,
@@ -97,32 +97,22 @@ object TicTacToe extends Activity:
     )
 
   private def renderPlay(): HtmlElement =
-    val variant: Var[Option[Variant]] = Var(None)
-    div(
-      cls := "stack-lg",
-      child <-- variant.signal.map {
-        case None    => chooserView(v => variant.set(Some(v)))
-        case Some(v) => gameView(v, () => variant.set(None))
+    ModeChooser.render(
+      activityId = id,
+      prefix = List("in-app"),
+      heading = _.ticTacToe.chooseVariant,
+      modes = variants.map { v =>
+        Mode(
+          id = v.id,
+          label = v.nameKey,
+          description = Some(v.descKey),
+          testIdPrefix = "variant",
+          render = () => gameView(v)
+        )
       }
     )
 
-  private def chooserView(onPick: Variant => Unit): HtmlElement =
-    sectionTag(
-      cls := "stack",
-      h2(cls := "h2", child.text <-- s(_.ticTacToe.chooseVariant)),
-      div(
-        cls := "stack",
-        variants.map { v =>
-          Components.tile(
-            AppState.strings.map(v.nameKey),
-            AppState.strings.map(v.descKey),
-            onPick(v)
-          )
-        }
-      )
-    )
-
-  private def gameView(v: Variant, onBack: () => Unit): HtmlElement =
+  private def gameView(v: Variant): HtmlElement =
     val state = Var(State.empty(v.size))
 
     def play(i: Int): Unit =
@@ -182,7 +172,7 @@ object TicTacToe extends Activity:
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",
-        Components.ghost(s(_.ticTacToe.changeVariant), onBack()),
+        Components.ghost(s(_.ticTacToe.changeVariant), Routing.go(Page.Activity(id, List("in-app")))),
         Components.replayButton(s(_.common.playAgain), reset(), finished)
       )
     )

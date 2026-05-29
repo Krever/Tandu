@@ -54,6 +54,7 @@ object Battleships extends Activity:
         id = "p2p",
         label = _.mode.p2p,
         hint = Some(_.battleships.p2p.intro),
+        experimental = true,
         render = () => BattleshipsP2P.render()
       ),
       Mode(

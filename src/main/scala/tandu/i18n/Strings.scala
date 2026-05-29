@@ -77,7 +77,9 @@ object Strings:
       offline: String,
       lichess: String,
       external: String,
-      p2p: String
+      p2p: String,
+      experimentalBadge: String,
+      experimentalWarning: String
   )
 
   final case class Printable(
@@ -428,7 +430,9 @@ object Strings:
       offline = "Play offline",
       lichess = "Play online",
       external = "Open online",
-      p2p = "Play on two devices"
+      p2p = "Play on two devices",
+      experimentalBadge = "Experimental",
+      experimentalWarning = "This mode is experimental and may not connect reliably."
     ),
     printable = Printable(
       print = "Print",
@@ -780,7 +784,9 @@ object Strings:
       offline = "Gra offline",
       p2p = "Gra na dwóch urządzeniach",
       lichess = "Zagraj online",
-      external = "Otwórz online"
+      external = "Otwórz online",
+      experimentalBadge = "Beta",
+      experimentalWarning = "Ta funkcjonalność jest eksperymentalna i może czasami nie działać"
     ),
     printable = Printable(
       print = "Drukuj",
@@ -1132,7 +1138,9 @@ object Strings:
       offline = "Jugar sin conexión",
       lichess = "Jugar online",
       external = "Abrir online",
-      p2p = "Jugar en dos dispositivos"
+      p2p = "Jugar en dos dispositivos",
+      experimentalBadge = "Experimental",
+      experimentalWarning = "Este modo es experimental y puede no conectarse de forma fiable."
     ),
     printable = Printable(
       print = "Imprimir",
@@ -1484,7 +1492,9 @@ object Strings:
       offline = "Jouer hors ligne",
       lichess = "Jouer en ligne",
       external = "Ouvrir en ligne",
-      p2p = "Jouer à deux appareils"
+      p2p = "Jouer à deux appareils",
+      experimentalBadge = "Expérimental",
+      experimentalWarning = "Ce mode est expérimental et peut ne pas se connecter de façon fiable."
     ),
     printable = Printable(
       print = "Imprimer",
@@ -1836,7 +1846,9 @@ object Strings:
       offline = "Offline spielen",
       lichess = "Online spielen",
       external = "Online öffnen",
-      p2p = "Auf zwei Geräten spielen"
+      p2p = "Auf zwei Geräten spielen",
+      experimentalBadge = "Experimentell",
+      experimentalWarning = "Dieser Modus ist experimentell und verbindet sich möglicherweise nicht zuverlässig."
     ),
     printable = Printable(
       print = "Drucken",

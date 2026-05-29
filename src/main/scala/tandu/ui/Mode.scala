@@ -14,6 +14,9 @@ final case class Mode(
     materials: List[Strings => String] = Nil,
     /** Hint text shown under the materials, before the body. */
     hint: Option[Strings => String] = None,
+    /** Marks a mode as not-yet-reliable. Adds a badge on the chooser tile
+      * and a warning banner above the body. */
+    experimental: Boolean = false,
     /** The body shown after the user has chosen this mode. */
     render: () => HtmlElement
 )
@@ -55,7 +58,13 @@ object ModeChooser:
             dataAttr("testid") := s"mode-${m.id}",
             div(
               cls := "stack",
-              div(cls := "tile__name", child.text <-- AppState.strings.map(m.label)),
+              div(
+                cls := "tile__name",
+                span(child.text <-- AppState.strings.map(m.label)),
+                if m.experimental then
+                  span(cls := "tile__badge", child.text <-- Components.s(_.mode.experimentalBadge))
+                else emptyNode
+              ),
               child.maybe <-- materialsText.map(t =>
                 Option.when(t.nonEmpty)(div(cls := "tile__desc", t))
               )
@@ -70,6 +79,10 @@ object ModeChooser:
   private def bodyOnly(m: Mode): HtmlElement =
     div(
       cls := "stack-lg",
+      if m.experimental then
+        Components.banner("warn", Components.s(_.mode.experimentalWarning))
+      else emptyNode
+      ,
       m.hint.map: hintFn =>
         p(cls := "muted center no-print", child.text <-- AppState.strings.map(hintFn))
       ,

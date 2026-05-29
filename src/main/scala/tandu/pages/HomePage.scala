@@ -38,14 +38,14 @@ object HomePage:
             handsFreePill(handsFreeOnly)
           )
         ),
-        Components.primaryBig(
-          s(_.home.suggestActivity),
-          Routing.go(Page.Activity(Registry.pickRandom(playersFilter.now(), handsFreeOnly.now()).id))
-        ),
         div(
           cls := "activity-grid",
           children <-- visible.map { activities =>
-            activities.map { a =>
+            val suggest = Components.suggestCard(
+              s(_.home.suggestActivity),
+              Routing.go(Page.Activity(Registry.pickRandom(playersFilter.now(), handsFreeOnly.now()).id))
+            )
+            suggest :: activities.map { a =>
               val v = ActivityVisual.get(a.id)
               Components.activityCard(
                 s(a.name),

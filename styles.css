@@ -423,6 +423,25 @@ select { font-family: inherit; font-size: inherit; }
   min-height: calc(2 * 1.3em);
 }
 
+/* Primary call-to-action card — vermilion field, cream ink, italic display
+   type. Distinct as the showpiece while still occupying a grid cell. */
+.activity-card--suggest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+}
+.activity-card--suggest .activity-card__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--color-primary-text);
+}
+
 /* Tint variants — color is contained to the glyph stamp, not the whole tile,
    so the grid reads as a quiet catalog rather than a patchwork. */
 .activity-card--vermilion { --tile-stamp: var(--tint-vermilion); }

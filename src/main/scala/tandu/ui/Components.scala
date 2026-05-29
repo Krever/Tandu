@@ -204,6 +204,16 @@ object Components:
       onClick --> (_ => onTap)
     )
 
+  /** Primary call-to-action card living in the activity grid. Vermilion fill,
+    * italic display type — visually announces itself as the showpiece while
+    * still belonging to the grid family. */
+  def suggestCard(label: Signal[String], onTap: => Unit): HtmlElement =
+    button(
+      cls := "activity-card activity-card--suggest",
+      div(cls := "activity-card__name", child.text <-- label),
+      onClick --> (_ => onTap)
+    )
+
   def s(f: Strings => String): Signal[String] = AppState.strings.map(f)
 
   def modal(

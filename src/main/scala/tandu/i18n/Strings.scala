@@ -401,7 +401,7 @@ object Strings:
       close = "Close"
     ),
     home = Home(
-      suggestActivity = "Suggest activity",
+      suggestActivity = "Suggest!",
       suggestAnother = "Suggest another",
       tools = "Tools",
       activities = "Activities",
@@ -755,7 +755,7 @@ object Strings:
       close = "Zamknij"
     ),
     home = Home(
-      suggestActivity = "Zaproponuj zabawę",
+      suggestActivity = "Zaproponuj!",
       suggestAnother = "Inna propozycja",
       tools = "Narzędzia",
       activities = "Zabawy",
@@ -1109,7 +1109,7 @@ object Strings:
       close = "Cerrar"
     ),
     home = Home(
-      suggestActivity = "Sugerir actividad",
+      suggestActivity = "Sugerir!",
       suggestAnother = "Otra sugerencia",
       tools = "Herramientas",
       activities = "Actividades",
@@ -1463,7 +1463,7 @@ object Strings:
       close = "Fermer"
     ),
     home = Home(
-      suggestActivity = "Proposer une activité",
+      suggestActivity = "Proposer!",
       suggestAnother = "Une autre idée",
       tools = "Outils",
       activities = "Activités",
@@ -1817,7 +1817,7 @@ object Strings:
       close = "Schließen"
     ),
     home = Home(
-      suggestActivity = "Aktivität vorschlagen",
+      suggestActivity = "Vorschlagen!",
       suggestAnother = "Andere Idee",
       tools = "Werkzeuge",
       activities = "Aktivitäten",

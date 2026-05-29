@@ -36,15 +36,17 @@
   --shadow-stamp: 4px 4px 0 var(--color-border-strong);
   --shadow-stamp-sm: 2px 2px 0 var(--color-border-strong);
 
-  /* Activity tints — used by .activity-card--<tint> */
-  --tint-vermilion: #f3c6b6;
-  --tint-teal:      #b6d1d6;
-  --tint-mustard:   #f1d899;
-  --tint-rose:      #ecbcc6;
-  --tint-olive:     #ccd29e;
-  --tint-plum:      #c8b6d5;
-  --tint-sky:       #b9cee5;
-  --tint-peach:     #f3cda9;
+  /* Activity tints — used as the glyph swatch fill on home cards.
+     Tuned to read cleanly against the warm cream bg (#f4ead8);
+     the originals were too washed out to separate from the page. */
+  --tint-vermilion: #ea9d83;
+  --tint-teal:      #9cc1c7;
+  --tint-mustard:   #e6c46a;
+  --tint-rose:      #e1a0b1;
+  --tint-olive:     #b8c184;
+  --tint-plum:      #b39bc9;
+  --tint-sky:       #98bbdd;
+  --tint-peach:     #ebab7c;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -378,11 +380,20 @@ select { font-family: inherit; font-size: inherit; }
   grid-column: 1;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 32px;
+  font-size: 22px;
   line-height: 1;
-  color: var(--color-text);
-  width: 36px;
-  text-align: center;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--tile-stamp, var(--color-bg-2));
+  /* Hairline border tinted from the swatch itself — anchors the square
+     against the parchment bg without dropping a hard black outline. */
+  border: 1px solid color-mix(in srgb, var(--tile-stamp, var(--color-border-strong)) 55%, var(--color-border-strong));
+  /* Glyph reads as ink from the same color family as the wash. */
+  color: color-mix(in srgb, var(--tile-stamp, var(--color-text)) 30%, var(--color-text));
 }
 /* Body wrapper participates in the outer grid via display:contents so
    name and desc can land in distinct grid cells without restructuring
@@ -412,15 +423,16 @@ select { font-family: inherit; font-size: inherit; }
   min-height: calc(2 * 1.3em);
 }
 
-/* Tint variants — applied via .activity-card--<name> */
-.activity-card--vermilion { background: var(--tint-vermilion); }
-.activity-card--teal      { background: var(--tint-teal); }
-.activity-card--mustard   { background: var(--tint-mustard); }
-.activity-card--rose      { background: var(--tint-rose); }
-.activity-card--olive     { background: var(--tint-olive); }
-.activity-card--plum      { background: var(--tint-plum); }
-.activity-card--sky       { background: var(--tint-sky); }
-.activity-card--peach     { background: var(--tint-peach); }
+/* Tint variants — color is contained to the glyph stamp, not the whole tile,
+   so the grid reads as a quiet catalog rather than a patchwork. */
+.activity-card--vermilion { --tile-stamp: var(--tint-vermilion); }
+.activity-card--teal      { --tile-stamp: var(--tint-teal); }
+.activity-card--mustard   { --tile-stamp: var(--tint-mustard); }
+.activity-card--rose      { --tile-stamp: var(--tint-rose); }
+.activity-card--olive     { --tile-stamp: var(--tint-olive); }
+.activity-card--plum      { --tile-stamp: var(--tint-plum); }
+.activity-card--sky       { --tile-stamp: var(--tint-sky); }
+.activity-card--peach     { --tile-stamp: var(--tint-peach); }
 
 /* Boards */
 .board {

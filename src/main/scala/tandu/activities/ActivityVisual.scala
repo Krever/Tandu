@@ -26,7 +26,8 @@ object ActivityVisual:
     "story-building"   -> Visual("✦",  "plum"),
     "last-letter"      -> Visual("Z",  "peach"),
     "would-you-rather" -> Visual("⇆",  "sky"),
-    "word-builder"     -> Visual("🔤", "teal")
+    "word-builder"     -> Visual("🔤", "teal"),
+    "math-practice"    -> Visual("➕", "mustard")
   )
 
   def get(id: String): Visual = byId.getOrElse(id, Visual("✦", "teal"))

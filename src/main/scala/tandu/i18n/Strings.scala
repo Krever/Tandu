@@ -28,7 +28,8 @@ final case class Strings(
     dice: Strings.Dice,
     sudoku: Strings.Sudoku,
     minesweeper: Strings.Minesweeper,
-    wordBuilder: Strings.WordBuilder
+    wordBuilder: Strings.WordBuilder,
+    mathPractice: Strings.MathPractice
 )
 
 object Strings:
@@ -382,6 +383,23 @@ object Strings:
       hard: WordBuilderLevel,
       correct: String,
       nextWord: String,
+      skip: String,
+      printTitle: String,
+      printHint: String
+  )
+
+  final case class MathPracticeLevel(name: String, description: String)
+
+  final case class MathPractice(
+      name: String,
+      description: String,
+      easy: MathPracticeLevel,
+      medium: MathPracticeLevel,
+      hard: MathPracticeLevel,
+      howMany: String,
+      pickGroup: String,
+      correct: String,
+      nextProblem: String,
       skip: String,
       printTitle: String,
       printHint: String
@@ -760,15 +778,29 @@ object Strings:
       hard = MinesweeperVariant("Hard", "16×12 with 40 mines.")
     ),
     wordBuilder = WordBuilder(
-      name = "Word Builder",
-      description = "Spell the word that matches the picture.",
+      name = "Read & Spell",
+      description = "Spell words and pick matching pictures.",
       easy = WordBuilderLevel("Easy", "Short words, no extra letters."),
       medium = WordBuilderLevel("Medium", "Longer words, a few extra letters."),
       hard = WordBuilderLevel("Hard", "Long words with extra letters."),
       correct = "Well done!",
       nextWord = "Next word",
       skip = "Skip",
-      printTitle = "Word Builder — worksheet",
+      printTitle = "Read & Spell — worksheet",
+      printHint = "Pick a level, then print a sheet."
+    ),
+    mathPractice = MathPractice(
+      name = "Math Practice",
+      description = "Count, compare, add and subtract.",
+      easy   = MathPracticeLevel("Easy",   "Count and compare with pictures, up to 10."),
+      medium = MathPracticeLevel("Medium", "Add and subtract within 10."),
+      hard   = MathPracticeLevel("Hard",   "Add and subtract within 20, with missing numbers."),
+      howMany = "How many?",
+      pickGroup = "Pick the matching group",
+      correct = "Well done!",
+      nextProblem = "Next",
+      skip = "Skip",
+      printTitle = "Math Practice — worksheet",
       printHint = "Pick a level, then print a sheet."
     )
   )
@@ -1128,15 +1160,29 @@ object Strings:
       hard = MinesweeperVariant("Trudny", "16×12 z 40 minami.")
     ),
     wordBuilder = WordBuilder(
-      name = "Układanka słów",
-      description = "Ułóż słowo pasujące do obrazka.",
+      name = "Czytaj i pisz",
+      description = "Układaj słowa i wybieraj pasujące obrazki.",
       easy = WordBuilderLevel("Łatwy", "Krótkie słowa, bez dodatkowych liter."),
       medium = WordBuilderLevel("Średni", "Dłuższe słowa, kilka dodatkowych liter."),
       hard = WordBuilderLevel("Trudny", "Długie słowa z dodatkowymi literami."),
       correct = "Super!",
       nextWord = "Następne słowo",
       skip = "Pomiń",
-      printTitle = "Układanka słów — karta do druku",
+      printTitle = "Czytaj i pisz — karta do druku",
+      printHint = "Wybierz poziom i wydrukuj kartę."
+    ),
+    mathPractice = MathPractice(
+      name = "Matematyka",
+      description = "Liczenie, dodawanie i odejmowanie.",
+      easy   = MathPracticeLevel("Łatwy",   "Liczenie i porównywanie z obrazkami, do 10."),
+      medium = MathPracticeLevel("Średni",  "Dodawanie i odejmowanie do 10."),
+      hard   = MathPracticeLevel("Trudny",  "Do 20 z brakującą liczbą."),
+      howMany = "Ile?",
+      pickGroup = "Wybierz pasującą grupę",
+      correct = "Brawo!",
+      nextProblem = "Następne",
+      skip = "Pomiń",
+      printTitle = "Matematyka — karta pracy",
       printHint = "Wybierz poziom i wydrukuj kartę."
     )
   )
@@ -1496,15 +1542,29 @@ object Strings:
       hard = MinesweeperVariant("Difícil", "16×12 con 40 minas.")
     ),
     wordBuilder = WordBuilder(
-      name = "Constructor de palabras",
-      description = "Forma la palabra que coincide con la imagen.",
+      name = "Lee y deletrea",
+      description = "Forma palabras y elige la imagen que corresponde.",
       easy = WordBuilderLevel("Fácil", "Palabras cortas, sin letras extra."),
       medium = WordBuilderLevel("Medio", "Palabras más largas, algunas letras extra."),
       hard = WordBuilderLevel("Difícil", "Palabras largas con letras extra."),
       correct = "¡Muy bien!",
       nextWord = "Siguiente palabra",
       skip = "Saltar",
-      printTitle = "Constructor de palabras — hoja",
+      printTitle = "Lee y deletrea — hoja",
+      printHint = "Elige un nivel e imprime una hoja."
+    ),
+    mathPractice = MathPractice(
+      name = "Práctica de matemáticas",
+      description = "Contar, comparar, sumar y restar.",
+      easy   = MathPracticeLevel("Fácil",   "Contar y comparar con imágenes, hasta 10."),
+      medium = MathPracticeLevel("Medio",   "Sumar y restar hasta 10."),
+      hard   = MathPracticeLevel("Difícil", "Hasta 20 con número que falta."),
+      howMany = "¿Cuántos?",
+      pickGroup = "Elige el grupo correcto",
+      correct = "¡Muy bien!",
+      nextProblem = "Siguiente",
+      skip = "Saltar",
+      printTitle = "Matemáticas — hoja",
       printHint = "Elige un nivel e imprime una hoja."
     )
   )
@@ -1864,15 +1924,29 @@ object Strings:
       hard = MinesweeperVariant("Difficile", "16×12 avec 40 mines.")
     ),
     wordBuilder = WordBuilder(
-      name = "Construis le mot",
-      description = "Forme le mot qui correspond à l'image.",
+      name = "Lis et écris",
+      description = "Forme des mots et choisis l'image qui correspond.",
       easy = WordBuilderLevel("Facile", "Mots courts, pas de lettres en plus."),
       medium = WordBuilderLevel("Moyen", "Mots plus longs, quelques lettres en plus."),
       hard = WordBuilderLevel("Difficile", "Mots longs avec lettres en plus."),
       correct = "Bravo !",
       nextWord = "Mot suivant",
       skip = "Passer",
-      printTitle = "Construis le mot — fiche",
+      printTitle = "Lis et écris — fiche",
+      printHint = "Choisis un niveau et imprime une fiche."
+    ),
+    mathPractice = MathPractice(
+      name = "Maths",
+      description = "Compter, comparer, additionner et soustraire.",
+      easy   = MathPracticeLevel("Facile",    "Compter et comparer avec des images, jusqu'à 10."),
+      medium = MathPracticeLevel("Moyen",     "Additions et soustractions jusqu'à 10."),
+      hard   = MathPracticeLevel("Difficile", "Jusqu'à 20 avec nombre manquant."),
+      howMany = "Combien ?",
+      pickGroup = "Choisis le bon groupe",
+      correct = "Bravo !",
+      nextProblem = "Suivant",
+      skip = "Passer",
+      printTitle = "Maths — fiche",
       printHint = "Choisis un niveau et imprime une fiche."
     )
   )
@@ -2232,15 +2306,29 @@ object Strings:
       hard = MinesweeperVariant("Schwer", "16×12 mit 40 Minen.")
     ),
     wordBuilder = WordBuilder(
-      name = "Wortbaukasten",
-      description = "Bilde das Wort, das zum Bild passt.",
+      name = "Lesen & Schreiben",
+      description = "Wörter bilden und das passende Bild auswählen.",
       easy = WordBuilderLevel("Leicht", "Kurze Wörter, keine zusätzlichen Buchstaben."),
       medium = WordBuilderLevel("Mittel", "Längere Wörter, ein paar zusätzliche Buchstaben."),
       hard = WordBuilderLevel("Schwer", "Lange Wörter mit zusätzlichen Buchstaben."),
       correct = "Super!",
       nextWord = "Nächstes Wort",
       skip = "Überspringen",
-      printTitle = "Wortbaukasten — Arbeitsblatt",
+      printTitle = "Lesen & Schreiben — Arbeitsblatt",
+      printHint = "Stufe wählen und Blatt drucken."
+    ),
+    mathPractice = MathPractice(
+      name = "Rechnen üben",
+      description = "Zählen, vergleichen, addieren und subtrahieren.",
+      easy   = MathPracticeLevel("Leicht",  "Zählen und vergleichen mit Bildern, bis 10."),
+      medium = MathPracticeLevel("Mittel",  "Addieren und subtrahieren bis 10."),
+      hard   = MathPracticeLevel("Schwer",  "Bis 20 mit fehlender Zahl."),
+      howMany = "Wie viele?",
+      pickGroup = "Wähle die passende Gruppe",
+      correct = "Super!",
+      nextProblem = "Weiter",
+      skip = "Überspringen",
+      printTitle = "Rechnen — Arbeitsblatt",
       printHint = "Stufe wählen und Blatt drucken."
     )
   )

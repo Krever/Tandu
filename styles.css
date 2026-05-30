@@ -442,6 +442,16 @@ select { font-family: inherit; font-size: inherit; }
   min-height: calc(2 * 1.3em);
 }
 
+/* Narrow phones: descriptions get squeezed in a 2-col grid, so the
+   activity catalog becomes a single-column index strip. Glyph stamp
+   spans both rows on the left; name + full-width description stack
+   to its right. The "Suggest" card still sits at the top as a banner. */
+@media (max-width: 479px) {
+  .activity-grid { grid-template-columns: 1fr; }
+  .activity-card .activity-card__glyph { grid-row: 1 / span 2; align-self: center; }
+  .activity-card .activity-card__desc { grid-column: 2; }
+}
+
 /* Primary call-to-action card — vermilion field, cream ink, italic display
    type. Distinct as the showpiece while still occupying a grid cell. */
 .activity-card--suggest {
@@ -1732,4 +1742,220 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   height: 32px;
   border: 1.5px dashed #333;
   border-radius: 4px;
+}
+
+/* Word stem (read direction: word -> picture) */
+.wb-word {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: var(--space-3) 0;
+  user-select: none;
+  color: var(--color-text);
+}
+.wb-word--correct { color: #065f46; }
+
+.wb-pic-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-2);
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+.wb-pic-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+  font-size: 72px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-stamp-sm);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.1s ease, background 0.1s ease;
+}
+.wb-pic-choice:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--color-border-strong); }
+.wb-pic-choice--correct {
+  border-color: #065f46;
+  background: color-mix(in srgb, #065f46 12%, var(--color-surface));
+}
+.wb-pic-choice--wrong {
+  border-color: var(--color-hit);
+  background: color-mix(in srgb, var(--color-hit) 12%, var(--color-surface));
+  animation: wb-shake 0.4s ease-in-out 1;
+}
+
+/* Print row for read direction */
+.wb-print-row--read {
+  grid-template-columns: auto auto 1fr;
+}
+.wb-print-word {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0 8px;
+}
+.wb-print-pics { display: flex; gap: 10px; flex-wrap: wrap; }
+.wb-print-pic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  font-size: 28px;
+  line-height: 1;
+  border: 1.5px solid #333;
+  border-radius: 8px;
+}
+
+/* Math Practice */
+.mp { display: flex; flex-direction: column; align-items: stretch; }
+
+.mp-prompt {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--color-text);
+  text-align: center;
+  min-height: 1.4em;
+}
+
+.mp-stem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  padding: var(--space-3) var(--space-2);
+}
+
+.mp-expr {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.mp-numeral {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 96px;
+  line-height: 1;
+  color: var(--color-text);
+}
+.mp-numeral--side { font-size: 72px; }
+
+.mp-group {
+  font-size: 40px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-align: center;
+  max-width: min(520px, 92vw);
+}
+
+.mp-pic-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.mp-op {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1;
+  color: var(--color-text);
+}
+.mp-op--vs { color: var(--color-text-muted, #777); font-size: 32px; }
+.mp-op--q  { color: var(--color-text-muted, #777); font-size: 56px; }
+
+.mp-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.mp-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-stamp-sm);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+.mp-choice:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--color-border-strong); }
+.mp-choice-num { font-size: 40px; line-height: 1; }
+.mp-choice-pic { font-size: 24px; line-height: 1.25; word-break: break-word; }
+.mp-choice-sym { font-size: 56px; line-height: 1; font-weight: 700; }
+.mp-choice--pic { min-height: 84px; }
+.mp-choice--correct {
+  border-color: #065f46;
+  background: color-mix(in srgb, #065f46 12%, var(--color-surface));
+}
+.mp-choice--wrong {
+  border-color: var(--color-hit);
+  background: color-mix(in srgb, var(--color-hit) 12%, var(--color-surface));
+  animation: mp-shake 0.4s ease-in-out 1;
+}
+@keyframes mp-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-3px); }
+}
+
+/* Math print worksheet */
+.mp-print-sheet { display: flex; flex-direction: column; gap: 12px; }
+.mp-print-row {
+  display: grid;
+  grid-template-columns: 1fr auto 96px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  border-bottom: 1px dashed #999;
+  min-height: 48px;
+}
+.mp-print-stem { font-size: 22px; }
+.mp-print-expr { font-weight: 700; letter-spacing: 0.04em; }
+.mp-print-group { font-size: 24px; line-height: 1.2; }
+.mp-print-pic { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mp-print-op { font-weight: 700; font-size: 22px; }
+.mp-print-eq { font-weight: 700; font-size: 22px; }
+.mp-print-slot {
+  border-bottom: 1.5px solid #333;
+  width: 96px;
+  height: 26px;
+}
+.mp-print-row--cmp {
+  grid-template-columns: 1fr auto 1fr;
+  justify-items: center;
+}
+.mp-print-slot--box {
+  border: 1.5px dashed #333;
+  border-bottom: 1.5px dashed #333;
+  border-radius: 4px;
+  width: 56px;
+  height: 36px;
 }

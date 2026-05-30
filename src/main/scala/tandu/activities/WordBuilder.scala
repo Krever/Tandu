@@ -22,17 +22,25 @@ object WordBuilder extends Activity:
 
   final case class Tile(idx: Int, char: Char)
 
+  enum RoundKind:
+    case Spell(pool: Vector[Tile], slots: Vector[Option[Int]])
+    case Read(choices: Vector[WordBuilderBank.Entry], correctIdx: Int, picked: Option[Int])
+
+    def isRead: Boolean = this match
+      case _: Read => true
+      case _       => false
+
   final case class Round(
       entry: WordBuilderBank.Entry,
       target: String,                   // displayed casing
-      pool: Vector[Tile],
-      slots: Vector[Option[Int]]
+      kind: RoundKind
   ):
-    def placedIdxs: Set[Int] = slots.flatten.toSet
-    def isComplete: Boolean  = slots.forall(_.isDefined)
-    def attempt: String =
-      slots.flatMap(_.flatMap(i => pool.find(_.idx == i).map(_.char))).mkString
-    def isCorrect: Boolean = isComplete && attempt == target
+    def isCorrect: Boolean = kind match
+      case RoundKind.Spell(pool, slots) =>
+        slots.forall(_.isDefined) &&
+          slots.flatMap(_.flatMap(i => pool.find(_.idx == i).map(_.char))).mkString == target
+      case RoundKind.Read(_, correctIdx, picked) =>
+        picked.contains(correctIdx)
 
   final case class Level(
       id: String,
@@ -58,11 +66,18 @@ object WordBuilder extends Activity:
   // ---------- round generation ----------
 
   private def buildRound(lang: Lang, level: Level, avoid: Option[WordBuilderBank.Entry]): Round =
-    val entry = Picker.pickAvoiding(WordBuilderBank.entriesInRange(lang, level.minLen, level.maxLen), avoid)
-    roundFor(lang, level, entry)
+    val pool  = WordBuilderBank.entriesInRange(lang, level.minLen, level.maxLen)
+    val entry = Picker.pickAvoiding(pool, avoid)
+    randomRound(lang, level, entry, pool)
 
-  private def roundFor(lang: Lang, level: Level, entry: WordBuilderBank.Entry): Round =
+  private def randomRound(
+      lang: Lang, level: Level, entry: WordBuilderBank.Entry, pool: Vector[WordBuilderBank.Entry]
+  ): Round =
     val display = if level.upperCase then entry.word.toUpperCase else entry.word
+    if Random.nextBoolean() then spellRound(lang, level, entry, display)
+    else readRound(lang, entry, display, pool)
+
+  private def spellRound(lang: Lang, level: Level, entry: WordBuilderBank.Entry, display: String): Round =
     val wordChars = display.toVector
 
     val alphabet      = HangmanBank.lettersFor(lang)
@@ -72,7 +87,22 @@ object WordBuilder extends Activity:
 
     val poolChars = scrambled(wordChars ++ distractors, display)
     val tiles = poolChars.zipWithIndex.map((c, i) => Tile(i, c))
-    Round(entry, display, tiles, Vector.fill(wordChars.length)(None))
+    Round(entry, display, RoundKind.Spell(tiles, Vector.fill(wordChars.length)(None)))
+
+  /** Read mode: pick 3 distractor entries from the same length band so all
+    * four emoji choices look comparable. Falls back to the whole-language
+    * bank if the band can't yield enough distinct entries. */
+  private def readRound(
+      lang: Lang, entry: WordBuilderBank.Entry, display: String, pool: Vector[WordBuilderBank.Entry]
+  ): Round =
+    val band = pool.filter(_ != entry)
+    val source =
+      if band.size >= 3 then band
+      else WordBuilderBank.entriesFor(lang).filter(_ != entry)
+    val distractors = Random.shuffle(source).take(3)
+    val all = Random.shuffle(entry +: distractors)
+    val idx = all.indexOf(entry)
+    Round(entry, display, RoundKind.Read(all, idx, None))
 
   /** Shuffle until the pool, read left-to-right, doesn't spell the target.
     * Without this an Easy-level round (no distractors) can land on the
@@ -142,48 +172,69 @@ object WordBuilder extends Activity:
   private def playForLevel(level: Level): HtmlElement =
     val round: Var[Round] = Var(buildRound(AppState.lang.now(), level, avoid = None))
     val wrongFlash: Var[Boolean] = Var(false)
+    val wrongPick: Var[Option[Int]] = Var(None)
 
     def newRound(): Unit =
       round.set(buildRound(AppState.lang.now(), level, avoid = Some(round.now().entry)))
       wrongFlash.set(false)
+      wrongPick.set(None)
 
     def placeTile(t: Tile): Unit =
       val r = round.now()
-      if r.placedIdxs.contains(t.idx) || r.isCorrect then ()
-      else
-        val nextSlot = r.slots.indexWhere(_.isEmpty)
-        if nextSlot < 0 then ()
-        else
-          val updatedSlots = r.slots.updated(nextSlot, Some(t.idx))
-          val updated = r.copy(slots = updatedSlots)
-          round.set(updated)
-          if updated.isComplete && !updated.isCorrect then
-            wrongFlash.set(true)
-            val _ = js.timers.setTimeout(420)(wrongFlash.set(false))
+      r.kind match
+        case spell: RoundKind.Spell if !r.isCorrect && !spell.slots.flatten.contains(t.idx) =>
+          val nextSlot = spell.slots.indexWhere(_.isEmpty)
+          if nextSlot >= 0 then
+            val updatedSlots = spell.slots.updated(nextSlot, Some(t.idx))
+            val updated = r.copy(kind = spell.copy(slots = updatedSlots))
+            round.set(updated)
+            if updatedSlots.forall(_.isDefined) && !updated.isCorrect then
+              wrongFlash.set(true)
+              val _ = js.timers.setTimeout(420)(wrongFlash.set(false))
+        case _ => ()
 
     def removeAt(slotIdx: Int): Unit =
       val r = round.now()
-      if r.isCorrect then ()
-      else
-        round.set(r.copy(slots = r.slots.updated(slotIdx, None)))
-        wrongFlash.set(false)
+      r.kind match
+        case spell: RoundKind.Spell if !r.isCorrect =>
+          round.set(r.copy(kind = spell.copy(slots = spell.slots.updated(slotIdx, None))))
+          wrongFlash.set(false)
+        case _ => ()
+
+    def pickPic(idx: Int): Unit =
+      val r = round.now()
+      r.kind match
+        case read: RoundKind.Read if !r.isCorrect =>
+          if idx == read.correctIdx then
+            round.set(r.copy(kind = read.copy(picked = Some(idx))))
+          else
+            wrongPick.set(Some(idx))
+            val _ = js.timers.setTimeout(420)(
+              if wrongPick.now().contains(idx) then wrongPick.set(None)
+            )
+        case _ => ()
 
     val langChange = AppState.lang.signal.changes --> { lang =>
       round.set(buildRound(lang, level, avoid = None))
       wrongFlash.set(false)
+      wrongPick.set(None)
     }
+
+    // Switch layouts only when the round's kind changes (i.e., between
+    // rounds), not on every tile click — that keeps the inner reactive
+    // bindings stable within a round.
+    val isReadSig: Signal[Boolean]    = round.signal.map(_.kind.isRead).distinct
+    val isCorrectSig: Signal[Boolean] = round.signal.map(_.isCorrect).distinct
 
     div(
       cls := "stack-lg",
       langChange,
-      div(
-        cls := "wb-picture",
-        child.text <-- round.signal.map(_.entry.emoji)
-      ),
-      slotsView(round.signal, wrongFlash.signal, removeAt),
-      poolView(round.signal, placeTile),
-      child <-- round.signal.map { r =>
-        if r.isCorrect then
+      child <-- isReadSig.map { isRead =>
+        if isRead then readLayout(round.signal, wrongPick.signal, pickPic)
+        else spellLayout(round.signal, wrongFlash.signal, placeTile, removeAt)
+      },
+      child <-- isCorrectSig.map { isCorrect =>
+        if isCorrect then
           div(
             cls := "stack",
             Components.banner("win", s(_.wordBuilder.correct)),
@@ -206,6 +257,24 @@ object WordBuilder extends Activity:
       }
     )
 
+  // ---------- spell layout (picture -> letters) ----------
+
+  private def spellLayout(
+      roundSig: Signal[Round],
+      wrongSig: Signal[Boolean],
+      onPlace: Tile => Unit,
+      onRemove: Int => Unit
+  ): HtmlElement =
+    div(
+      cls := "stack-lg",
+      div(
+        cls := "wb-picture",
+        child.text <-- roundSig.map(_.entry.emoji)
+      ),
+      slotsView(roundSig, wrongSig, onRemove),
+      poolView(roundSig, onPlace)
+    )
+
   private def slotsView(
       roundSig: Signal[Round],
       wrongSig: Signal[Boolean],
@@ -216,19 +285,22 @@ object WordBuilder extends Activity:
       cls("wb-slots--wrong") <-- wrongSig,
       cls("wb-slots--correct") <-- roundSig.map(_.isCorrect),
       children <-- roundSig.map { r =>
-        r.slots.zipWithIndex.map { (slot, idx) =>
-          slot match
-            case None =>
-              div(cls := "wb-slot wb-slot--empty", "")
-            case Some(tileIdx) =>
-              val ch = r.pool.find(_.idx == tileIdx).map(_.char.toString).getOrElse("")
-              button(
-                cls := "wb-slot wb-slot--filled",
-                disabled := r.isCorrect,
-                ch,
-                onClick --> (_ => onRemove(idx))
-              )
-        }
+        r.kind match
+          case RoundKind.Spell(pool, slots) =>
+            slots.zipWithIndex.map { (slot, idx) =>
+              slot match
+                case None =>
+                  div(cls := "wb-slot wb-slot--empty", "")
+                case Some(tileIdx) =>
+                  val ch = pool.find(_.idx == tileIdx).map(_.char.toString).getOrElse("")
+                  button(
+                    cls := "wb-slot wb-slot--filled",
+                    disabled := r.isCorrect,
+                    ch,
+                    onClick --> (_ => onRemove(idx))
+                  )
+            }
+          case _ => Nil
       }
     )
 
@@ -236,16 +308,63 @@ object WordBuilder extends Activity:
     div(
       cls := "wb-pool no-print",
       children <-- roundSig.map { r =>
-        r.pool.map { tile =>
-          val used = r.placedIdxs.contains(tile.idx)
-          button(
-            cls := "wb-tile",
-            cls("wb-tile--used") := used,
-            disabled := used || r.isCorrect,
-            tile.char.toString,
-            onClick --> (_ => onPlace(tile))
-          )
-        }
+        r.kind match
+          case RoundKind.Spell(pool, slots) =>
+            val placed = slots.flatten.toSet
+            pool.map { tile =>
+              val used = placed.contains(tile.idx)
+              button(
+                cls := "wb-tile",
+                cls("wb-tile--used") := used,
+                disabled := used || r.isCorrect,
+                tile.char.toString,
+                onClick --> (_ => onPlace(tile))
+              )
+            }
+          case _ => Nil
+      }
+    )
+
+  // ---------- read layout (word -> picture) ----------
+
+  private def readLayout(
+      roundSig: Signal[Round],
+      wrongPickSig: Signal[Option[Int]],
+      onPick: Int => Unit
+  ): HtmlElement =
+    div(
+      cls := "stack-lg",
+      div(
+        cls := "wb-word",
+        cls("wb-word--correct") <-- roundSig.map(_.isCorrect),
+        child.text <-- roundSig.map(_.target)
+      ),
+      picChoicesView(roundSig, wrongPickSig, onPick)
+    )
+
+  private def picChoicesView(
+      roundSig: Signal[Round],
+      wrongPickSig: Signal[Option[Int]],
+      onPick: Int => Unit
+  ): HtmlElement =
+    div(
+      cls := "wb-pic-choices no-print",
+      children <-- roundSig.combineWith(wrongPickSig).map { (r, wrong) =>
+        r.kind match
+          case RoundKind.Read(choices, correctIdx, picked) =>
+            choices.zipWithIndex.map { (entry, i) =>
+              val isWrong   = wrong.contains(i)
+              val isCorrect = picked.contains(i) && i == correctIdx
+              button(
+                cls := "wb-pic-choice",
+                cls("wb-pic-choice--wrong")   := isWrong,
+                cls("wb-pic-choice--correct") := isCorrect,
+                disabled := r.isCorrect,
+                entry.emoji,
+                onClick --> (_ => onPick(i))
+              )
+            }
+          case _ => Nil
       }
     )
 
@@ -258,7 +377,7 @@ object WordBuilder extends Activity:
       val lang = AppState.lang.now()
       val pool = WordBuilderBank.entriesInRange(lang, level.minLen, level.maxLen)
       val picks = Random.shuffle(pool.toList).take(WorksheetRows).toVector
-      rounds.set(picks.map(e => roundFor(lang, level, e)))
+      rounds.set(picks.map(e => randomRound(lang, level, e, pool)))
       val _ = js.timers.setTimeout(50)(Printable.print())
 
     div(
@@ -290,18 +409,28 @@ object WordBuilder extends Activity:
       )
     )
 
-  private def printableRow(r: Round): HtmlElement =
-    div(
-      cls := "wb-print-row",
-      div(cls := "wb-print-emoji", r.entry.emoji),
+  private def printableRow(r: Round): HtmlElement = r.kind match
+    case RoundKind.Spell(pool, slots) =>
       div(
-        cls := "wb-print-pool",
-        r.pool.map(t => div(cls := "wb-print-tile", t.char.toString))
-      ),
-      div(cls := "wb-print-arrow", "→"),
-      div(
-        cls := "wb-print-slots",
-        r.slots.map(_ => div(cls := "wb-print-slot", ""))
+        cls := "wb-print-row",
+        div(cls := "wb-print-emoji", r.entry.emoji),
+        div(
+          cls := "wb-print-pool",
+          pool.map(t => div(cls := "wb-print-tile", t.char.toString))
+        ),
+        div(cls := "wb-print-arrow", "→"),
+        div(
+          cls := "wb-print-slots",
+          slots.map(_ => div(cls := "wb-print-slot", ""))
+        )
       )
-    )
-
+    case RoundKind.Read(choices, _, _) =>
+      div(
+        cls := "wb-print-row wb-print-row--read",
+        div(cls := "wb-print-word", r.target),
+        div(cls := "wb-print-arrow", "→"),
+        div(
+          cls := "wb-print-pics",
+          choices.map(e => div(cls := "wb-print-pic", e.emoji))
+        )
+      )

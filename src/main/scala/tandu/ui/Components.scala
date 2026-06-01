@@ -44,6 +44,7 @@ object Components:
   def cornerMenu(): HtmlElement =
     val open: Var[Boolean] = Var(false)
     val aboutOpen: Var[Boolean] = Var(false)
+    val iosHelpOpen: Var[Boolean] = Var(false)
 
     def closeAnd(action: => Unit): Unit =
       action
@@ -88,11 +89,20 @@ object Components:
         div(cls := "corner-menu__divider"),
         child <-- Pwa.available.map {
           case true =>
+            // Chromium: one-tap install via the deferred prompt.
             button(
               cls := "corner-menu__item",
               menuIcon(iconDownload),
               span(child.text <-- s(_.home.installApp)),
               onClick --> (_ => closeAnd(Pwa.prompt()))
+            )
+          case false if Pwa.needsManualInstall =>
+            // iOS: no prompt exists — explain the Share → Add to Home Screen flow.
+            button(
+              cls := "corner-menu__item",
+              menuIcon(iconDownload),
+              span(child.text <-- s(_.home.installApp)),
+              onClick --> (_ => closeAnd(iosHelpOpen.set(true)))
             )
           case false => emptyNode
         },
@@ -121,7 +131,8 @@ object Components:
           onClick --> (_ => open.set(false))
         )
       ),
-      modal(aboutOpen, s(_.about.title), s(_.about.body))
+      modal(aboutOpen, s(_.about.title), s(_.about.body)),
+      modal(iosHelpOpen, s(_.installHelp.title), s(_.installHelp.body))
     )
 
   def segmentedToggle[A](

@@ -7,6 +7,7 @@ final case class Strings(
     home: Strings.Home,
     filters: Strings.Filters,
     about: Strings.About,
+    installHelp: Strings.InstallHelp,
     menu: Strings.Menu,
     mode: Strings.Mode,
     printable: Strings.Printable,
@@ -29,7 +30,8 @@ final case class Strings(
     sudoku: Strings.Sudoku,
     minesweeper: Strings.Minesweeper,
     wordBuilder: Strings.WordBuilder,
-    mathPractice: Strings.MathPractice
+    mathPractice: Strings.MathPractice,
+    reading: Strings.Reading
 )
 
 object Strings:
@@ -65,6 +67,13 @@ object Strings:
 
   final case class About(
       open: String,
+      title: String,
+      body: String
+  )
+
+  /** Shown on iOS, where there is no install prompt — the user must add the
+    * app to the home screen manually from Safari. */
+  final case class InstallHelp(
       title: String,
       body: String
   )
@@ -405,6 +414,18 @@ object Strings:
       printHint: String
   )
 
+  final case class Reading(
+      name: String,
+      description: String,
+      hint: String,
+      search: String,
+      freeEbook: String,
+      bandTots: String,
+      bandPicture: String,
+      bandChapter: String,
+      bandOlder: String
+  )
+
   final case class MinesweeperVariant(name: String, description: String)
 
   final case class Minesweeper(
@@ -456,6 +477,10 @@ object Strings:
       open = "About",
       title = "About Tandu",
       body = "Tandu is a little helper for picking something fun to do with the kids. Tap \"Suggest activity\" for a random idea, or browse the list. Some games are playable in the app, others are prompts for things you do offline — perfect for the car, the couch, or a rainy afternoon."
+    ),
+    installHelp = InstallHelp(
+      title = "Add Tandu to your Home Screen",
+      body = "On iPhone or iPad, open this page in Safari (other browsers can't install it), tap the Share button at the bottom, then choose \"Add to Home Screen\". Tandu will then open like a normal app, full-screen and offline-ready."
     ),
     menu = Menu(
       open = "Menu",
@@ -802,6 +827,17 @@ object Strings:
       skip = "Skip",
       printTitle = "Math Practice — worksheet",
       printHint = "Pick a level, then print a sheet."
+    ),
+    reading = Reading(
+      name = "Reading",
+      description = "Read a classic together.",
+      hint = "Below you can find some inspirations.",
+      search = "Search",
+      freeEbook = "E-book",
+      bandTots = "Ages 0–3",
+      bandPicture = "Ages 3–6",
+      bandChapter = "Ages 5–9",
+      bandOlder = "Ages 8+"
     )
   )
 
@@ -838,6 +874,10 @@ object Strings:
       open = "O aplikacji",
       title = "O Tandu",
       body = "Tandu to mały pomocnik, gdy szukacie pomysłu na zabawę z dziećmi. Stuknij „Zaproponuj zabawę\", żeby wylosować coś na chybił trafił, albo przeglądaj listę. Część gier zagrasz w aplikacji, inne to pomysły do zabawy offline — idealne do auta, na kanapę albo deszczowe popołudnie."
+    ),
+    installHelp = InstallHelp(
+      title = "Dodaj Tandu do ekranu początkowego",
+      body = "Na iPhonie lub iPadzie otwórz tę stronę w Safari (inne przeglądarki nie zainstalują aplikacji), stuknij przycisk Udostępnij na dole, a następnie wybierz „Do ekranu początkowego\". Tandu będzie się otwierać jak zwykła aplikacja — na pełnym ekranie i offline."
     ),
     menu = Menu(
       open = "Menu",
@@ -1184,6 +1224,17 @@ object Strings:
       skip = "Pomiń",
       printTitle = "Matematyka — karta pracy",
       printHint = "Wybierz poziom i wydrukuj kartę."
+    ),
+    reading = Reading(
+      name = "Czytanie",
+      description = "Przeczytaj razem klasykę.",
+      hint = "Poniżej znajdziesz kilka inspiracji.",
+      search = "Szukaj",
+      freeEbook = "E-book",
+      bandTots = "0–3 lat",
+      bandPicture = "3–6 lat",
+      bandChapter = "5–9 lat",
+      bandOlder = "8+ lat"
     )
   )
 
@@ -1220,6 +1271,10 @@ object Strings:
       open = "Acerca de",
       title = "Acerca de Tandu",
       body = "Tandu es un pequeño ayudante para elegir algo divertido que hacer con los niños. Toca \"Sugerir actividad\" para una idea al azar, o explora la lista. Algunos juegos se juegan en la app, otros son ideas para hacer sin pantalla — perfectos para el coche, el sofá o una tarde lluviosa."
+    ),
+    installHelp = InstallHelp(
+      title = "Añade Tandu a la pantalla de inicio",
+      body = "En iPhone o iPad, abre esta página en Safari (otros navegadores no pueden instalarla), toca el botón Compartir abajo y elige \"Añadir a pantalla de inicio\". Tandu se abrirá como una app normal, a pantalla completa y lista para usar sin conexión."
     ),
     menu = Menu(
       open = "Menú",
@@ -1566,6 +1621,17 @@ object Strings:
       skip = "Saltar",
       printTitle = "Matemáticas — hoja",
       printHint = "Elige un nivel e imprime una hoja."
+    ),
+    reading = Reading(
+      name = "Hora de leer",
+      description = "Lee un clásico juntos.",
+      hint = "A continuación encontrarás algunas inspiraciones.",
+      search = "Buscar",
+      freeEbook = "E-book",
+      bandTots = "0–3 años",
+      bandPicture = "3–6 años",
+      bandChapter = "5–9 años",
+      bandOlder = "8+ años"
     )
   )
 
@@ -1602,6 +1668,10 @@ object Strings:
       open = "À propos",
       title = "À propos de Tandu",
       body = "Tandu est un petit assistant pour choisir une activité amusante avec les enfants. Appuyez sur « Proposer une activité » pour une idée au hasard, ou parcourez la liste. Certains jeux se jouent dans l'application, d'autres sont des idées à faire hors-écran — parfaits pour la voiture, le canapé ou un après-midi pluvieux."
+    ),
+    installHelp = InstallHelp(
+      title = "Ajoutez Tandu à l'écran d'accueil",
+      body = "Sur iPhone ou iPad, ouvrez cette page dans Safari (les autres navigateurs ne peuvent pas l'installer), appuyez sur le bouton Partager en bas, puis choisissez « Sur l'écran d'accueil ». Tandu s'ouvrira comme une vraie application, en plein écran et utilisable hors ligne."
     ),
     menu = Menu(
       open = "Menu",
@@ -1948,6 +2018,17 @@ object Strings:
       skip = "Passer",
       printTitle = "Maths — fiche",
       printHint = "Choisis un niveau et imprime une fiche."
+    ),
+    reading = Reading(
+      name = "L'heure de la lecture",
+      description = "Lisez un classique ensemble.",
+      hint = "Ci-dessous, quelques idées pour vous inspirer.",
+      search = "Rechercher",
+      freeEbook = "E-book",
+      bandTots = "0–3 ans",
+      bandPicture = "3–6 ans",
+      bandChapter = "5–9 ans",
+      bandOlder = "8+ ans"
     )
   )
 
@@ -1984,6 +2065,10 @@ object Strings:
       open = "Über",
       title = "Über Tandu",
       body = "Tandu ist ein kleiner Helfer, um etwas Lustiges mit den Kindern auszusuchen. Tippe auf „Aktivität vorschlagen\" für eine zufällige Idee oder stöbere in der Liste. Manche Spiele kannst du in der App spielen, andere sind Anregungen für Offline-Spaß — perfekt fürs Auto, das Sofa oder einen verregneten Nachmittag."
+    ),
+    installHelp = InstallHelp(
+      title = "Tandu zum Home-Bildschirm hinzufügen",
+      body = "Öffne diese Seite auf iPhone oder iPad in Safari (andere Browser können sie nicht installieren), tippe unten auf „Teilen\" und wähle dann „Zum Home-Bildschirm\". Tandu öffnet sich danach wie eine normale App — im Vollbild und offline nutzbar."
     ),
     menu = Menu(
       open = "Menü",
@@ -2330,6 +2415,17 @@ object Strings:
       skip = "Überspringen",
       printTitle = "Rechnen — Arbeitsblatt",
       printHint = "Stufe wählen und Blatt drucken."
+    ),
+    reading = Reading(
+      name = "Lesezeit",
+      description = "Lest gemeinsam einen Klassiker.",
+      hint = "Unten findet ihr einige Inspirationen.",
+      search = "Suchen",
+      freeEbook = "E-Book",
+      bandTots = "0–3 Jahre",
+      bandPicture = "3–6 Jahre",
+      bandChapter = "5–9 Jahre",
+      bandOlder = "8+ Jahre"
     )
   )
 

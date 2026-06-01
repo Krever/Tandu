@@ -15,7 +15,7 @@ export default defineConfig({
         short_name: "Tandu",
         description: "Pick an activity to play with the kids",
         lang: "en",
-        theme_color: "#2563eb",
+        theme_color: "#d94f2a",
         background_color: "#f8fafc",
         display: "standalone",
         orientation: "portrait",

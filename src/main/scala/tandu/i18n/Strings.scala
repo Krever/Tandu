@@ -62,7 +62,11 @@ object Strings:
       solo: String,
       two: String,
       group: String,
-      handsFree: String
+      handsFree: String,
+      favourites: String,
+      addToFavourites: String,
+      removeFromFavourites: String,
+      noFavouritesYet: String
   )
 
   final case class About(
@@ -471,7 +475,11 @@ object Strings:
       solo = "Solo",
       two = "Two",
       group = "3+",
-      handsFree = "Hands-free"
+      handsFree = "Hands-free",
+      favourites = "Favourites",
+      addToFavourites = "Add to favourites",
+      removeFromFavourites = "Remove from favourites",
+      noFavouritesYet = "Tap the star on any activity to save it as a favourite."
     ),
     about = About(
       open = "About",
@@ -868,7 +876,11 @@ object Strings:
       solo = "Solo",
       two = "Dwóch",
       group = "3+",
-      handsFree = "Bez rąk"
+      handsFree = "Bez rąk",
+      favourites = "Ulubione",
+      addToFavourites = "Dodaj do ulubionych",
+      removeFromFavourites = "Usuń z ulubionych",
+      noFavouritesYet = "Dotknij gwiazdki przy aktywności, aby zapisać ją jako ulubioną."
     ),
     about = About(
       open = "O aplikacji",
@@ -1265,7 +1277,11 @@ object Strings:
       solo = "Solo",
       two = "Dos",
       group = "3+",
-      handsFree = "Manos libres"
+      handsFree = "Manos libres",
+      favourites = "Favoritos",
+      addToFavourites = "Añadir a favoritos",
+      removeFromFavourites = "Quitar de favoritos",
+      noFavouritesYet = "Toca la estrella en una actividad para guardarla como favorita."
     ),
     about = About(
       open = "Acerca de",
@@ -1662,7 +1678,11 @@ object Strings:
       solo = "Solo",
       two = "Deux",
       group = "3+",
-      handsFree = "Mains libres"
+      handsFree = "Mains libres",
+      favourites = "Favoris",
+      addToFavourites = "Ajouter aux favoris",
+      removeFromFavourites = "Retirer des favoris",
+      noFavouritesYet = "Touchez l'étoile sur une activité pour l'enregistrer comme favorite."
     ),
     about = About(
       open = "À propos",
@@ -2059,7 +2079,11 @@ object Strings:
       solo = "Solo",
       two = "Zwei",
       group = "3+",
-      handsFree = "Ohne Hände"
+      handsFree = "Ohne Hände",
+      favourites = "Favoriten",
+      addToFavourites = "Zu Favoriten hinzufügen",
+      removeFromFavourites = "Aus Favoriten entfernen",
+      noFavouritesYet = "Tippe auf den Stern bei einer Aktivität, um sie als Favorit zu speichern."
     ),
     about = About(
       open = "Über",

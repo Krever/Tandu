@@ -224,6 +224,14 @@ select { font-family: inherit; font-size: inherit; }
   background: var(--color-text);
   color: var(--color-bg);
 }
+.pill-toggle .pill-btn--icon {
+  font-size: 16px;
+  line-height: 1;
+  min-width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .corner-menu { position: relative; }
 .corner-menu__backdrop {
@@ -370,6 +378,14 @@ select { font-family: inherit; font-size: inherit; }
   background: var(--color-border);
 }
 .activity-grid__divider-label { white-space: nowrap; }
+.activity-grid__empty {
+  grid-column: 1 / -1;
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
 .activity-card {
   position: relative;
   /* Two-row grid: glyph+name share row 1 (horizontal), desc spans row 2
@@ -441,6 +457,31 @@ select { font-family: inherit; font-size: inherit; }
   overflow: hidden;
   min-height: calc(2 * 1.3em);
 }
+.activity-card__fav {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-muted);
+  border-radius: 6px;
+  transition: color 0.08s ease, background 0.08s ease, transform 0.08s ease;
+}
+.activity-card__fav:hover {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text);
+}
+.activity-card__fav:active { transform: scale(0.92); }
+.activity-card__fav.is-active { color: var(--color-primary); }
 
 /* Narrow phones: descriptions get squeezed in a 2-col grid, so the
    activity catalog becomes a single-column index strip. Glyph stamp

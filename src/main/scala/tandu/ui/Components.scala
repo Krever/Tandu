@@ -203,7 +203,16 @@ object Components:
       onClick --> (_ => onTap)
     )
 
-  def activityCard(name: Signal[String], desc: Signal[String], onTap: => Unit, glyph: String = "✦", tint: String = "teal"): HtmlElement =
+  def activityCard(
+      name: Signal[String],
+      desc: Signal[String],
+      onTap: => Unit,
+      isFavourite: Signal[Boolean],
+      onToggleFavourite: () => Unit,
+      favouriteLabel: Signal[String],
+      glyph: String = "✦",
+      tint: String = "teal"
+  ): HtmlElement =
     button(
       cls := s"activity-card activity-card--$tint",
       span(cls := "activity-card__glyph", glyph),
@@ -211,6 +220,14 @@ object Components:
         cls := "activity-card__body",
         div(cls := "activity-card__name", child.text <-- name),
         div(cls := "activity-card__desc", child.text <-- desc)
+      ),
+      button(
+        cls := "activity-card__fav no-print",
+        cls("is-active") <-- isFavourite,
+        aria.label <-- favouriteLabel,
+        aria.pressed <-- isFavourite.map(_.toString),
+        child.text <-- isFavourite.map(if _ then "★" else "☆"),
+        onClick.stopPropagation --> (_ => onToggleFavourite())
       ),
       onClick --> (_ => onTap)
     )

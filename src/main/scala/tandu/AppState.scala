@@ -13,6 +13,12 @@ object AppState:
   val kindFilter: Var[Kind] =
     Var(Storage.loadKind().flatMap(Kind.fromString).getOrElse(Kind.All))
 
+  val favourites: Var[Set[String]] = Var(Storage.loadFavourites())
+  val favouritesOnly: Var[Boolean] = Var(Storage.loadFavouritesOnly())
+
+  def toggleFavourite(id: String): Unit =
+    favourites.update(s => if s.contains(id) then s - id else s + id)
+
   val strings: Signal[Strings] = lang.signal.map(Strings.of)
 
   // Persist language whenever it changes, and reflect it on the root <html>
@@ -23,3 +29,6 @@ object AppState:
   }(using unsafeWindowOwner)
 
   val _ = kindFilter.signal.foreach(k => Storage.saveKind(k.toString))(using unsafeWindowOwner)
+
+  val _ = favourites.signal.foreach(Storage.saveFavourites)(using unsafeWindowOwner)
+  val _ = favouritesOnly.signal.foreach(Storage.saveFavouritesOnly)(using unsafeWindowOwner)

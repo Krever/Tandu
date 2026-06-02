@@ -9,11 +9,18 @@ object Registry:
 
   def byId(id: String): Option[Activity] = all.find(_.id == id)
 
-  def filtered(partySize: Option[Players], handsFreeOnly: Boolean, kind: Kind): List[Activity] =
+  def filtered(
+      partySize: Option[Players],
+      handsFreeOnly: Boolean,
+      kind: Kind,
+      favouritesOnly: Boolean,
+      favourites: Set[String]
+  ): List[Activity] =
     all
       .filter(a => kind == Kind.All || a.kind == kind)
       .filter(a => partySize.forall(fitsParty(a, _)))
       .filter(a => !handsFreeOnly || a.handsFree)
+      .filter(a => !favouritesOnly || favourites.contains(a.id))
 
   private def fitsParty(a: Activity, party: Players): Boolean = party match
     case Players.Solo  => a.minPlayers <= 1
@@ -25,8 +32,14 @@ object Registry:
   private def orFallback[A](xs: List[A], fallback: List[A]): List[A] =
     if xs.isEmpty then fallback else xs
 
-  def pickRandom(partySize: Option[Players], handsFreeOnly: Boolean, kind: Kind): Activity =
-    val matching = orFallback(filtered(partySize, handsFreeOnly, kind), all)
+  def pickRandom(
+      partySize: Option[Players],
+      handsFreeOnly: Boolean,
+      kind: Kind,
+      favouritesOnly: Boolean,
+      favourites: Set[String]
+  ): Activity =
+    val matching = orFallback(filtered(partySize, handsFreeOnly, kind, favouritesOnly, favourites), all)
     val pool = orFallback(matching.filterNot(a => lastPicked.contains(a.id)), matching)
     val pick = pool(Random.nextInt(pool.size))
     lastPicked = Some(pick.id)

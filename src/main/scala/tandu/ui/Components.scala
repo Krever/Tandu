@@ -131,7 +131,20 @@ object Components:
           onClick --> (_ => open.set(false))
         )
       ),
-      modal(aboutOpen, s(_.about.title), s(_.about.body)),
+      modal(
+        aboutOpen,
+        s(_.about.title),
+        s(_.about.body),
+        extraActions = Seq(
+          a(
+            cls := "btn btn--ghost",
+            href := "/privacy",
+            target := "_blank",
+            rel := "noopener noreferrer",
+            child.text <-- s(_.about.privacy)
+          )
+        )
+      ),
       modal(iosHelpOpen, s(_.installHelp.title), s(_.installHelp.body))
     )
 

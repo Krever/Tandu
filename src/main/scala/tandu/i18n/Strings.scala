@@ -72,7 +72,8 @@ object Strings:
   final case class About(
       open: String,
       title: String,
-      body: String
+      body: String,
+      privacy: String
   )
 
   /** Shown on iOS, where there is no install prompt — the user must add the
@@ -484,7 +485,8 @@ object Strings:
     about = About(
       open = "About",
       title = "About Tandu",
-      body = "Tandu is a little helper for picking something fun to do with the kids. Tap \"Suggest activity\" for a random idea, or browse the list. Some games are playable in the app, others are prompts for things you do offline — perfect for the car, the couch, or a rainy afternoon."
+      body = "Tandu is a little helper for picking something fun to do with the kids. Tap \"Suggest activity\" for a random idea, or browse the list. Some games are playable in the app, others are prompts for things you do offline — perfect for the car, the couch, or a rainy afternoon.",
+      privacy = "Privacy policy"
     ),
     installHelp = InstallHelp(
       title = "Add Tandu to your Home Screen",
@@ -885,7 +887,8 @@ object Strings:
     about = About(
       open = "O aplikacji",
       title = "O Tandu",
-      body = "Tandu to mały pomocnik, gdy szukacie pomysłu na zabawę z dziećmi. Stuknij „Zaproponuj zabawę\", żeby wylosować coś na chybił trafił, albo przeglądaj listę. Część gier zagrasz w aplikacji, inne to pomysły do zabawy offline — idealne do auta, na kanapę albo deszczowe popołudnie."
+      body = "Tandu to mały pomocnik, gdy szukacie pomysłu na zabawę z dziećmi. Stuknij „Zaproponuj zabawę\", żeby wylosować coś na chybił trafił, albo przeglądaj listę. Część gier zagrasz w aplikacji, inne to pomysły do zabawy offline — idealne do auta, na kanapę albo deszczowe popołudnie.",
+      privacy = "Polityka prywatności"
     ),
     installHelp = InstallHelp(
       title = "Dodaj Tandu do ekranu początkowego",
@@ -1286,7 +1289,8 @@ object Strings:
     about = About(
       open = "Acerca de",
       title = "Acerca de Tandu",
-      body = "Tandu es un pequeño ayudante para elegir algo divertido que hacer con los niños. Toca \"Sugerir actividad\" para una idea al azar, o explora la lista. Algunos juegos se juegan en la app, otros son ideas para hacer sin pantalla — perfectos para el coche, el sofá o una tarde lluviosa."
+      body = "Tandu es un pequeño ayudante para elegir algo divertido que hacer con los niños. Toca \"Sugerir actividad\" para una idea al azar, o explora la lista. Algunos juegos se juegan en la app, otros son ideas para hacer sin pantalla — perfectos para el coche, el sofá o una tarde lluviosa.",
+      privacy = "Política de privacidad"
     ),
     installHelp = InstallHelp(
       title = "Añade Tandu a la pantalla de inicio",
@@ -1687,7 +1691,8 @@ object Strings:
     about = About(
       open = "À propos",
       title = "À propos de Tandu",
-      body = "Tandu est un petit assistant pour choisir une activité amusante avec les enfants. Appuyez sur « Proposer une activité » pour une idée au hasard, ou parcourez la liste. Certains jeux se jouent dans l'application, d'autres sont des idées à faire hors-écran — parfaits pour la voiture, le canapé ou un après-midi pluvieux."
+      body = "Tandu est un petit assistant pour choisir une activité amusante avec les enfants. Appuyez sur « Proposer une activité » pour une idée au hasard, ou parcourez la liste. Certains jeux se jouent dans l'application, d'autres sont des idées à faire hors-écran — parfaits pour la voiture, le canapé ou un après-midi pluvieux.",
+      privacy = "Politique de confidentialité"
     ),
     installHelp = InstallHelp(
       title = "Ajoutez Tandu à l'écran d'accueil",
@@ -2088,7 +2093,8 @@ object Strings:
     about = About(
       open = "Über",
       title = "Über Tandu",
-      body = "Tandu ist ein kleiner Helfer, um etwas Lustiges mit den Kindern auszusuchen. Tippe auf „Aktivität vorschlagen\" für eine zufällige Idee oder stöbere in der Liste. Manche Spiele kannst du in der App spielen, andere sind Anregungen für Offline-Spaß — perfekt fürs Auto, das Sofa oder einen verregneten Nachmittag."
+      body = "Tandu ist ein kleiner Helfer, um etwas Lustiges mit den Kindern auszusuchen. Tippe auf „Aktivität vorschlagen\" für eine zufällige Idee oder stöbere in der Liste. Manche Spiele kannst du in der App spielen, andere sind Anregungen für Offline-Spaß — perfekt fürs Auto, das Sofa oder einen verregneten Nachmittag.",
+      privacy = "Datenschutz"
     ),
     installHelp = InstallHelp(
       title = "Tandu zum Home-Bildschirm hinzufügen",

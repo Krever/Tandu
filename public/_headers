@@ -4,3 +4,6 @@
   Cache-Control: no-cache
 /manifest.webmanifest
   Cache-Control: no-cache
+/.well-known/assetlinks.json
+  Content-Type: application/json
+  Cache-Control: no-cache

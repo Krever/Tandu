@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.tandu",
+      "sha256_cert_fingerprints": [
+        "DC:07:8F:94:19:54:5F:39:C6:DA:C7:AA:58:4B:AC:01:3E:98:E0:9D:BA:EB:2A:23:B2:A5:9A:7C:16:0E:AB:16"
+      ]
+    }
+  }
+]

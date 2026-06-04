@@ -268,8 +268,14 @@ object WordBuilder extends Activity:
     div(
       cls := "stack-lg",
       div(
-        cls := "wb-picture",
-        child.text <-- roundSig.map(_.entry.emoji)
+        cls := "wb-picture-row",
+        div(
+          cls := "wb-picture",
+          child.text <-- roundSig.map(_.entry.emoji)
+        ),
+        // Hear the word the picture stands for — the way in for a pre-reader
+        // who can't otherwise know what to spell.
+        Components.speakBtn(roundSig.map(_.entry.word))
       ),
       slotsView(roundSig, wrongSig, onRemove),
       poolView(roundSig, onPlace)
@@ -335,9 +341,13 @@ object WordBuilder extends Activity:
     div(
       cls := "stack-lg",
       div(
-        cls := "wb-word",
-        cls("wb-word--correct") <-- roundSig.map(_.isCorrect),
-        child.text <-- roundSig.map(_.target)
+        cls := "wb-word-row",
+        div(
+          cls := "wb-word",
+          cls("wb-word--correct") <-- roundSig.map(_.isCorrect),
+          child.text <-- roundSig.map(_.target)
+        ),
+        Components.speakBtn(roundSig.map(_.entry.word))
       ),
       picChoicesView(roundSig, wrongPickSig, onPick)
     )

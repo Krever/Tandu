@@ -4,6 +4,7 @@ import com.raquo.laminar.api.L.*
 import scala.util.Random
 import tandu.AppState
 import tandu.i18n.Strings
+import tandu.ui.Components
 import tandu.ui.Components.s
 
 object WouldYouRather extends Activity:
@@ -54,6 +55,11 @@ object WouldYouRather extends Activity:
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",
+        Components.speakBtn(
+          pair.signal.combineWith(AppState.strings).map { (a, b, str) =>
+            s"${str.wouldYouRather.prefix} $a, ${str.wouldYouRather.or} $b?"
+          }
+        ),
         button(
           cls := "btn btn--lg",
           child.text <-- s(_.wouldYouRather.next),

@@ -87,7 +87,8 @@ object Strings:
   final case class Menu(
       open: String,
       feedback: String,
-      language: String
+      language: String,
+      readAloud: String
   )
 
   final case class Mode(
@@ -274,7 +275,10 @@ object Strings:
       name: String,
       description: String,
       hint: String,
-      next: String
+      next: String,
+      // Spoken-only connector, read as "{category} {startingWith} {letter}"
+      // e.g. "Vegetables starting with letter J"
+      startingWith: String
   )
 
   final case class Solitaire(
@@ -417,7 +421,15 @@ object Strings:
       nextProblem: String,
       skip: String,
       printTitle: String,
-      printHint: String
+      printHint: String,
+      // Spoken-only words used to read a problem aloud (text-to-speech).
+      plus: String,
+      minus: String,
+      equals: String,
+      whatNumber: String,
+      // Connector for a comparison, read as "{a} {compare} {b}?"
+      // e.g. "8 is greater or less than 6?"
+      compare: String
   )
 
   final case class Clock(
@@ -518,7 +530,8 @@ object Strings:
     menu = Menu(
       open = "Menu",
       feedback = "Send feedback",
-      language = "Language"
+      language = "Language",
+      readAloud = "Read aloud"
     ),
     mode = Mode(
       choose = "How do you want to play?",
@@ -722,7 +735,8 @@ object Strings:
       name = "Categories",
       description = "Name things in a category, all starting with a given letter.",
       hint = "Take turns. Whoever stalls or repeats loses the round.",
-      next = "New round"
+      next = "New round",
+      startingWith = "starting with letter"
     ),
     solitaire = Solitaire(
       name = "Solitaire",
@@ -859,7 +873,12 @@ object Strings:
       nextProblem = "Next",
       skip = "Skip",
       printTitle = "Math Practice — worksheet",
-      printHint = "Pick a level, then print a sheet."
+      printHint = "Pick a level, then print a sheet.",
+      plus = "plus",
+      minus = "minus",
+      equals = "equals",
+      whatNumber = "what number",
+      compare = "is greater or less than"
     ),
     clock = Clock(
       name = "Clock",
@@ -941,7 +960,8 @@ object Strings:
     menu = Menu(
       open = "Menu",
       feedback = "Prześlij opinię",
-      language = "Język"
+      language = "Język",
+      readAloud = "Czytaj na głos"
     ),
     mode = Mode(
       choose = "Jak chcecie grać?",
@@ -1145,7 +1165,8 @@ object Strings:
       name = "Kategorie",
       description = "Wymieniajcie rzeczy z kategorii, wszystkie na podaną literę.",
       hint = "Po kolei. Kto się zatnie albo powtórzy — przegrywa rundę.",
-      next = "Nowa runda"
+      next = "Nowa runda",
+      startingWith = "na literę"
     ),
     solitaire = Solitaire(
       name = "Pasjans",
@@ -1282,7 +1303,12 @@ object Strings:
       nextProblem = "Następne",
       skip = "Pomiń",
       printTitle = "Matematyka — karta pracy",
-      printHint = "Wybierz poziom i wydrukuj kartę."
+      printHint = "Wybierz poziom i wydrukuj kartę.",
+      plus = "plus",
+      minus = "minus",
+      equals = "równa się",
+      whatNumber = "ile",
+      compare = "jest większe czy mniejsze niż"
     ),
     clock = Clock(
       name = "Zegar",
@@ -1364,7 +1390,8 @@ object Strings:
     menu = Menu(
       open = "Menú",
       feedback = "Enviar comentarios",
-      language = "Idioma"
+      language = "Idioma",
+      readAloud = "Leer en voz alta"
     ),
     mode = Mode(
       choose = "¿Cómo queréis jugar?",
@@ -1568,7 +1595,8 @@ object Strings:
       name = "Categorías",
       description = "Nombra cosas de una categoría, todas empezando por una letra dada.",
       hint = "Por turnos. Quien dude o repita pierde la ronda.",
-      next = "Nueva ronda"
+      next = "Nueva ronda",
+      startingWith = "que empiezan por la letra"
     ),
     solitaire = Solitaire(
       name = "Solitario",
@@ -1705,7 +1733,12 @@ object Strings:
       nextProblem = "Siguiente",
       skip = "Saltar",
       printTitle = "Matemáticas — hoja",
-      printHint = "Elige un nivel e imprime una hoja."
+      printHint = "Elige un nivel e imprime una hoja.",
+      plus = "más",
+      minus = "menos",
+      equals = "es igual a",
+      whatNumber = "qué número",
+      compare = "es mayor o menor que"
     ),
     clock = Clock(
       name = "Reloj",
@@ -1787,7 +1820,8 @@ object Strings:
     menu = Menu(
       open = "Menu",
       feedback = "Envoyer un avis",
-      language = "Langue"
+      language = "Langue",
+      readAloud = "Lecture à voix haute"
     ),
     mode = Mode(
       choose = "Comment voulez-vous jouer ?",
@@ -1991,7 +2025,8 @@ object Strings:
       name = "Catégories",
       description = "Nommez des choses d'une catégorie, toutes commençant par une lettre donnée.",
       hint = "Chacun son tour. Celui qui hésite ou répète perd la manche.",
-      next = "Nouvelle manche"
+      next = "Nouvelle manche",
+      startingWith = "commençant par la lettre"
     ),
     solitaire = Solitaire(
       name = "Solitaire",
@@ -2128,7 +2163,12 @@ object Strings:
       nextProblem = "Suivant",
       skip = "Passer",
       printTitle = "Maths — fiche",
-      printHint = "Choisis un niveau et imprime une fiche."
+      printHint = "Choisis un niveau et imprime une fiche.",
+      plus = "plus",
+      minus = "moins",
+      equals = "égale",
+      whatNumber = "quel nombre",
+      compare = "est plus grand ou plus petit que"
     ),
     clock = Clock(
       name = "Horloge",
@@ -2210,7 +2250,8 @@ object Strings:
     menu = Menu(
       open = "Menü",
       feedback = "Feedback senden",
-      language = "Sprache"
+      language = "Sprache",
+      readAloud = "Vorlesen"
     ),
     mode = Mode(
       choose = "Wie möchtet ihr spielen?",
@@ -2414,7 +2455,8 @@ object Strings:
       name = "Kategorien",
       description = "Nenne Dinge aus einer Kategorie, alle mit einem vorgegebenen Anfangsbuchstaben.",
       hint = "Reihum. Wer stockt oder wiederholt, verliert die Runde.",
-      next = "Neue Runde"
+      next = "Neue Runde",
+      startingWith = "mit dem Buchstaben"
     ),
     solitaire = Solitaire(
       name = "Solitär",
@@ -2551,7 +2593,12 @@ object Strings:
       nextProblem = "Weiter",
       skip = "Überspringen",
       printTitle = "Rechnen — Arbeitsblatt",
-      printHint = "Stufe wählen und Blatt drucken."
+      printHint = "Stufe wählen und Blatt drucken.",
+      plus = "plus",
+      minus = "minus",
+      equals = "ist gleich",
+      whatNumber = "welche Zahl",
+      compare = "ist größer oder kleiner als"
     ),
     clock = Clock(
       name = "Uhr",

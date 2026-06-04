@@ -265,8 +265,12 @@ object MathPractice extends Activity:
     div(
       cls := "stack-lg",
       div(
-        cls := "mp-prompt center",
-        child.text <-- task.signal.combineWith(AppState.strings).map { (t, str) => t.prompt(str) }
+        cls := "mp-prompt-row",
+        child <-- task.signal.combineWith(AppState.strings).map { (t, str) =>
+          spoken(t, str) match
+            case Some(txt) => Components.speakBtn(Val(txt))
+            case None      => emptyNode
+        }
       ),
       div(
         cls := "mp-stem",
@@ -319,6 +323,32 @@ object MathPractice extends Activity:
           )
       }
     )
+
+  // ---------- speech ----------
+
+  /** What to read aloud for a task — the numbers on screen, not the (visible,
+    * obvious) instruction. Returns None where the only number present is the
+    * answer the child must produce, so speech never gives the game away:
+    *   - Count: a group of pictures to tally — saying the count is the answer.
+    *   - Pictorial compare: the two counts ARE the comparison.
+    * Everything else has numbers that are part of the question, safe to voice. */
+  private def spoken(t: Task, str: Strings): Option[String] = t.stem match
+    case Stem.Expression(text)          => Some(exprToSpeech(text, str))
+    case Stem.ShowNumeral(n)            => Some(n.toString)
+    case Stem.TwoNumerals(a, b)         => Some(s"$a ${str.mathPractice.compare} $b?")
+    case Stem.TwoGroups(a, b, Some(op)) => Some(exprToSpeech(s"${a.count} $op ${b.count}", str))
+    case Stem.ShowGroup(_)              => None
+    case Stem.TwoGroups(_, _, None)     => None
+
+  private def exprToSpeech(text: String, str: Strings): String =
+    val mp = str.mathPractice
+    text
+      .replace("+", s" ${mp.plus} ")
+      .replace("−", s" ${mp.minus} ")
+      .replace("=", s" ${mp.equals} ")
+      .replace("?", s" ${mp.whatNumber} ")
+      .replaceAll("\\s+", " ")
+      .trim
 
   private def stemNode(stem: Stem): HtmlElement = stem match
     case Stem.Expression(text) =>

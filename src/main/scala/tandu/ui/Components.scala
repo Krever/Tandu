@@ -2,6 +2,7 @@ package tandu.ui
 
 import com.raquo.laminar.api.L.*
 import tandu.{AppState, Page, Pwa, Routing}
+import tandu.audio.Speech
 import tandu.i18n.{Lang, Strings}
 
 object Components:
@@ -255,6 +256,29 @@ object Components:
       onClick --> (_ => onTap)
     )
 
+  /** Round "tap to hear" button. Speaks the current value of `text` in the
+    * active language. Hidden when the browser can't synthesize speech, so call
+    * sites can place it unconditionally. `no-print` keeps it off worksheets. */
+  def speakBtn(text: Signal[String]): HtmlElement =
+    button(
+      cls := "speak-btn no-print",
+      tpe := "button",
+      aria.label <-- s(_.menu.readAloud),
+      hidden := !Speech.supported,
+      svg.svg(
+        svg.cls := "speak-btn__icon",
+        svg.viewBox := "0 0 24 24",
+        svg.fill := "none",
+        svg.stroke := "currentColor",
+        svg.strokeWidth := "2",
+        svg.strokeLineCap := "round",
+        svg.strokeLineJoin := "round",
+        iconSpeaker
+      ),
+      onClick.stopPropagation.compose(_.sample(text)) -->
+        (value => Speech.speak(value, AppState.lang.now()))
+    )
+
   def s(f: Strings => String): Signal[String] = AppState.strings.map(f)
 
   def modal(
@@ -316,6 +340,13 @@ object Components:
     nodeSeq(
       svg.rect(svg.x := "3", svg.y := "5", svg.width := "18", svg.height := "14", svg.rx := "2"),
       svg.path(svg.d := "M3 7l9 6 9-6")
+    )
+
+  private val iconSpeaker: Modifier[SvgElement] =
+    nodeSeq(
+      svg.path(svg.d := "M11 5L6 9H3v6h3l5 4V5z"),
+      svg.path(svg.d := "M15.5 8.5a5 5 0 0 1 0 7"),
+      svg.path(svg.d := "M18.5 6a8 8 0 0 1 0 12")
     )
 
   private val iconGithub: Modifier[SvgElement] =

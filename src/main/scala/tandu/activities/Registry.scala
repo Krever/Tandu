@@ -39,8 +39,13 @@ object Registry:
       favouritesOnly: Boolean,
       favourites: Set[String]
   ): Activity =
-    val matching = orFallback(filtered(partySize, handsFreeOnly, kind, favouritesOnly, favourites), all)
-    val pool = orFallback(matching.filterNot(a => lastPicked.contains(a.id)), matching)
-    val pick = pool(Random.nextInt(pool.size))
+    pickRandom(filtered(partySize, handsFreeOnly, kind, favouritesOnly, favourites))
+
+  /** Pick from an already-filtered pool, avoiding the previous draw. Lets a
+    * caller that also needs the pool (e.g. the suggest reel) filter just once. */
+  def pickRandom(pool: List[Activity]): Activity =
+    val matching = orFallback(pool, all)
+    val choices  = orFallback(matching.filterNot(a => lastPicked.contains(a.id)), matching)
+    val pick     = choices(Random.nextInt(choices.size))
     lastPicked = Some(pick.id)
     pick

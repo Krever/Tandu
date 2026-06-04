@@ -2,6 +2,7 @@ package tandu.activities
 
 import com.raquo.laminar.api.L.*
 import tandu.AppState
+import tandu.audio.Speech
 import tandu.i18n.{Lang, Strings}
 import tandu.tools.Timer
 import tandu.ui.{Components, Mode, ModeChooser, Printable}
@@ -132,8 +133,7 @@ object Categories extends Activity:
         styleAttr := "justify-content: center;",
         Components.speakBtn(
           round.signal.combineWith(AppState.strings).map { (r, str) =>
-            // Lower-case the letter for speech, else it's read as "capital J".
-            s"${r.prompt} ${str.categoriesGame.startingWith} ${r.letter.toLower}"
+            s"${r.prompt} ${str.categoriesGame.startingWith} ${Speech.spokenLetter(r.letter)}"
           }
         ),
         button(

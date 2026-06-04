@@ -69,8 +69,8 @@ object HomePage:
                   val k       = kindFilter.now()
                   val favOnly = favouritesOnly.now()
                   val favs    = favourites.now()
-                  val pick    = Registry.pickRandom(p, hf, k, favOnly, favs)
                   val pool    = Registry.filtered(p, hf, k, favOnly, favs)
+                  val pick    = Registry.pickRandom(pool)
                   spin.set(Some(SuggestSpin.build(pool, pick)))
                 }
               )

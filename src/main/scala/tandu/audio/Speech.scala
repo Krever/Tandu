@@ -50,6 +50,10 @@ object Speech:
         catch case _: Throwable => ()
     }
 
+  /** A single letter as it should be fed to speech synthesis: lower-cased, so
+    * an upper-case "J" isn't read aloud as "capital J". */
+  def spokenLetter(c: Char): String = c.toLower.toString
+
   /** Stop any ongoing speech (e.g. on round change or unmount). */
   def cancel(): Unit =
     synth.foreach(s => try s.cancel() catch case _: Throwable => ())

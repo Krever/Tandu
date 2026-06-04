@@ -3,6 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.AppState
 import tandu.i18n.{Lang, Strings}
+import tandu.audio.Speech
 import tandu.ui.Components
 import tandu.ui.Components.s
 
@@ -38,8 +39,7 @@ object LastLetter extends Activity:
       div(
         cls := "row no-print",
         styleAttr := "justify-content: center;",
-        // Lower-case for speech: a bare "O" is read as "capital O".
-        Components.speakBtn(letter.signal.map(_.toLower.toString)),
+        Components.speakBtn(letter.signal.map(Speech.spokenLetter)),
         button(
           cls := "btn btn--lg",
           child.text <-- s(_.lastLetter.newLetter),

@@ -1967,6 +1967,58 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   75% { transform: translateX(-3px); }
 }
 
+/* Clock — telling the time */
+.clock-format {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.clock-format__label {
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.clock-digital {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.clock-choice-time {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.clock-analog { display: inline-flex; }
+.clock-dial { display: block; }
+/* SVG text honours CSS font/anchor via the wrapper. */
+.clock-dial text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  fill: var(--color-text);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.clock-daypart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+.clock-daypart__emoji { font-size: 34px; line-height: 1; }
+.clock-daypart__label { font-size: 16px; }
+
 /* Math print worksheet */
 .mp-print-sheet { display: flex; flex-direction: column; gap: 12px; }
 .mp-print-row {

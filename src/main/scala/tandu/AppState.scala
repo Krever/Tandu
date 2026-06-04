@@ -1,7 +1,7 @@
 package tandu
 
 import com.raquo.laminar.api.L.*
-import tandu.activities.Players
+import tandu.activities.{ClockFormat, Players}
 import tandu.i18n.{Lang, Strings}
 
 object AppState:
@@ -15,6 +15,11 @@ object AppState:
 
   val favourites: Var[Set[String]] = Var(Storage.loadFavourites())
   val favouritesOnly: Var[Boolean] = Var(Storage.loadFavouritesOnly())
+
+  // Digital-clock notation, shared across the app and persisted. 12-hour is the
+  // usual starting point for kids learning to tell the time.
+  val clockFormat: Var[ClockFormat] =
+    Var(Storage.loadClockFormat().flatMap(ClockFormat.fromString).getOrElse(ClockFormat.H12))
 
   def toggleFavourite(id: String): Unit =
     favourites.update(s => if s.contains(id) then s - id else s + id)
@@ -32,3 +37,5 @@ object AppState:
 
   val _ = favourites.signal.foreach(Storage.saveFavourites)(using unsafeWindowOwner)
   val _ = favouritesOnly.signal.foreach(Storage.saveFavouritesOnly)(using unsafeWindowOwner)
+
+  val _ = clockFormat.signal.foreach(f => Storage.saveClockFormat(f.toString))(using unsafeWindowOwner)

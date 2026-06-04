@@ -27,7 +27,15 @@ object ActivityVisual:
     "last-letter"      -> Visual("Z",  "peach"),
     "would-you-rather" -> Visual("⇆",  "sky"),
     "word-builder"     -> Visual("🔤", "teal"),
-    "math-practice"    -> Visual("➕", "mustard")
+    "math-practice"    -> Visual("➕", "mustard"),
+    "clock"            -> Visual("🕐", "sky"),
+    "reading"          -> Visual("📖", "plum")
   )
 
-  def get(id: String): Visual = byId.getOrElse(id, Visual("✦", "teal"))
+  // Every catalog activity must declare a visual. Validated eagerly so a new
+  // activity without an entry fails loudly at startup rather than silently
+  // rendering a shared fallback glyph.
+  private val missing: List[String] = Registry.all.map(_.id).filterNot(byId.contains)
+  require(missing.isEmpty, s"Activities missing an ActivityVisual entry: ${missing.mkString(", ")}")
+
+  def get(id: String): Visual = byId(id)

@@ -8,6 +8,7 @@ object Storage:
   private val KeyKind           = "tandu.kind"
   private val KeyFavourites     = "tandu.favourites"
   private val KeyFavouritesOnly = "tandu.favouritesOnly"
+  private val KeyClockFormat    = "tandu.clockFormat"
 
   def getString(key: String): Option[String] =
     Try(Option(dom.window.localStorage.getItem(key))).toOption.flatten
@@ -30,3 +31,6 @@ object Storage:
 
   def loadFavouritesOnly(): Boolean         = getString(KeyFavouritesOnly).contains("true")
   def saveFavouritesOnly(value: Boolean): Unit = setString(KeyFavouritesOnly, value.toString)
+
+  def loadClockFormat(): Option[String]    = getString(KeyClockFormat)
+  def saveClockFormat(value: String): Unit = setString(KeyClockFormat, value)

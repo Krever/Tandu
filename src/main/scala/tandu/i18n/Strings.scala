@@ -31,6 +31,7 @@ final case class Strings(
     minesweeper: Strings.Minesweeper,
     wordBuilder: Strings.WordBuilder,
     mathPractice: Strings.MathPractice,
+    clock: Strings.Clock,
     reading: Strings.Reading
 )
 
@@ -417,6 +418,28 @@ object Strings:
       skip: String,
       printTitle: String,
       printHint: String
+  )
+
+  final case class Clock(
+      name: String,
+      description: String,
+      matchName: String,
+      matchDesc: String,
+      todName: String,
+      todDesc: String,
+      formatLabel: String,
+      format12: String,
+      format24: String,
+      whatTime: String,
+      pickClock: String,
+      partOfDay: String,
+      morning: String,
+      afternoon: String,
+      evening: String,
+      night: String,
+      correct: String,
+      next: String,
+      skip: String
   )
 
   final case class Reading(
@@ -838,6 +861,27 @@ object Strings:
       printTitle = "Math Practice — worksheet",
       printHint = "Pick a level, then print a sheet."
     ),
+    clock = Clock(
+      name = "Clock",
+      description = "Tell the time on a clock.",
+      matchName = "Read the clock",
+      matchDesc = "Match analog and digital, to the quarter hour.",
+      todName = "Part of the day",
+      todDesc = "Name the part of the day from the time.",
+      formatLabel = "Clock",
+      format12 = "12-hour",
+      format24 = "24-hour",
+      whatTime = "What time is it?",
+      pickClock = "Pick the matching clock",
+      partOfDay = "What part of the day?",
+      morning = "Morning",
+      afternoon = "Afternoon",
+      evening = "Evening",
+      night = "Night",
+      correct = "Well done!",
+      next = "Next",
+      skip = "Skip"
+    ),
     reading = Reading(
       name = "Reading",
       description = "Read a classic together.",
@@ -1239,6 +1283,27 @@ object Strings:
       skip = "Pomiń",
       printTitle = "Matematyka — karta pracy",
       printHint = "Wybierz poziom i wydrukuj kartę."
+    ),
+    clock = Clock(
+      name = "Zegar",
+      description = "Odczytuj godziny z zegara.",
+      matchName = "Odczytaj zegar",
+      matchDesc = "Dopasuj zegar wskazówkowy i cyfrowy, co kwadrans.",
+      todName = "Pora dnia",
+      todDesc = "Nazwij porę dnia na podstawie godziny.",
+      formatLabel = "Zegar",
+      format12 = "12-godzinny",
+      format24 = "24-godzinny",
+      whatTime = "Która godzina?",
+      pickClock = "Wybierz pasujący zegar",
+      partOfDay = "Jaka to pora dnia?",
+      morning = "Rano",
+      afternoon = "Popołudnie",
+      evening = "Wieczór",
+      night = "Noc",
+      correct = "Brawo!",
+      next = "Dalej",
+      skip = "Pomiń"
     ),
     reading = Reading(
       name = "Czytanie",
@@ -1642,6 +1707,27 @@ object Strings:
       printTitle = "Matemáticas — hoja",
       printHint = "Elige un nivel e imprime una hoja."
     ),
+    clock = Clock(
+      name = "Reloj",
+      description = "Aprende a leer la hora.",
+      matchName = "Lee el reloj",
+      matchDesc = "Relaciona analógico y digital, en cuartos de hora.",
+      todName = "Parte del día",
+      todDesc = "Nombra la parte del día según la hora.",
+      formatLabel = "Reloj",
+      format12 = "12 horas",
+      format24 = "24 horas",
+      whatTime = "¿Qué hora es?",
+      pickClock = "Elige el reloj correcto",
+      partOfDay = "¿Qué parte del día es?",
+      morning = "Mañana",
+      afternoon = "Tarde",
+      evening = "Atardecer",
+      night = "Noche",
+      correct = "¡Muy bien!",
+      next = "Siguiente",
+      skip = "Saltar"
+    ),
     reading = Reading(
       name = "Hora de leer",
       description = "Lee un clásico juntos.",
@@ -2044,6 +2130,27 @@ object Strings:
       printTitle = "Maths — fiche",
       printHint = "Choisis un niveau et imprime une fiche."
     ),
+    clock = Clock(
+      name = "Horloge",
+      description = "Apprends à lire l'heure.",
+      matchName = "Lis l'horloge",
+      matchDesc = "Associe l'analogique et le numérique, au quart d'heure.",
+      todName = "Moment de la journée",
+      todDesc = "Nomme le moment de la journée d'après l'heure.",
+      formatLabel = "Horloge",
+      format12 = "12 heures",
+      format24 = "24 heures",
+      whatTime = "Quelle heure est-il ?",
+      pickClock = "Choisis la bonne horloge",
+      partOfDay = "Quel moment de la journée ?",
+      morning = "Matin",
+      afternoon = "Après-midi",
+      evening = "Soir",
+      night = "Nuit",
+      correct = "Bravo !",
+      next = "Suivant",
+      skip = "Passer"
+    ),
     reading = Reading(
       name = "L'heure de la lecture",
       description = "Lisez un classique ensemble.",
@@ -2445,6 +2552,27 @@ object Strings:
       skip = "Überspringen",
       printTitle = "Rechnen — Arbeitsblatt",
       printHint = "Stufe wählen und Blatt drucken."
+    ),
+    clock = Clock(
+      name = "Uhr",
+      description = "Lerne, die Uhr zu lesen.",
+      matchName = "Lies die Uhr",
+      matchDesc = "Verbinde analog und digital, im Viertelstundentakt.",
+      todName = "Tageszeit",
+      todDesc = "Benenne die Tageszeit anhand der Uhrzeit.",
+      formatLabel = "Uhr",
+      format12 = "12-Stunden",
+      format24 = "24-Stunden",
+      whatTime = "Wie spät ist es?",
+      pickClock = "Wähle die passende Uhr",
+      partOfDay = "Welche Tageszeit?",
+      morning = "Morgen",
+      afternoon = "Nachmittag",
+      evening = "Abend",
+      night = "Nacht",
+      correct = "Gut gemacht!",
+      next = "Weiter",
+      skip = "Überspringen"
     ),
     reading = Reading(
       name = "Lesezeit",

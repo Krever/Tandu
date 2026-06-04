@@ -15,6 +15,8 @@ object Battleships extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = 2
   val handsFree: Boolean = false
+  val glyph: String = "⊕"
+  val tint: String = "vermilion"
 
   // ---------- pass-and-play state ----------
 

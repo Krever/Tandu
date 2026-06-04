@@ -19,6 +19,8 @@ object Reading extends Activity:
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = false
+  val glyph: String = "📖"
+  val tint: String = "plum"
 
   def render(): HtmlElement =
     div(

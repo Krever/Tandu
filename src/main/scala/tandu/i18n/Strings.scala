@@ -32,7 +32,9 @@ final case class Strings(
     wordBuilder: Strings.WordBuilder,
     mathPractice: Strings.MathPractice,
     clock: Strings.Clock,
-    reading: Strings.Reading
+    reading: Strings.Reading,
+    memoryChain: Strings.MemoryChain,
+    iSpy: Strings.ISpy
 )
 
 object Strings:
@@ -68,7 +70,9 @@ object Strings:
       favourites: String,
       addToFavourites: String,
       removeFromFavourites: String,
-      noFavouritesYet: String
+      noFavouritesYet: String,
+      searchPlaceholder: String,
+      noMatches: String
   )
 
   final case class About(
@@ -359,6 +363,26 @@ object Strings:
       newLetter: String
   )
 
+  final case class MemoryChain(
+      name: String,
+      description: String,
+      hint: String,
+      newTheme: String
+  )
+
+  final case class ISpy(
+      name: String,
+      description: String,
+      hint: String,
+      howTitle: String,
+      step1: String,
+      step2: String,
+      step3: String,
+      tipsTitle: String,
+      tip1: String,
+      tip2: String
+  )
+
   final case class WouldYouRather(
       name: String,
       description: String,
@@ -517,7 +541,9 @@ object Strings:
       favourites = "Favourites",
       addToFavourites = "Add to favourites",
       removeFromFavourites = "Remove from favourites",
-      noFavouritesYet = "Tap the star on any activity to save it as a favourite."
+      noFavouritesYet = "Tap the star on any activity to save it as a favourite.",
+      searchPlaceholder = "Search activities…",
+      noMatches = "No activities match your search."
     ),
     about = About(
       open = "About",
@@ -913,6 +939,24 @@ object Strings:
       bandPicture = "Ages 3–6",
       bandChapter = "Ages 5–9",
       bandOlder = "Ages 8+"
+    ),
+    memoryChain = MemoryChain(
+      name = "Memory train",
+      description = "Repeat the whole list, then add one more.",
+      hint = "Take turns. Each player repeats everything said so far, in order, then adds one new thing. Break the chain and you're out.",
+      newTheme = "New theme"
+    ),
+    iSpy = ISpy(
+      name = "I Spy",
+      description = "Spot something nearby and give one clue.",
+      hint = "A looking game — best with things you can all see right now.",
+      howTitle = "How to play",
+      step1 = "One player secretly picks something everyone can see.",
+      step2 = "They give one clue, like \"I spy something red\".",
+      step3 = "The others guess out loud. First to get it picks the next thing.",
+      tipsTitle = "Clue ideas",
+      tip1 = "By colour, shape, size or what it's made of.",
+      tip2 = "Or by first letter: \"…something beginning with B\"."
     )
   )
 
@@ -948,7 +992,9 @@ object Strings:
       favourites = "Ulubione",
       addToFavourites = "Dodaj do ulubionych",
       removeFromFavourites = "Usuń z ulubionych",
-      noFavouritesYet = "Dotknij gwiazdki przy aktywności, aby zapisać ją jako ulubioną."
+      noFavouritesYet = "Dotknij gwiazdki przy aktywności, aby zapisać ją jako ulubioną.",
+      searchPlaceholder = "Szukaj zabaw…",
+      noMatches = "Brak zabaw pasujących do wyszukiwania."
     ),
     about = About(
       open = "O aplikacji",
@@ -1344,6 +1390,24 @@ object Strings:
       bandPicture = "3–6 lat",
       bandChapter = "5–9 lat",
       bandOlder = "8+ lat"
+    ),
+    memoryChain = MemoryChain(
+      name = "Pociąg pamięci",
+      description = "Powtórz całą listę i dodaj jedną rzecz.",
+      hint = "Gracie po kolei. Każdy powtarza po kolei wszystko, co już padło, i dodaje jedną nową rzecz. Pomylisz kolejność — odpadasz.",
+      newTheme = "Nowy temat"
+    ),
+    iSpy = ISpy(
+      name = "Widzę coś",
+      description = "Wypatrz coś w pobliżu i podaj jedną wskazówkę.",
+      hint = "Gra na spostrzegawczość — najlepiej z rzeczami, które wszyscy teraz widzicie.",
+      howTitle = "Jak grać",
+      step1 = "Jeden gracz po cichu wybiera coś, co wszyscy widzą.",
+      step2 = "Podaje jedną wskazówkę, np. „Widzę coś czerwonego”.",
+      step3 = "Reszta zgaduje na głos. Kto trafi pierwszy, wybiera następną rzecz.",
+      tipsTitle = "Pomysły na wskazówki",
+      tip1 = "Po kolorze, kształcie, wielkości albo z czego jest zrobione.",
+      tip2 = "Albo po pierwszej literze: „…coś na literę B”."
     )
   )
 
@@ -1379,7 +1443,9 @@ object Strings:
       favourites = "Favoritos",
       addToFavourites = "Añadir a favoritos",
       removeFromFavourites = "Quitar de favoritos",
-      noFavouritesYet = "Toca la estrella en una actividad para guardarla como favorita."
+      noFavouritesYet = "Toca la estrella en una actividad para guardarla como favorita.",
+      searchPlaceholder = "Buscar actividades…",
+      noMatches = "Ninguna actividad coincide con tu búsqueda."
     ),
     about = About(
       open = "Acerca de",
@@ -1775,6 +1841,24 @@ object Strings:
       bandPicture = "3–6 años",
       bandChapter = "5–9 años",
       bandOlder = "8+ años"
+    ),
+    memoryChain = MemoryChain(
+      name = "Tren de memoria",
+      description = "Repite toda la lista y añade una cosa más.",
+      hint = "Por turnos. Cada jugador repite en orden todo lo dicho y añade algo nuevo. Si rompes la cadena, quedas fuera.",
+      newTheme = "Nuevo tema"
+    ),
+    iSpy = ISpy(
+      name = "Veo veo",
+      description = "Fíjate en algo cercano y da una pista.",
+      hint = "Un juego de observación — mejor con cosas que todos podáis ver ahora.",
+      howTitle = "Cómo se juega",
+      step1 = "Un jugador elige en secreto algo que todos puedan ver.",
+      step2 = "Da una sola pista, como «Veo algo rojo».",
+      step3 = "Los demás adivinan en voz alta. Quien acierte primero elige lo siguiente.",
+      tipsTitle = "Ideas de pistas",
+      tip1 = "Por color, forma, tamaño o material.",
+      tip2 = "O por la primera letra: «…algo que empieza por B»."
     )
   )
 
@@ -1810,7 +1894,9 @@ object Strings:
       favourites = "Favoris",
       addToFavourites = "Ajouter aux favoris",
       removeFromFavourites = "Retirer des favoris",
-      noFavouritesYet = "Touchez l'étoile sur une activité pour l'enregistrer comme favorite."
+      noFavouritesYet = "Touchez l'étoile sur une activité pour l'enregistrer comme favorite.",
+      searchPlaceholder = "Rechercher une activité…",
+      noMatches = "Aucune activité ne correspond à votre recherche."
     ),
     about = About(
       open = "À propos",
@@ -2206,6 +2292,24 @@ object Strings:
       bandPicture = "3–6 ans",
       bandChapter = "5–9 ans",
       bandOlder = "8+ ans"
+    ),
+    memoryChain = MemoryChain(
+      name = "Le train de la mémoire",
+      description = "Répète toute la liste, puis ajoute un élément.",
+      hint = "Chacun son tour. Chaque joueur répète tout ce qui a été dit, dans l'ordre, puis ajoute une nouvelle chose. Casse la chaîne et tu es éliminé.",
+      newTheme = "Nouveau thème"
+    ),
+    iSpy = ISpy(
+      name = "Je vois, je vois",
+      description = "Repère un objet autour de toi et donne un indice.",
+      hint = "Un jeu d'observation — idéal avec des choses que vous voyez tous maintenant.",
+      howTitle = "Comment jouer",
+      step1 = "Un joueur choisit en secret une chose que tout le monde peut voir.",
+      step2 = "Il donne un seul indice, comme « Je vois quelque chose de rouge ».",
+      step3 = "Les autres devinent à voix haute. Le premier qui trouve choisit ensuite.",
+      tipsTitle = "Idées d'indices",
+      tip1 = "Par couleur, forme, taille ou matière.",
+      tip2 = "Ou par première lettre : « …quelque chose qui commence par B »."
     )
   )
 
@@ -2241,7 +2345,9 @@ object Strings:
       favourites = "Favoriten",
       addToFavourites = "Zu Favoriten hinzufügen",
       removeFromFavourites = "Aus Favoriten entfernen",
-      noFavouritesYet = "Tippe auf den Stern bei einer Aktivität, um sie als Favorit zu speichern."
+      noFavouritesYet = "Tippe auf den Stern bei einer Aktivität, um sie als Favorit zu speichern.",
+      searchPlaceholder = "Aktivitäten suchen…",
+      noMatches = "Keine Aktivitäten passen zu deiner Suche."
     ),
     about = About(
       open = "Über",
@@ -2637,6 +2743,24 @@ object Strings:
       bandPicture = "3–6 Jahre",
       bandChapter = "5–9 Jahre",
       bandOlder = "8+ Jahre"
+    ),
+    memoryChain = MemoryChain(
+      name = "Gedächtniszug",
+      description = "Wiederhole die ganze Liste und füge eine Sache hinzu.",
+      hint = "Reihum. Jeder wiederholt der Reihe nach alles bisher Gesagte und fügt eine neue Sache hinzu. Wer die Kette unterbricht, scheidet aus.",
+      newTheme = "Neues Thema"
+    ),
+    iSpy = ISpy(
+      name = "Ich sehe was",
+      description = "Entdecke etwas in der Nähe und gib einen Hinweis.",
+      hint = "Ein Suchspiel — am besten mit Dingen, die ihr alle gerade sehen könnt.",
+      howTitle = "So wird gespielt",
+      step1 = "Ein Spieler wählt heimlich etwas, das alle sehen können.",
+      step2 = "Er gibt einen Hinweis, zum Beispiel „Ich sehe etwas Rotes“.",
+      step3 = "Die anderen raten laut. Wer zuerst richtig liegt, ist als Nächstes dran.",
+      tipsTitle = "Hinweis-Ideen",
+      tip1 = "Nach Farbe, Form, Größe oder Material.",
+      tip2 = "Oder nach dem ersten Buchstaben: „…etwas mit B“."
     )
   )
 

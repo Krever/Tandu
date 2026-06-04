@@ -13,20 +13,21 @@ object WordAssociation extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = true
-
-  private def pickWord(lang: Lang, avoid: Option[String]): String =
-    Picker.pickAvoiding(WordBank.forLang(lang), avoid)
+  val glyph: String = "≈"
+  val tint: String = "rose"
 
   def render(): HtmlElement =
-    val currentWord: Var[String] = Var(pickWord(AppState.lang.now(), avoid = None))
+    val roller = new Roller[String]
+    def pick(lang: Lang): String = roller.next(WordBank.forLang(lang))
 
-    def next(): Unit =
-      currentWord.update(prev => pickWord(AppState.lang.now(), avoid = Some(prev)))
+    val currentWord: Var[String] = Var(pick(AppState.lang.now()))
+
+    def next(): Unit = currentWord.set(pick(AppState.lang.now()))
 
     // If the user switches language while on the page, draw a fresh
     // seed word from the new language's bank.
     val langChange = AppState.lang.signal.changes --> { lang =>
-      currentWord.set(pickWord(lang, avoid = None))
+      currentWord.set(pick(lang))
     }
 
     div(

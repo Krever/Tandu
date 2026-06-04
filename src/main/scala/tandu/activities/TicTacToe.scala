@@ -13,6 +13,8 @@ object TicTacToe extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = 2
   val handsFree: Boolean = false
+  val glyph: String = "✕"
+  val tint: String = "rose"
 
   enum Mark:
     case X, O

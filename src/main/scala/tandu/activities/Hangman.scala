@@ -13,6 +13,8 @@ object Hangman extends Activity:
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = false
+  val glyph: String = "Ⓐ"
+  val tint: String = "peach"
 
   val DefaultLives: Int = 6
   private val LivesOptions: List[Int] = List(4, 6, 8, 10)
@@ -29,9 +31,9 @@ object Hangman extends Activity:
     def won: Boolean = word.forall(c => !c.isLetter || guesses.contains(c))
     def finished: Boolean = lost || won
 
-  private def newState(lang: Lang, avoid: Option[String], maxWrong: Int): State =
+  private def newState(word: String, maxWrong: Int): State =
     State(
-      display  = Picker.pickAvoiding(HangmanBank.wordsFor(lang), avoid),
+      display  = word,
       guesses  = Set.empty,
       wrong    = 0,
       maxWrong = maxWrong
@@ -54,17 +56,19 @@ object Hangman extends Activity:
     ))
 
   private def renderKeeper(): HtmlElement =
-    val word    = Var(Picker.pickAvoiding(HangmanBank.wordsFor(AppState.lang.now()), None))
+    val roller  = new Roller[String]
+    def pick(lang: Lang): String = roller.next(HangmanBank.wordsFor(lang))
+
+    val word    = Var(pick(AppState.lang.now()))
     val shown   = Var(false)
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      word.set(Picker.pickAvoiding(HangmanBank.wordsFor(lang), None))
+      word.set(pick(lang))
       shown.set(false)
     }
 
     def nextWord(): Unit =
-      val w = word.now()
-      word.set(Picker.pickAvoiding(HangmanBank.wordsFor(AppState.lang.now()), Some(w)))
+      word.set(pick(AppState.lang.now()))
       shown.set(false)
 
     div(
@@ -107,8 +111,11 @@ object Hangman extends Activity:
     )
 
   private def renderPlay(): HtmlElement =
+    val roller = new Roller[String]
+    def pick(lang: Lang): String = roller.next(HangmanBank.wordsFor(lang))
+
     val lives: Var[Int]   = Var(DefaultLives)
-    val state: Var[State] = Var(newState(AppState.lang.now(), avoid = None, maxWrong = lives.now()))
+    val state: Var[State] = Var(newState(pick(AppState.lang.now()), lives.now()))
 
     def guess(c: Char): Unit =
       val cur = state.now()
@@ -124,14 +131,14 @@ object Hangman extends Activity:
           ))
 
     def nextWord(): Unit =
-      state.set(newState(AppState.lang.now(), avoid = Some(state.now().display), maxWrong = lives.now()))
+      state.set(newState(pick(AppState.lang.now()), lives.now()))
 
     def setLives(n: Int): Unit =
       lives.set(n)
-      state.set(newState(AppState.lang.now(), avoid = Some(state.now().display), maxWrong = n))
+      state.set(newState(pick(AppState.lang.now()), n))
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      state.set(newState(lang, avoid = None, maxWrong = lives.now()))
+      state.set(newState(pick(lang), lives.now()))
     }
 
     val lettersSig: Signal[Vector[Char]] =

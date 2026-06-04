@@ -16,6 +16,8 @@ object WordBuilder extends Activity:
   val minPlayers: Int = 1
   val maxPlayers: Int = 1
   val handsFree: Boolean = false
+  val glyph: String = "🔤"
+  val tint: String = "teal"
   override val kind: Kind = Kind.Learn
 
   // ---------- model ----------
@@ -65,9 +67,9 @@ object WordBuilder extends Activity:
 
   // ---------- round generation ----------
 
-  private def buildRound(lang: Lang, level: Level, avoid: Option[WordBuilderBank.Entry]): Round =
+  private def buildRound(roller: Roller[WordBuilderBank.Entry], lang: Lang, level: Level): Round =
     val pool  = WordBuilderBank.entriesInRange(lang, level.minLen, level.maxLen)
-    val entry = Picker.pickAvoiding(pool, avoid)
+    val entry = roller.next(pool)
     randomRound(lang, level, entry, pool)
 
   private def randomRound(
@@ -170,12 +172,13 @@ object WordBuilder extends Activity:
     )
 
   private def playForLevel(level: Level): HtmlElement =
-    val round: Var[Round] = Var(buildRound(AppState.lang.now(), level, avoid = None))
+    val roller = new Roller[WordBuilderBank.Entry]
+    val round: Var[Round] = Var(buildRound(roller, AppState.lang.now(), level))
     val wrongFlash: Var[Boolean] = Var(false)
     val wrongPick: Var[Option[Int]] = Var(None)
 
     def newRound(): Unit =
-      round.set(buildRound(AppState.lang.now(), level, avoid = Some(round.now().entry)))
+      round.set(buildRound(roller, AppState.lang.now(), level))
       wrongFlash.set(false)
       wrongPick.set(None)
 
@@ -214,8 +217,8 @@ object WordBuilder extends Activity:
             )
         case _ => ()
 
-    val langChange = AppState.lang.signal.changes --> { lang =>
-      round.set(buildRound(lang, level, avoid = None))
+    val langChange = AppState.lang.signal.changes --> { _ =>
+      round.set(buildRound(roller, AppState.lang.now(), level))
       wrongFlash.set(false)
       wrongPick.set(None)
     }

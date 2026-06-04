@@ -16,6 +16,8 @@ object MathPractice extends Activity:
   val minPlayers: Int = 1
   val maxPlayers: Int = 1
   val handsFree: Boolean = false
+  val glyph: String = "➕"
+  val tint: String = "mustard"
   override val kind: Kind = Kind.Learn
 
   // ---------- model ----------

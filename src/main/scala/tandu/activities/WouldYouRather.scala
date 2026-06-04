@@ -1,9 +1,8 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import scala.util.Random
 import tandu.AppState
-import tandu.i18n.Strings
+import tandu.i18n.{Lang, Strings}
 import tandu.ui.Components
 import tandu.ui.Components.s
 
@@ -14,28 +13,24 @@ object WouldYouRather extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = true
-
-  // Avoid the previous pair's items so consecutive dilemmas don't share
-  // an option — repeats feel like bugs even when the pool is large.
-  private def pickPair(pool: Vector[String], avoid: Set[String]): (String, String) =
-    val available =
-      if pool.size > avoid.size + 1 then pool.filterNot(avoid.contains) else pool
-    val a = available(Random.nextInt(available.size))
-    val rest = available.filterNot(_ == a)
-    val b = if rest.nonEmpty then rest(Random.nextInt(rest.size)) else a
-    (a, b)
+  val glyph: String = "⇆"
+  val tint: String = "sky"
 
   def render(): HtmlElement =
-    val pair: Var[(String, String)] =
-      Var(pickPair(WouldYouRatherBank.forLang(AppState.lang.now()), Set.empty))
+    // Two draws from one roller give two distinct options, and no option
+    // recurs until the whole bank has cycled — so consecutive dilemmas never
+    // share an item (repeats feel like bugs even with a large pool).
+    val roller = new Roller[String]
+    def pickPair(lang: Lang): (String, String) =
+      val pool = WouldYouRatherBank.forLang(lang)
+      (roller.next(pool), roller.next(pool))
 
-    def next(): Unit =
-      pair.update { case (a, b) =>
-        pickPair(WouldYouRatherBank.forLang(AppState.lang.now()), Set(a, b))
-      }
+    val pair: Var[(String, String)] = Var(pickPair(AppState.lang.now()))
+
+    def next(): Unit = pair.set(pickPair(AppState.lang.now()))
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      pair.set(pickPair(WouldYouRatherBank.forLang(lang), Set.empty))
+      pair.set(pickPair(lang))
     }
 
     div(

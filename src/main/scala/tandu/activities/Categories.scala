@@ -15,14 +15,10 @@ object Categories extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = true
+  val glyph: String = "◫"
+  val tint: String = "olive"
 
   final case class Round(prompt: String, letter: Char)
-
-  private def pickRound(lang: Lang, avoid: Option[Round]): Round =
-    Round(
-      Picker.pickAvoiding(CategoryBank.categoriesFor(lang), avoid.map(_.prompt)),
-      Picker.pickAvoiding(CategoryBank.lettersFor(lang), avoid.map(_.letter))
-    )
 
   def render(): HtmlElement =
     ModeChooser.render(id, List(
@@ -44,13 +40,14 @@ object Categories extends Activity:
 
   private def renderOffline(): HtmlElement =
     val initLang = AppState.lang.now()
-    val letter: Var[Char] = Var(Picker.pickAvoiding(CategoryBank.lettersFor(initLang), None))
+    val letterRoller = new Roller[Char]
+    val letter: Var[Char] = Var(letterRoller.next(CategoryBank.lettersFor(initLang)))
 
     def nextLetter(): Unit =
-      letter.update(prev => Picker.pickAvoiding(CategoryBank.lettersFor(AppState.lang.now()), Some(prev)))
+      letter.set(letterRoller.next(CategoryBank.lettersFor(AppState.lang.now())))
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      letter.set(Picker.pickAvoiding(CategoryBank.lettersFor(lang), None))
+      letter.set(letterRoller.next(CategoryBank.lettersFor(lang)))
     }
 
     div(
@@ -104,13 +101,20 @@ object Categories extends Activity:
     )
 
   private def renderInApp(): HtmlElement =
-    val round: Var[Round] = Var(pickRound(AppState.lang.now(), avoid = None))
+    val promptRoller = new Roller[String]
+    val letterRoller = new Roller[Char]
+    def pickRound(lang: Lang): Round =
+      Round(
+        promptRoller.next(CategoryBank.categoriesFor(lang)),
+        letterRoller.next(CategoryBank.lettersFor(lang))
+      )
 
-    def next(): Unit =
-      round.update(prev => pickRound(AppState.lang.now(), avoid = Some(prev)))
+    val round: Var[Round] = Var(pickRound(AppState.lang.now()))
+
+    def next(): Unit = round.set(pickRound(AppState.lang.now()))
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      round.set(pickRound(lang, avoid = None))
+      round.set(pickRound(lang))
     }
 
     div(

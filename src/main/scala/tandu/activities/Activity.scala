@@ -13,5 +13,10 @@ trait Activity:
   def handsFree: Boolean
   def kind: Kind = Kind.Games
 
+  /** Home-grid presentation. Declared here (not in a sidecar map) so the
+    * compiler forces every new activity to pick a glyph and tint. */
+  def glyph: String
+  def tint: String
+
   /** The page body shown after Suggest. Rendered fresh on each navigation. */
   def render(): HtmlElement

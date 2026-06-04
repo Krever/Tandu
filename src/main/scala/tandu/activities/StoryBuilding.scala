@@ -11,6 +11,8 @@ object StoryBuilding extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = true
+  val glyph: String = "✦"
+  val tint: String = "plum"
 
   def render(): HtmlElement =
     div(

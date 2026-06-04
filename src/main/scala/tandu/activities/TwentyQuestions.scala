@@ -13,14 +13,16 @@ object TwentyQuestions extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = true
+  val glyph: String = "?"
+  val tint: String = "mustard"
 
   val MaxQuestions: Int = 20
 
-  private def pickWord(lang: Lang, avoid: Option[String]): String =
-    Picker.pickAvoiding(WordBank.forLang(lang), avoid)
-
   def render(): HtmlElement =
-    val word: Var[String]        = Var(pickWord(AppState.lang.now(), avoid = None))
+    val roller = new Roller[String]
+    def pick(lang: Lang): String = roller.next(WordBank.forLang(lang))
+
+    val word: Var[String]        = Var(pick(AppState.lang.now()))
     val revealed: Var[Boolean]   = Var(false)
     val asked: Var[Int]          = Var(0)
 
@@ -30,10 +32,10 @@ object TwentyQuestions extends Activity:
       asked.set(0)
 
     def newWord(): Unit =
-      resetWith(pickWord(AppState.lang.now(), avoid = Some(word.now())))
+      resetWith(pick(AppState.lang.now()))
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      resetWith(pickWord(lang, avoid = None))
+      resetWith(pick(lang))
     }
 
     val cardText: Signal[String] =

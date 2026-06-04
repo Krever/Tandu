@@ -2,7 +2,7 @@ package tandu.ui
 
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
-import tandu.activities.{Activity, ActivityVisual}
+import tandu.activities.Activity
 import tandu.ui.Components.s
 
 import scala.util.Random
@@ -110,9 +110,8 @@ object SuggestSpin:
     )
 
   private def item(a: Activity): HtmlElement =
-    val v = ActivityVisual.get(a.id)
     div(
-      cls := s"suggest-reel__item activity-card--${v.tint}",
-      span(cls := "suggest-reel__glyph", v.glyph),
+      cls := s"suggest-reel__item activity-card--${a.tint}",
+      span(cls := "suggest-reel__glyph", a.glyph),
       span(cls := "suggest-reel__name", child.text <-- s(a.name))
     )

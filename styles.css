@@ -378,6 +378,22 @@ select { font-family: inherit; font-size: inherit; }
   gap: var(--space-3);
   margin-top: var(--space-5);
 }
+.activity-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-3) var(--space-4);
+  font-size: 1rem;
+  color: inherit;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2, #f3f4f6);
+}
+.activity-search::placeholder { color: var(--color-muted); }
+.activity-search:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
 .activity-grid__divider {
   grid-column: 1 / -1;
   display: flex;

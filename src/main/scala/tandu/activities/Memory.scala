@@ -16,6 +16,8 @@ object Memory extends Activity:
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = false
+  val glyph: String = "◉"
+  val tint: String = "teal"
 
   private val Emojis: Vector[String] = Vector(
     "🐶", "🐱", "🦊", "🐻", "🐼", "🐯", "🦁", "🐮",

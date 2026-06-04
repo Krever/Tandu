@@ -14,18 +14,19 @@ object LastLetter extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
   val handsFree: Boolean = true
-
-  private def pickLetter(lang: Lang, avoid: Option[Char]): Char =
-    Picker.pickAvoiding(CategoryBank.lettersFor(lang), avoid)
+  val glyph: String = "Z"
+  val tint: String = "peach"
 
   def render(): HtmlElement =
-    val letter: Var[Char] = Var(pickLetter(AppState.lang.now(), avoid = None))
+    val roller = new Roller[Char]
+    def pick(lang: Lang): Char = roller.next(CategoryBank.lettersFor(lang))
 
-    def next(): Unit =
-      letter.update(prev => pickLetter(AppState.lang.now(), avoid = Some(prev)))
+    val letter: Var[Char] = Var(pick(AppState.lang.now()))
+
+    def next(): Unit = letter.set(pick(AppState.lang.now()))
 
     val langChange = AppState.lang.signal.changes --> { lang =>
-      letter.set(pickLetter(lang, avoid = None))
+      letter.set(pick(lang))
     }
 
     div(

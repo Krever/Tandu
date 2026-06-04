@@ -15,6 +15,8 @@ object Checkers extends Activity:
   val minPlayers: Int = 2
   val maxPlayers: Int = 2
   val handsFree: Boolean = false
+  val glyph: String = "●"
+  val tint: String = "mustard"
 
   private val Size = 8
 

@@ -51,6 +51,7 @@ object Strings:
   final case class Home(
       suggestActivity: String,
       suggestAnother: String,
+      spinning: String,
       tools: String,
       activities: String,
       installApp: String
@@ -500,6 +501,7 @@ object Strings:
     home = Home(
       suggestActivity = "Suggest!",
       suggestAnother = "Suggest another",
+      spinning = "Picking…",
       tools = "Tools",
       activities = "Activities",
       installApp = "Install app"
@@ -930,6 +932,7 @@ object Strings:
     home = Home(
       suggestActivity = "Zaproponuj!",
       suggestAnother = "Inna propozycja",
+      spinning = "Losowanie…",
       tools = "Narzędzia",
       activities = "Zabawy",
       installApp = "Zainstaluj aplikację"
@@ -1360,6 +1363,7 @@ object Strings:
     home = Home(
       suggestActivity = "Sugerir!",
       suggestAnother = "Otra sugerencia",
+      spinning = "Eligiendo…",
       tools = "Herramientas",
       activities = "Actividades",
       installApp = "Instalar app"
@@ -1790,6 +1794,7 @@ object Strings:
     home = Home(
       suggestActivity = "Proposer!",
       suggestAnother = "Une autre idée",
+      spinning = "Tirage…",
       tools = "Outils",
       activities = "Activités",
       installApp = "Installer l'app"
@@ -2220,6 +2225,7 @@ object Strings:
     home = Home(
       suggestActivity = "Vorschlagen!",
       suggestAnother = "Andere Idee",
+      spinning = "Wird gewählt…",
       tools = "Werkzeuge",
       activities = "Aktivitäten",
       installApp = "App installieren"

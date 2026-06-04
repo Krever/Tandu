@@ -542,6 +542,149 @@ select { font-family: inherit; font-size: inherit; }
 .activity-card--sky       { --tile-stamp: var(--tint-sky); }
 .activity-card--peach     { --tile-stamp: var(--tint-peach); }
 
+/* ── Suggest spin — slot reel ──────────────────────────────────────────
+   Plays after tapping the Suggest card: a strip of catalog cards spins
+   through a framed focus window and decelerates onto the picked activity,
+   then gives a stamp "thunk". Item height (76px) is mirrored in
+   SuggestSpin.ItemPx — keep the two in sync. */
+.suggest-spin { position: fixed; inset: 0; z-index: 200; display: none; }
+.suggest-spin.is-open { display: block; }
+
+.suggest-spin__backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-text) 60%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: suggest-fade 0.18s ease both;
+}
+@keyframes suggest-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.suggest-spin__panel {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.suggest-spin__title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--color-surface);
+  text-shadow: 2px 2px 0 var(--color-border-strong);
+}
+
+.suggest-reel {
+  position: relative;
+  width: 100%;
+  height: 228px; /* 3 * item height */
+  overflow: hidden;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-stamp);
+}
+/* Static viewport: soften the top and bottom rows so the eye settles on the
+   focus band. The fade lives here (not on the strip) so it stays anchored to
+   the window while the strip scrolls behind it. */
+.suggest-reel__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 1%, #000 30%, #000 70%, transparent 99%);
+  mask-image: linear-gradient(to bottom, transparent 1%, #000 30%, #000 70%, transparent 99%);
+}
+.suggest-reel__strip {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transition: transform 2.7s cubic-bezier(0.13, 0.86, 0.13, 1);
+}
+.suggest-reel__item {
+  height: 76px;
+  flex: 0 0 76px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+}
+.suggest-reel__glyph {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+  border-radius: 10px;
+  background: var(--tile-stamp, var(--color-bg-2));
+  border: 1px solid color-mix(in srgb, var(--tile-stamp, var(--color-border-strong)) 55%, var(--color-border-strong));
+  color: color-mix(in srgb, var(--tile-stamp, var(--color-text)) 30%, var(--color-text));
+}
+.suggest-reel__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+
+/* Focus band: the centre row, framed with dashed rules and a vermilion
+   needle biting in from each edge. Sits above the strip, ignores pointers. */
+.suggest-reel__window {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 76px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  border-top: 2px dashed var(--color-border-strong);
+  border-bottom: 2px dashed var(--color-border-strong);
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+.suggest-reel__window::before,
+.suggest-reel__window::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: translateY(-50%);
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+}
+.suggest-reel__window::before { left: 0;  border-left: 12px solid var(--color-primary); }
+.suggest-reel__window::after  { right: 0; border-right: 12px solid var(--color-primary); }
+
+/* Stamp "thunk" the moment the reel lands. */
+.suggest-spin__panel.is-landed .suggest-reel__window {
+  animation: suggest-thunk 0.42s cubic-bezier(0.2, 1.5, 0.3, 1) both;
+}
+@keyframes suggest-thunk {
+  0%   { transform: translateY(-50%) scaleY(1); }
+  35%  { transform: translateY(-50%) scaleY(1.18); background: color-mix(in srgb, var(--color-primary) 24%, transparent); }
+  100% { transform: translateY(-50%) scaleY(1); }
+}
+
+/* Honour reduced-motion: collapse the long decel to a quick settle. */
+@media (prefers-reduced-motion: reduce) {
+  .suggest-reel__strip { transition-duration: 0.35s; }
+  .suggest-spin__backdrop { animation: none; }
+  .suggest-spin__panel.is-landed .suggest-reel__window { animation: none; }
+}
+
 /* Boards */
 .board {
   display: grid;

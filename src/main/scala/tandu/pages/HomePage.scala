@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L.*
 import tandu.{AppState, Kind, Page, Routing}
 import tandu.activities.{Activity, ActivityVisual, Players, Registry}
 import tandu.tools.Tools
-import tandu.ui.Components
+import tandu.ui.{Components, SuggestSpin}
 import tandu.ui.Components.s
 
 object HomePage:
@@ -15,6 +15,9 @@ object HomePage:
     val kindFilter      = AppState.kindFilter
     val favourites      = AppState.favourites
     val favouritesOnly  = AppState.favouritesOnly
+
+    // Holds the in-flight slot-reel spin; cleared once it lands and navigates.
+    val spin = Var(Option.empty[SuggestSpin.Reel])
 
     val visible: Signal[(List[Activity], List[Activity])] =
       playersFilter.signal
@@ -28,6 +31,7 @@ object HomePage:
 
     div(
       cls := "app stack-lg",
+      SuggestSpin.overlay(spin, a => { spin.set(None); Routing.go(Page.Activity(a.id)) }),
       Components.header(
         s(_.appTitle),
         back = None,
@@ -59,16 +63,16 @@ object HomePage:
               List(emptyFavouritesCard())
             else
               val suggest = Components.suggestCard(
-                s(_.home.suggestActivity),
-                Routing.go(Page.Activity(
-                  Registry.pickRandom(
-                    playersFilter.now(),
-                    handsFreeOnly.now(),
-                    kindFilter.now(),
-                    favouritesOnly.now(),
-                    favourites.now()
-                  ).id
-                ))
+                s(_.home.suggestActivity), {
+                  val p       = playersFilter.now()
+                  val hf      = handsFreeOnly.now()
+                  val k       = kindFilter.now()
+                  val favOnly = favouritesOnly.now()
+                  val favs    = favourites.now()
+                  val pick    = Registry.pickRandom(p, hf, k, favOnly, favs)
+                  val pool    = Registry.filtered(p, hf, k, favOnly, favs)
+                  spin.set(Some(SuggestSpin.build(pool, pick)))
+                }
               )
               suggest :: games.map(activityCard) ++ divider ++ learn.map(activityCard)
           }

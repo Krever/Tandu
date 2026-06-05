@@ -1886,6 +1886,64 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   .printable__footer { margin-top: auto; }
 }
 
+/* Maze — SVG board, drag-to-trace play, batch-print sheet.
+   Geometry is drawn in CELL-unit space and scaled by the viewBox; the board is
+   always square so its aspect-ratio matches the viewBox, which keeps the
+   pointer→cell mapping in Maze.scala exact. */
+.maze-svg {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  overflow: visible;       /* let the border stroke straddle the viewBox edge */
+  touch-action: none;      /* claim drags so the page doesn't scroll under them */
+  user-select: none;
+  cursor: pointer;
+}
+.maze-border {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 0.7;
+  stroke-linejoin: round;
+}
+.maze-wall {
+  stroke: var(--color-border-strong);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+}
+.maze-trail {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+.maze-start { fill: color-mix(in srgb, var(--color-primary) 40%, var(--color-surface)); }
+.maze-instruction { margin: 0 auto; max-width: 34ch; }
+.maze-controls { margin-top: var(--space-2); }
+
+.maze-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
+.maze-print-sheet {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6mm;
+  justify-content: center;
+  align-content: start;
+}
+.maze-print-sheet--single { grid-template-columns: 1fr; }
+.maze-print-board { display: flex; align-items: center; justify-content: center; }
+.maze-print-svg { width: 100%; height: auto; overflow: visible; }
+.maze-print-board--easy   { width: 88mm;  height: 88mm;  }
+.maze-print-board--medium { width: 92mm;  height: 92mm;  }
+.maze-print-board--hard   { width: 180mm; height: 180mm; }
+.maze-print-svg .maze-border,
+.maze-print-svg .maze-wall { stroke: black; stroke-width: 0.6; }
+
 /* ---- P2P lobby ---- */
 .p2p-code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

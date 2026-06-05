@@ -34,7 +34,8 @@ final case class Strings(
     clock: Strings.Clock,
     reading: Strings.Reading,
     memoryChain: Strings.MemoryChain,
-    iSpy: Strings.ISpy
+    iSpy: Strings.ISpy,
+    maze: Strings.Maze
 )
 
 object Strings:
@@ -212,6 +213,12 @@ object Strings:
       rules: Rules
   )
 
+  final case class MazeOff(
+      printTitle: String,
+      sheetHint: String,
+      rules: Rules
+  )
+
   final case class Offline(
       materials: Materials,
       battleships: BattleshipsOff,
@@ -222,7 +229,8 @@ object Strings:
       solitaire: SolitaireOff,
       categories: CategoriesOff,
       checkers: CheckersOff,
-      sudoku: SudokuOff
+      sudoku: SudokuOff,
+      maze: MazeOff
   )
 
   final case class TttVariant(name: String, description: String)
@@ -512,6 +520,20 @@ object Strings:
       hard: MinesweeperVariant
   )
 
+  final case class MazeVariant(name: String, description: String)
+
+  final case class Maze(
+      name: String,
+      description: String,
+      instruction: String,
+      won: String,
+      clearPath: String,
+      newGame: String,
+      easy: MazeVariant,
+      medium: MazeVariant,
+      hard: MazeVariant
+  )
+
   val en: Strings = Strings(
     appTitle = "Tandu",
     tagline = "Your time together",
@@ -716,6 +738,15 @@ object Strings:
           "The given numbers can't change. Use small pencil marks for candidates when you're unsure.",
           "Work by elimination: if a cell can only hold one digit, that's the answer."
         ))
+      ),
+      maze = MazeOff(
+        printTitle = "Mazes — help the mouse find the cheese",
+        sheetHint = "Print the sheet and draw a path from the mouse to the cheese with a pencil. There's one way through each maze.",
+        rules = Rules("How to play", List(
+          "Start at the mouse 🐭 and find a path to the cheese 🧀.",
+          "You can't cross the walls — only follow the open corridors.",
+          "Stuck in a dead-end? Back up and try another turn."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -882,6 +913,17 @@ object Strings:
       easy = MinesweeperVariant("Easy", "9×9 with 10 mines."),
       medium = MinesweeperVariant("Medium", "12×12 with 25 mines."),
       hard = MinesweeperVariant("Hard", "16×12 with 40 mines.")
+    ),
+    maze = Maze(
+      name = "Maze",
+      description = "Help the mouse find the cheese.",
+      instruction = "Swipe or drag to guide the mouse to the cheese — arrow keys work too.",
+      won = "You found the cheese! 🧀",
+      clearPath = "Clear path",
+      newGame = "New maze",
+      easy = MazeVariant("Easy", "10×10 with gentle loops."),
+      medium = MazeVariant("Medium", "16×16, one way through."),
+      hard = MazeVariant("Hard", "24×24, a real labyrinth.")
     ),
     wordBuilder = WordBuilder(
       name = "Read & Spell",
@@ -1170,6 +1212,15 @@ object Strings:
           "Podane cyfry są niezmienne. Używaj małych notatek przy niepewnych polach.",
           "Działaj przez eliminację: jeśli w polu pasuje tylko jedna cyfra — to jest rozwiązanie."
         ))
+      ),
+      maze = MazeOff(
+        printTitle = "Labirynty — pomóż myszce znaleźć ser",
+        sheetHint = "Wydrukuj kartkę i narysuj ołówkiem drogę od myszki do sera. Przez każdy labirynt prowadzi jedna ścieżka.",
+        rules = Rules("Jak grać", List(
+          "Zacznij przy myszce 🐭 i znajdź drogę do sera 🧀.",
+          "Nie można przechodzić przez ściany — idź tylko otwartymi korytarzami.",
+          "Ślepa uliczka? Cofnij się i spróbuj innej drogi."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1336,6 +1387,17 @@ object Strings:
       easy = MinesweeperVariant("Łatwy", "9×9 z 10 minami."),
       medium = MinesweeperVariant("Średni", "12×12 z 25 minami."),
       hard = MinesweeperVariant("Trudny", "16×12 z 40 minami.")
+    ),
+    maze = Maze(
+      name = "Labirynt",
+      description = "Pomóż myszce znaleźć ser.",
+      instruction = "Przesuwaj palcem lub przeciągaj, by zaprowadzić myszkę do sera — strzałki też działają.",
+      won = "Ser znaleziony! 🧀",
+      clearPath = "Wyczyść drogę",
+      newGame = "Nowy labirynt",
+      easy = MazeVariant("Łatwy", "10×10 z łagodnymi pętlami."),
+      medium = MazeVariant("Średni", "16×16, jedna droga."),
+      hard = MazeVariant("Trudny", "24×24, prawdziwy labirynt.")
     ),
     wordBuilder = WordBuilder(
       name = "Czytaj i pisz",
@@ -1624,6 +1686,15 @@ object Strings:
           "Los números dados no cambian. Usa pequeñas anotaciones para los candidatos.",
           "Trabaja por eliminación: si una casilla solo admite un dígito, ese es la respuesta."
         ))
+      ),
+      maze = MazeOff(
+        printTitle = "Laberintos — ayuda al ratón a encontrar el queso",
+        sheetHint = "Imprime la hoja y dibuja con lápiz un camino del ratón al queso. Hay un solo camino en cada laberinto.",
+        rules = Rules("Cómo jugar", List(
+          "Empieza en el ratón 🐭 y encuentra el camino hasta el queso 🧀.",
+          "No puedes cruzar las paredes — sigue solo los pasillos abiertos.",
+          "¿Sin salida? Retrocede y prueba otro camino."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1790,6 +1861,17 @@ object Strings:
       easy = MinesweeperVariant("Fácil", "9×9 con 10 minas."),
       medium = MinesweeperVariant("Medio", "12×12 con 25 minas."),
       hard = MinesweeperVariant("Difícil", "16×12 con 40 minas.")
+    ),
+    maze = Maze(
+      name = "Laberinto",
+      description = "Ayuda al ratón a encontrar el queso.",
+      instruction = "Desliza o arrastra para llevar al ratón hasta el queso — las flechas también funcionan.",
+      won = "¡Encontraste el queso! 🧀",
+      clearPath = "Borrar camino",
+      newGame = "Nuevo laberinto",
+      easy = MazeVariant("Fácil", "10×10 con bucles suaves."),
+      medium = MazeVariant("Medio", "16×16, un solo camino."),
+      hard = MazeVariant("Difícil", "24×24, un verdadero laberinto.")
     ),
     wordBuilder = WordBuilder(
       name = "Lee y deletrea",
@@ -2078,6 +2160,15 @@ object Strings:
           "Les chiffres donnés ne changent pas. Notez les candidats en petit quand vous hésitez.",
           "Procédez par élimination : si une case n'accepte qu'un seul chiffre, c'est la réponse."
         ))
+      ),
+      maze = MazeOff(
+        printTitle = "Labyrinthes — aide la souris à trouver le fromage",
+        sheetHint = "Imprimez la feuille et tracez au crayon un chemin de la souris au fromage. Un seul passage par labyrinthe.",
+        rules = Rules("Comment jouer", List(
+          "Pars de la souris 🐭 et trouve le chemin jusqu'au fromage 🧀.",
+          "On ne traverse pas les murs — suis seulement les couloirs ouverts.",
+          "Cul-de-sac ? Reviens en arrière et essaie un autre tournant."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2244,6 +2335,17 @@ object Strings:
       easy = MinesweeperVariant("Facile", "9×9 avec 10 mines."),
       medium = MinesweeperVariant("Moyen", "12×12 avec 25 mines."),
       hard = MinesweeperVariant("Difficile", "16×12 avec 40 mines.")
+    ),
+    maze = Maze(
+      name = "Labyrinthe",
+      description = "Aide la souris à trouver le fromage.",
+      instruction = "Balaie ou glisse pour mener la souris au fromage — les flèches marchent aussi.",
+      won = "Tu as trouvé le fromage ! 🧀",
+      clearPath = "Effacer le chemin",
+      newGame = "Nouveau labyrinthe",
+      easy = MazeVariant("Facile", "10×10 avec des boucles douces."),
+      medium = MazeVariant("Moyen", "16×16, un seul passage."),
+      hard = MazeVariant("Difficile", "24×24, un vrai labyrinthe.")
     ),
     wordBuilder = WordBuilder(
       name = "Lis et écris",
@@ -2532,6 +2634,15 @@ object Strings:
           "Die vorgegebenen Zahlen sind fest. Tragt kleine Kandidatennotizen ein, wenn ihr unsicher seid.",
           "Arbeitet per Ausschluss: passt nur eine Ziffer in ein Feld, ist sie die Lösung."
         ))
+      ),
+      maze = MazeOff(
+        printTitle = "Labyrinthe — hilf der Maus zum Käse",
+        sheetHint = "Druckt das Blatt aus und malt mit einem Stift einen Weg von der Maus zum Käse. Durch jedes Labyrinth führt ein Weg.",
+        rules = Rules("So wird gespielt", List(
+          "Starte bei der Maus 🐭 und finde den Weg zum Käse 🧀.",
+          "Wände kann man nicht überqueren — folge nur den offenen Gängen.",
+          "Sackgasse? Geh zurück und versuch eine andere Abzweigung."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2698,6 +2809,17 @@ object Strings:
       easy = MinesweeperVariant("Leicht", "9×9 mit 10 Minen."),
       medium = MinesweeperVariant("Mittel", "12×12 mit 25 Minen."),
       hard = MinesweeperVariant("Schwer", "16×12 mit 40 Minen.")
+    ),
+    maze = Maze(
+      name = "Labyrinth",
+      description = "Hilf der Maus, den Käse zu finden.",
+      instruction = "Wische oder zieh, um die Maus zum Käse zu führen — Pfeiltasten gehen auch.",
+      won = "Du hast den Käse gefunden! 🧀",
+      clearPath = "Weg löschen",
+      newGame = "Neues Labyrinth",
+      easy = MazeVariant("Leicht", "10×10 mit sanften Schleifen."),
+      medium = MazeVariant("Mittel", "16×16, ein Weg hindurch."),
+      hard = MazeVariant("Schwer", "24×24, ein echtes Labyrinth.")
     ),
     wordBuilder = WordBuilder(
       name = "Lesen & Schreiben",

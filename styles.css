@@ -168,6 +168,78 @@ select { font-family: inherit; font-size: inherit; }
 .btn__sub.is-hidden { display: none; }
 .corner-menu__toggle svg { width: 22px; height: 22px; display: block; }
 
+/* A horizontal rule sets the reroll off from the activity; the button sits
+   centred below it. In flow at the end of the activity. */
+.activity-bar {
+  margin-top: var(--space-4);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.activity-bar__rule {
+  width: 100%;
+  height: 1.5px;
+  margin: 0;
+  border: none;
+  background: var(--color-border);
+}
+
+/* A compact, centred button below the rule — the home Suggest wordmark's serif
+   at a lighter weight, no vermilion fill, so it reads as the same action
+   without competing with the activity. The › ‹ marks echo the reel's focus
+   needles and bite inward on hover, linking it to the spin it triggers. */
+.activity-resuggest {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-stamp-sm);
+  cursor: pointer;
+  color: var(--color-text);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.activity-resuggest:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--color-border-strong); }
+.activity-resuggest__main {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+.activity-resuggest__chev { color: var(--color-muted); transition: transform 0.12s ease; }
+.activity-resuggest:hover .activity-resuggest__main > .activity-resuggest__chev:first-child { transform: translateX(3px); }
+.activity-resuggest:hover .activity-resuggest__main > .activity-resuggest__chev:last-child  { transform: translateX(-3px); }
+.activity-resuggest__sub { font-size: 12px; font-weight: 500; color: var(--color-muted); }
+.activity-resuggest__sub.is-hidden { display: none; }
+
+/* Home hero carries the same › ‹ motif (cream on vermilion) so the primary
+   Suggest and the per-activity re-suggest read as one family. */
+.suggest-chev {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--color-primary-text);
+  opacity: 0.7;
+  transition: transform 0.12s ease;
+}
+.activity-card--suggest:hover .suggest-chev:first-child { transform: translateX(4px); }
+.activity-card--suggest:hover .suggest-chev:last-child  { transform: translateX(-4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-resuggest__chev, .suggest-chev { transition: none; }
+}
+
 .card {
   background: var(--color-surface);
   border: 1.5px solid var(--color-border-strong);
@@ -584,6 +656,7 @@ select { font-family: inherit; font-size: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-3);
   min-height: 72px;
   background: var(--color-primary);
   color: var(--color-primary-text);

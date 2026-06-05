@@ -26,13 +26,14 @@ object ActivityPage:
       SuggestSpin.overlay(spin, picked => { spin.set(None); Routing.replace(Page.Activity(picked.id)) }),
       Components.header(s(a.name), glyph = Some(a.glyph), tint = Some(a.tint)),
       a.render(),
-      div(
-        cls := "no-print",
-        suggestAnotherButton(spin)
-      )
+      suggestBar(spin)
     )
 
-  private def suggestAnotherButton(spin: Var[Option[SuggestSpin.Reel]]): HtmlElement =
+  /** The "give me the next one" loop control — a sticky bar docked to the bottom
+    * of every activity, always one tap away as you play. Vermilion (ties it to
+    * the home Suggest hero) with a shuffle glyph that reads as "another", and
+    * the active filters shown beneath so the draw's scope is clear. */
+  private def suggestBar(spin: Var[Option[SuggestSpin.Reel]]): HtmlElement =
     val filtersLabel: Signal[String] =
       AppState.playersFilter.signal
         .combineWith(AppState.handsFreeOnly.signal)
@@ -41,24 +42,33 @@ object ActivityPage:
           val parts = List(p.map(_.label(str)), Option.when(hf)(str.filters.handsFree)).flatten
           parts.mkString(" · ")
         }
-    button(
-      cls := "btn btn--ghost btn--stacked",
-      onClick --> { _ =>
-        val pool = Registry.filtered(
-          AppState.playersFilter.now(),
-          AppState.handsFreeOnly.now(),
-          AppState.kindFilter.now(),
-          AppState.favouritesOnly.now(),
-          AppState.favourites.now(),
-          AppState.hidden.now()
+    div(
+      cls := "activity-bar no-print",
+      hr(cls := "activity-bar__rule"),
+      button(
+        cls := "activity-resuggest",
+        onClick --> { _ =>
+          val pool = Registry.filtered(
+            AppState.playersFilter.now(),
+            AppState.handsFreeOnly.now(),
+            AppState.kindFilter.now(),
+            AppState.favouritesOnly.now(),
+            AppState.favourites.now(),
+            AppState.hidden.now()
+          )
+          val pick = Registry.pickRandom(pool)
+          spin.set(Some(SuggestSpin.build(pool, pick)))
+        },
+        span(
+          cls := "activity-resuggest__main",
+          span(cls := "activity-resuggest__chev", "›"),
+          span(cls := "activity-resuggest__word", child.text <-- s(_.home.suggestAnother)),
+          span(cls := "activity-resuggest__chev", "‹")
+        ),
+        span(
+          cls := "activity-resuggest__sub",
+          cls("is-hidden") <-- filtersLabel.map(_.isEmpty),
+          child.text <-- filtersLabel
         )
-        val pick = Registry.pickRandom(pool)
-        spin.set(Some(SuggestSpin.build(pool, pick)))
-      },
-      span(cls := "btn__label", child.text <-- s(_.home.suggestAnother)),
-      span(
-        cls := "btn__sub muted",
-        cls("is-hidden") <-- filtersLabel.map(_.isEmpty),
-        child.text <-- filtersLabel
       )
     )

@@ -301,7 +301,11 @@ object Components:
   def suggestCard(label: Signal[String], onTap: => Unit): HtmlElement =
     button(
       cls := "activity-card activity-card--suggest",
+      // The › ‹ marks mirror the reel's focus needles, tying the card to the
+      // spin it launches — the same motif marks the per-activity re-suggest.
+      span(cls := "suggest-chev", "›"),
       div(cls := "activity-card__name", child.text <-- label),
+      span(cls := "suggest-chev", "‹"),
       onClick --> (_ => onTap)
     )
 

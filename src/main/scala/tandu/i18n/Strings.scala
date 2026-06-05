@@ -35,7 +35,8 @@ final case class Strings(
     reading: Strings.Reading,
     memoryChain: Strings.MemoryChain,
     iSpy: Strings.ISpy,
-    maze: Strings.Maze
+    maze: Strings.Maze,
+    wordSearch: Strings.WordSearch
 )
 
 object Strings:
@@ -219,6 +220,13 @@ object Strings:
       rules: Rules
   )
 
+  final case class WordSearchOff(
+      printTitle: String,
+      sheetHint: String,
+      wordsLabel: String,
+      rules: Rules
+  )
+
   final case class Offline(
       materials: Materials,
       battleships: BattleshipsOff,
@@ -230,7 +238,8 @@ object Strings:
       categories: CategoriesOff,
       checkers: CheckersOff,
       sudoku: SudokuOff,
-      maze: MazeOff
+      maze: MazeOff,
+      wordSearch: WordSearchOff
   )
 
   final case class TttVariant(name: String, description: String)
@@ -534,6 +543,20 @@ object Strings:
       hard: MazeVariant
   )
 
+  final case class WordSearchVariant(name: String, description: String)
+
+  final case class WordSearch(
+      name: String,
+      description: String,
+      instruction: String,
+      foundLabel: String,
+      won: String,
+      newGame: String,
+      easy: WordSearchVariant,
+      medium: WordSearchVariant,
+      hard: WordSearchVariant
+  )
+
   val en: Strings = Strings(
     appTitle = "Tandu",
     tagline = "Your time together",
@@ -747,6 +770,16 @@ object Strings:
           "You can't cross the walls — only follow the open corridors.",
           "Stuck in a dead-end? Back up and try another turn."
         ))
+      ),
+      wordSearch = WordSearchOff(
+        printTitle = "Word Search — find the hidden words",
+        sheetHint = "Print the sheet and circle each word you find. The word list sits below the grid.",
+        wordsLabel = "Find these words",
+        rules = Rules("How to play", List(
+          "Every word from the list is hidden in the grid of letters.",
+          "Words run in a straight line — across, down, or diagonally, sometimes backwards.",
+          "Circle each word as you find it and cross it off the list."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -924,6 +957,17 @@ object Strings:
       easy = MazeVariant("Easy", "10×10 with gentle loops."),
       medium = MazeVariant("Medium", "16×16, one way through."),
       hard = MazeVariant("Hard", "24×24, a real labyrinth.")
+    ),
+    wordSearch = WordSearch(
+      name = "Word Search",
+      description = "Find the hidden words in the grid.",
+      instruction = "Drag across the letters to trace a word — across, down, or diagonally.",
+      foundLabel = "Found",
+      won = "You found them all! 🔍",
+      newGame = "New puzzle",
+      easy = WordSearchVariant("Easy", "8×8, 6 words, across and down."),
+      medium = WordSearchVariant("Medium", "11×11, 8 words, with diagonals."),
+      hard = WordSearchVariant("Hard", "13×13, 10 words, every direction.")
     ),
     wordBuilder = WordBuilder(
       name = "Read & Spell",
@@ -1221,6 +1265,16 @@ object Strings:
           "Nie można przechodzić przez ściany — idź tylko otwartymi korytarzami.",
           "Ślepa uliczka? Cofnij się i spróbuj innej drogi."
         ))
+      ),
+      wordSearch = WordSearchOff(
+        printTitle = "Wykreślanka — znajdź ukryte słowa",
+        sheetHint = "Wydrukuj kartkę i zakreślaj znalezione słowa. Lista słów jest pod planszą.",
+        wordsLabel = "Znajdź te słowa",
+        rules = Rules("Jak grać", List(
+          "Każde słowo z listy jest ukryte w siatce liter.",
+          "Słowa biegną w linii prostej — w poziomie, pionie lub po skosie, czasem wspak.",
+          "Zakreślaj każde znalezione słowo i skreślaj je z listy."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1398,6 +1452,17 @@ object Strings:
       easy = MazeVariant("Łatwy", "10×10 z łagodnymi pętlami."),
       medium = MazeVariant("Średni", "16×16, jedna droga."),
       hard = MazeVariant("Trudny", "24×24, prawdziwy labirynt.")
+    ),
+    wordSearch = WordSearch(
+      name = "Wykreślanka",
+      description = "Znajdź ukryte słowa w siatce liter.",
+      instruction = "Przeciągaj palcem po literach, by zaznaczyć słowo — w poziomie, pionie lub po skosie.",
+      foundLabel = "Znaleziono",
+      won = "Znalazłeś wszystkie! 🔍",
+      newGame = "Nowa plansza",
+      easy = WordSearchVariant("Łatwy", "8×8, 6 słów, w poziomie i pionie."),
+      medium = WordSearchVariant("Średni", "11×11, 8 słów, ze skosami."),
+      hard = WordSearchVariant("Trudny", "13×13, 10 słów, w każdą stronę.")
     ),
     wordBuilder = WordBuilder(
       name = "Czytaj i pisz",
@@ -1695,6 +1760,16 @@ object Strings:
           "No puedes cruzar las paredes — sigue solo los pasillos abiertos.",
           "¿Sin salida? Retrocede y prueba otro camino."
         ))
+      ),
+      wordSearch = WordSearchOff(
+        printTitle = "Sopa de letras — encuentra las palabras",
+        sheetHint = "Imprime la hoja y rodea cada palabra que encuentres. La lista está debajo de la cuadrícula.",
+        wordsLabel = "Encuentra estas palabras",
+        rules = Rules("Cómo jugar", List(
+          "Cada palabra de la lista está escondida en la cuadrícula de letras.",
+          "Las palabras van en línea recta — en horizontal, vertical o diagonal, a veces al revés.",
+          "Rodea cada palabra que encuentres y táchala de la lista."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1872,6 +1947,17 @@ object Strings:
       easy = MazeVariant("Fácil", "10×10 con bucles suaves."),
       medium = MazeVariant("Medio", "16×16, un solo camino."),
       hard = MazeVariant("Difícil", "24×24, un verdadero laberinto.")
+    ),
+    wordSearch = WordSearch(
+      name = "Sopa de letras",
+      description = "Encuentra las palabras escondidas en la cuadrícula.",
+      instruction = "Arrastra por las letras para marcar una palabra — horizontal, vertical o diagonal.",
+      foundLabel = "Encontradas",
+      won = "¡Las encontraste todas! 🔍",
+      newGame = "Nueva sopa",
+      easy = WordSearchVariant("Fácil", "8×8, 6 palabras, horizontal y vertical."),
+      medium = WordSearchVariant("Medio", "11×11, 8 palabras, con diagonales."),
+      hard = WordSearchVariant("Difícil", "13×13, 10 palabras, en todas direcciones.")
     ),
     wordBuilder = WordBuilder(
       name = "Lee y deletrea",
@@ -2169,6 +2255,16 @@ object Strings:
           "On ne traverse pas les murs — suis seulement les couloirs ouverts.",
           "Cul-de-sac ? Reviens en arrière et essaie un autre tournant."
         ))
+      ),
+      wordSearch = WordSearchOff(
+        printTitle = "Mots mêlés — trouve les mots cachés",
+        sheetHint = "Imprimez la feuille et entourez chaque mot trouvé. La liste est sous la grille.",
+        wordsLabel = "Trouve ces mots",
+        rules = Rules("Comment jouer", List(
+          "Chaque mot de la liste est caché dans la grille de lettres.",
+          "Les mots vont en ligne droite — à l'horizontale, à la verticale ou en diagonale, parfois à l'envers.",
+          "Entoure chaque mot trouvé et raye-le de la liste."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2346,6 +2442,17 @@ object Strings:
       easy = MazeVariant("Facile", "10×10 avec des boucles douces."),
       medium = MazeVariant("Moyen", "16×16, un seul passage."),
       hard = MazeVariant("Difficile", "24×24, un vrai labyrinthe.")
+    ),
+    wordSearch = WordSearch(
+      name = "Mots mêlés",
+      description = "Trouve les mots cachés dans la grille.",
+      instruction = "Glisse sur les lettres pour tracer un mot — à l'horizontale, à la verticale ou en diagonale.",
+      foundLabel = "Trouvés",
+      won = "Tu les as tous trouvés ! 🔍",
+      newGame = "Nouvelle grille",
+      easy = WordSearchVariant("Facile", "8×8, 6 mots, horizontal et vertical."),
+      medium = WordSearchVariant("Moyen", "11×11, 8 mots, avec diagonales."),
+      hard = WordSearchVariant("Difficile", "13×13, 10 mots, dans tous les sens.")
     ),
     wordBuilder = WordBuilder(
       name = "Lis et écris",
@@ -2643,6 +2750,16 @@ object Strings:
           "Wände kann man nicht überqueren — folge nur den offenen Gängen.",
           "Sackgasse? Geh zurück und versuch eine andere Abzweigung."
         ))
+      ),
+      wordSearch = WordSearchOff(
+        printTitle = "Wortsuche — finde die versteckten Wörter",
+        sheetHint = "Druckt das Blatt aus und kreist jedes gefundene Wort ein. Die Wortliste steht unter dem Gitter.",
+        wordsLabel = "Finde diese Wörter",
+        rules = Rules("So wird gespielt", List(
+          "Jedes Wort aus der Liste ist im Buchstabengitter versteckt.",
+          "Die Wörter verlaufen gerade — waagerecht, senkrecht oder diagonal, manchmal rückwärts.",
+          "Kreise jedes gefundene Wort ein und streiche es von der Liste."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2820,6 +2937,17 @@ object Strings:
       easy = MazeVariant("Leicht", "10×10 mit sanften Schleifen."),
       medium = MazeVariant("Mittel", "16×16, ein Weg hindurch."),
       hard = MazeVariant("Schwer", "24×24, ein echtes Labyrinth.")
+    ),
+    wordSearch = WordSearch(
+      name = "Wortsuche",
+      description = "Finde die versteckten Wörter im Gitter.",
+      instruction = "Zieh über die Buchstaben, um ein Wort zu markieren — waagerecht, senkrecht oder diagonal.",
+      foundLabel = "Gefunden",
+      won = "Du hast alle gefunden! 🔍",
+      newGame = "Neues Gitter",
+      easy = WordSearchVariant("Leicht", "8×8, 6 Wörter, waagerecht und senkrecht."),
+      medium = WordSearchVariant("Mittel", "11×11, 8 Wörter, mit Diagonalen."),
+      hard = WordSearchVariant("Schwer", "13×13, 10 Wörter, in alle Richtungen.")
     ),
     wordBuilder = WordBuilder(
       name = "Lesen & Schreiben",

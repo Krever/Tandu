@@ -1,8 +1,28 @@
+import { execSync } from "node:child_process";
 import { defineConfig } from "vite";
 import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Build stamp embedded in the UI: "{commit-count}-{short-hash}", with a
+// trailing "+" when built from a dirty tree. The "+" is deliberately subtle —
+// developers recognise it as "and some uncommitted changes" (semver
+// build-metadata / git-describe convention) while users just see a code.
+// Runs locally at build time (deploy.sh builds here, then uploads dist/), so
+// git is always available; falls back to "dev" if it somehow isn't.
+function appVersion() {
+  try {
+    const git = (c) => execSync(c, { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+    const count = git("git rev-list --count HEAD");
+    const hash = git("git rev-parse --short HEAD");
+    const dirty = git("git status --porcelain") !== "";
+    return `${count}-${hash}${dirty ? "+" : ""}`;
+  } catch {
+    return "dev";
+  }
+}
+
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(appVersion()) },
   plugins: [
     scalaJSPlugin(),
     VitePWA({

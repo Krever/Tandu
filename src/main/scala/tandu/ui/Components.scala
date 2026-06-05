@@ -1,7 +1,7 @@
 package tandu.ui
 
 import com.raquo.laminar.api.L.*
-import tandu.{AppState, Page, Pwa, Routing}
+import tandu.{AppState, Page, Pwa, Routing, Version}
 import tandu.audio.Speech
 import tandu.i18n.{Lang, Strings}
 
@@ -157,7 +157,10 @@ object Components:
             rel := "noopener noreferrer",
             child.text <-- s(_.about.privacy)
           )
-        )
+        ),
+        // Build stamp — quiet, no translated label. Recognisable to anyone
+        // filing a bug; invisible noise to everyone else.
+        footer = Some(p(cls := "modal__version muted", Version.current))
       ),
       modal(iosHelpOpen, s(_.installHelp.title), s(_.installHelp.body))
     )
@@ -331,7 +334,8 @@ object Components:
       isOpen: Var[Boolean],
       title: Signal[String],
       body: Signal[String],
-      extraActions: Seq[HtmlElement] = Nil
+      extraActions: Seq[HtmlElement] = Nil,
+      footer: Option[HtmlElement] = None
   ): HtmlElement =
     div(
       cls := "modal-backdrop no-print",
@@ -350,7 +354,8 @@ object Components:
             child.text <-- s(_.common.close),
             onClick --> (_ => isOpen.set(false))
           )
-        )
+        ),
+        footer
       )
     )
 

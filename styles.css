@@ -2448,6 +2448,37 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .mp-op--vs { color: var(--color-text-muted, #777); font-size: 32px; }
 .mp-op--q  { color: var(--color-text-muted, #777); font-size: 56px; }
 
+/* Numeral shown above a pictured group, so the picture supports the numeral. */
+.mp-operand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+.mp-operand-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+/* Crossed-out item in a take-away (subtraction) group. */
+.mp-strike {
+  display: inline-block;
+  position: relative;
+  opacity: 0.5;
+}
+.mp-strike::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  border-top: 3px solid var(--color-hit);
+  transform: rotate(-12deg);
+}
+
 .mp-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

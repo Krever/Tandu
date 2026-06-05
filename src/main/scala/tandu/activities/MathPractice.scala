@@ -31,8 +31,9 @@ object MathPractice extends Activity:
     case Expression(text: String)                            // "3 + 4 = ?"
     case ShowGroup(group: Group)                             // count
     case ShowNumeral(n: Int)                                 // recognize
-    case TwoGroups(a: Group, b: Group, op: Option[String])   // pictorial arith / pictorial compare
+    case TwoGroups(a: Group, b: Group, op: Option[String])   // pictorial addition / pictorial compare
     case TwoNumerals(a: Int, b: Int)                         // numeric compare
+    case TakeAway(emoji: String, total: Int, removed: Int)   // pictorial subtraction (cross-out)
 
   enum Choice:
     case Num(n: Int)
@@ -169,8 +170,15 @@ object MathPractice extends Activity:
     val op = if plus then "+" else "−"
     if pictorial then
       val emoji = randomEmoji()
+      // Addition shows two groups (numeral + picture each), so the picture
+      // supports the sum instead of replacing it. Subtraction shows a single
+      // group with the subtracted items crossed out, so the picture actually
+      // means "take away" and is solved by counting what remains.
+      val stem =
+        if plus then Stem.TwoGroups(Group(emoji, a), Group(emoji, b), Some(op))
+        else Stem.TakeAway(emoji, a, b)
       Task(if plus then TaskKind.AddPic else TaskKind.SubPic,
-        Stem.TwoGroups(Group(emoji, a), Group(emoji, b), Some(op)), _.mathPractice.howMany,
+        stem, _.mathPractice.howMany,
         choices.map(Choice.Num.apply), idx)
     else
       Task(if plus then TaskKind.AddNum else TaskKind.SubNum,
@@ -339,6 +347,7 @@ object MathPractice extends Activity:
     case Stem.ShowNumeral(n)            => Some(n.toString)
     case Stem.TwoNumerals(a, b)         => Some(s"$a ${str.mathPractice.compare} $b?")
     case Stem.TwoGroups(a, b, Some(op)) => Some(exprToSpeech(s"${a.count} $op ${b.count}", str))
+    case Stem.TakeAway(_, total, rem)   => Some(exprToSpeech(s"$total − $rem", str))
     case Stem.ShowGroup(_)              => None
     case Stem.TwoGroups(_, _, None)     => None
 
@@ -360,6 +369,16 @@ object MathPractice extends Activity:
     case Stem.ShowNumeral(n) =>
       div(cls := "mp-numeral", n.toString)
     case Stem.TwoGroups(a, b, op) =>
+      // With an operator (addition) show the numeral above each group so the
+      // picture supports the sum; without one (comparison) show bare groups so
+      // the child compares quantities, not numerals.
+      def operand(g: Group): HtmlElement = op match
+        case Some(_) =>
+          div(cls := "mp-operand",
+            div(cls := "mp-operand-num", g.count.toString),
+            div(cls := "mp-group", g.emoji * g.count))
+        case None =>
+          div(cls := "mp-group", g.emoji * g.count)
       val opNode = op match
         case Some(o) => div(cls := "mp-op", o)
         case None    => div(cls := "mp-op mp-op--q", "?")
@@ -368,10 +387,22 @@ object MathPractice extends Activity:
         case None    => Nil
       div(
         cls := "mp-pic-row",
-        div(cls := "mp-group", a.emoji * a.count),
+        operand(a),
         opNode,
-        div(cls := "mp-group", b.emoji * b.count),
+        operand(b),
         tail
+      )
+    case Stem.TakeAway(emoji, total, removed) =>
+      div(
+        cls := "mp-pic-row",
+        div(cls := "mp-operand",
+          div(cls := "mp-operand-num", s"$total − $removed"),
+          div(cls := "mp-group",
+            (0 until total).map(i => span(cls("mp-strike") := i >= total - removed, emoji))
+          )
+        ),
+        div(cls := "mp-op", "="),
+        div(cls := "mp-op", "?")
       )
     case Stem.TwoNumerals(a, b) =>
       div(
@@ -472,4 +503,12 @@ object MathPractice extends Activity:
         span(cls := "mp-print-expr", a.toString),
         span(cls := "mp-print-op", "?"),
         span(cls := "mp-print-expr", b.toString)
+      )
+    case Stem.TakeAway(emoji, total, removed) =>
+      div(
+        cls := "mp-print-pic",
+        span(cls := "mp-print-expr", s"$total − $removed"),
+        span(cls := "mp-print-group",
+          (0 until total).map(i => span(cls("mp-strike") := i >= total - removed, emoji))
+        )
       )

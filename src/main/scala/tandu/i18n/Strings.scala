@@ -72,7 +72,10 @@ object Strings:
       removeFromFavourites: String,
       noFavouritesYet: String,
       searchPlaceholder: String,
-      noMatches: String
+      noMatches: String,
+      hide: String,
+      unhide: String,
+      showHidden: String
   )
 
   final case class About(
@@ -543,7 +546,10 @@ object Strings:
       removeFromFavourites = "Remove from favourites",
       noFavouritesYet = "Tap the star on any activity to save it as a favourite.",
       searchPlaceholder = "Search activities…",
-      noMatches = "No activities match your search."
+      noMatches = "No activities match your search.",
+      hide = "Hide activity",
+      unhide = "Show activity",
+      showHidden = "Hidden"
     ),
     about = About(
       open = "About",
@@ -994,7 +1000,10 @@ object Strings:
       removeFromFavourites = "Usuń z ulubionych",
       noFavouritesYet = "Dotknij gwiazdki przy aktywności, aby zapisać ją jako ulubioną.",
       searchPlaceholder = "Szukaj zabaw…",
-      noMatches = "Brak zabaw pasujących do wyszukiwania."
+      noMatches = "Brak zabaw pasujących do wyszukiwania.",
+      hide = "Ukryj zabawę",
+      unhide = "Pokaż zabawę",
+      showHidden = "Ukryte"
     ),
     about = About(
       open = "O aplikacji",
@@ -1445,7 +1454,10 @@ object Strings:
       removeFromFavourites = "Quitar de favoritos",
       noFavouritesYet = "Toca la estrella en una actividad para guardarla como favorita.",
       searchPlaceholder = "Buscar actividades…",
-      noMatches = "Ninguna actividad coincide con tu búsqueda."
+      noMatches = "Ninguna actividad coincide con tu búsqueda.",
+      hide = "Ocultar actividad",
+      unhide = "Mostrar actividad",
+      showHidden = "Ocultas"
     ),
     about = About(
       open = "Acerca de",
@@ -1896,7 +1908,10 @@ object Strings:
       removeFromFavourites = "Retirer des favoris",
       noFavouritesYet = "Touchez l'étoile sur une activité pour l'enregistrer comme favorite.",
       searchPlaceholder = "Rechercher une activité…",
-      noMatches = "Aucune activité ne correspond à votre recherche."
+      noMatches = "Aucune activité ne correspond à votre recherche.",
+      hide = "Masquer l'activité",
+      unhide = "Afficher l'activité",
+      showHidden = "Masquées"
     ),
     about = About(
       open = "À propos",
@@ -2347,7 +2362,10 @@ object Strings:
       removeFromFavourites = "Aus Favoriten entfernen",
       noFavouritesYet = "Tippe auf den Stern bei einer Aktivität, um sie als Favorit zu speichern.",
       searchPlaceholder = "Aktivitäten suchen…",
-      noMatches = "Keine Aktivitäten passen zu deiner Suche."
+      noMatches = "Keine Aktivitäten passen zu deiner Suche.",
+      hide = "Aktivität ausblenden",
+      unhide = "Aktivität anzeigen",
+      showHidden = "Ausgeblendet"
     ),
     about = About(
       open = "Über",

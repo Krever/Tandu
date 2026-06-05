@@ -8,6 +8,7 @@ object Storage:
   private val KeyKind           = "tandu.kind"
   private val KeyFavourites     = "tandu.favourites"
   private val KeyFavouritesOnly = "tandu.favouritesOnly"
+  private val KeyHidden         = "tandu.hidden"
   private val KeyClockFormat    = "tandu.clockFormat"
 
   def getString(key: String): Option[String] =
@@ -31,6 +32,13 @@ object Storage:
 
   def loadFavouritesOnly(): Boolean         = getString(KeyFavouritesOnly).contains("true")
   def saveFavouritesOnly(value: Boolean): Unit = setString(KeyFavouritesOnly, value.toString)
+
+  def loadHidden(): Set[String] =
+    getString(KeyHidden)
+      .map(_.split(',').iterator.map(_.trim).filter(_.nonEmpty).toSet)
+      .getOrElse(Set.empty)
+  def saveHidden(ids: Set[String]): Unit =
+    setString(KeyHidden, ids.toList.sorted.mkString(","))
 
   def loadClockFormat(): Option[String]    = getString(KeyClockFormat)
   def saveClockFormat(value: String): Unit = setString(KeyClockFormat, value)

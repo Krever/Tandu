@@ -11,7 +11,9 @@ object Components:
       title: Signal[String],
       back: Option[Page] = Some(Page.Home),
       subtitle: Option[Signal[String]] = None,
-      brand: Boolean = false
+      brand: Boolean = false,
+      glyph: Option[String] = None,
+      tint: Option[String] = None
   ): HtmlElement =
     val titleNode: HtmlElement =
       if brand then
@@ -32,9 +34,20 @@ object Components:
         case None => emptyNode
       ,
       div(
-        cls := "header__titles",
-        titleNode,
-        subtitle.map(sub => p(cls := "header__tagline muted", child.text <-- sub))
+        cls := "header__lede",
+        // A tinted glyph stamp echoes the activity's home-grid card, anchoring
+        // the page to the swatch the user just tapped.
+        glyph.map(g =>
+          span(cls := s"header__glyph activity-card--${tint.getOrElse("teal")}", g)
+        ),
+        div(
+          cls := "header__titles",
+          titleNode,
+          // A short rule in the activity's own tint underlines the title,
+          // pairing with the glyph stamp so both accents share one swatch.
+          tint.map(t => span(cls := s"header__rule activity-card--$t")),
+          subtitle.map(sub => p(cls := "header__tagline muted", child.text <-- sub))
+        )
       ),
       div(
         cls := "header__actions",
@@ -224,26 +237,59 @@ object Components:
       isFavourite: Signal[Boolean],
       onToggleFavourite: () => Unit,
       favouriteLabel: Signal[String],
+      isHidden: Signal[Boolean],
+      onToggleHidden: () => Unit,
+      hideLabel: Signal[String],
       glyph: String = "✦",
       tint: String = "teal"
   ): HtmlElement =
     button(
       cls := s"activity-card activity-card--$tint",
+      cls("activity-card--muted") <-- isHidden,
       span(cls := "activity-card__glyph", glyph),
       div(
         cls := "activity-card__body",
         div(cls := "activity-card__name", child.text <-- name),
         div(cls := "activity-card__desc", child.text <-- desc)
       ),
-      button(
-        cls := "activity-card__fav no-print",
-        cls("is-active") <-- isFavourite,
-        aria.label <-- favouriteLabel,
-        aria.pressed <-- isFavourite.map(_.toString),
-        child.text <-- isFavourite.map(if _ then "★" else "☆"),
-        onClick.stopPropagation --> (_ => onToggleFavourite())
+      div(
+        cls := "activity-card__actions no-print",
+        button(
+          cls := "activity-card__action activity-card__hide",
+          cls("is-active") <-- isHidden,
+          aria.label <-- hideLabel,
+          aria.pressed <-- isHidden.map(_.toString),
+          eyeIcon("activity-card__action-icon", "activity-card__eye-slash"),
+          onClick.stopPropagation --> (_ => onToggleHidden())
+        ),
+        button(
+          cls := "activity-card__action activity-card__fav",
+          cls("is-active") <-- isFavourite,
+          aria.label <-- favouriteLabel,
+          aria.pressed <-- isFavourite.map(_.toString),
+          child.text <-- isFavourite.map(if _ then "★" else "☆"),
+          onClick.stopPropagation --> (_ => onToggleFavourite())
+        )
       ),
       onClick --> (_ => onTap)
+    )
+
+  /** Eye glyph shared by the card hide-toggle and the "show hidden" pill. The
+    * slash line is always present; give it `slashCls` so CSS can reveal it per
+    * state (open eye = visible, slashed = hidden), or leave it unclassed to
+    * show a permanently-slashed "hidden items" eye. */
+  def eyeIcon(iconCls: String, slashCls: String = ""): SvgElement =
+    svg.svg(
+      svg.cls := iconCls,
+      svg.viewBox := "0 0 24 24",
+      svg.fill := "none",
+      svg.stroke := "currentColor",
+      svg.strokeWidth := "2",
+      svg.strokeLineCap := "round",
+      svg.strokeLineJoin := "round",
+      svg.path(svg.d := "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"),
+      svg.circle(svg.cx := "12", svg.cy := "12", svg.r := "3"),
+      svg.line(svg.cls := slashCls, svg.x1 := "3", svg.y1 := "3", svg.x2 := "21", svg.y2 := "21")
     )
 
   /** Primary call-to-action card living in the activity grid. Vermilion fill,

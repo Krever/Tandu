@@ -14,13 +14,15 @@ object Registry:
       handsFreeOnly: Boolean,
       kind: Kind,
       favouritesOnly: Boolean,
-      favourites: Set[String]
+      favourites: Set[String],
+      hidden: Set[String]
   ): List[Activity] =
     all
       .filter(a => kind == Kind.All || a.kind == kind)
       .filter(a => partySize.forall(fitsParty(a, _)))
       .filter(a => !handsFreeOnly || a.handsFree)
       .filter(a => !favouritesOnly || favourites.contains(a.id))
+      .filterNot(a => hidden.contains(a.id))
 
   private def fitsParty(a: Activity, party: Players): Boolean = party match
     case Players.Solo  => a.minPlayers <= 1
@@ -31,15 +33,6 @@ object Registry:
 
   private def orFallback[A](xs: List[A], fallback: List[A]): List[A] =
     if xs.isEmpty then fallback else xs
-
-  def pickRandom(
-      partySize: Option[Players],
-      handsFreeOnly: Boolean,
-      kind: Kind,
-      favouritesOnly: Boolean,
-      favourites: Set[String]
-  ): Activity =
-    pickRandom(filtered(partySize, handsFreeOnly, kind, favouritesOnly, favourites))
 
   /** Pick from an already-filtered pool, avoiding the previous draw. Lets a
     * caller that also needs the pool (e.g. the suggest reel) filter just once. */

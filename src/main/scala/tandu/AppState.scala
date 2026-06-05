@@ -16,6 +16,10 @@ object AppState:
   val favourites: Var[Set[String]] = Var(Storage.loadFavourites())
   val favouritesOnly: Var[Boolean] = Var(Storage.loadFavouritesOnly())
 
+  // Activities the user has hidden from the grid (a "reverse favourite"). They
+  // stay excluded from the catalog and from suggestions until restored.
+  val hidden: Var[Set[String]] = Var(Storage.loadHidden())
+
   // Digital-clock notation, shared across the app and persisted. 12-hour is the
   // usual starting point for kids learning to tell the time.
   val clockFormat: Var[ClockFormat] =
@@ -23,6 +27,9 @@ object AppState:
 
   def toggleFavourite(id: String): Unit =
     favourites.update(s => if s.contains(id) then s - id else s + id)
+
+  def toggleHidden(id: String): Unit =
+    hidden.update(s => if s.contains(id) then s - id else s + id)
 
   val strings: Signal[Strings] = lang.signal.map(Strings.of)
 
@@ -37,5 +44,6 @@ object AppState:
 
   val _ = favourites.signal.foreach(Storage.saveFavourites)(using unsafeWindowOwner)
   val _ = favouritesOnly.signal.foreach(Storage.saveFavouritesOnly)(using unsafeWindowOwner)
+  val _ = hidden.signal.foreach(Storage.saveHidden)(using unsafeWindowOwner)
 
   val _ = clockFormat.signal.foreach(f => Storage.saveClockFormat(f.toString))(using unsafeWindowOwner)

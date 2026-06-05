@@ -232,6 +232,7 @@ select { font-family: inherit; font-size: inherit; }
   align-items: center;
   justify-content: center;
 }
+.pill-eye { width: 18px; height: 18px; display: block; }
 
 .corner-menu { position: relative; }
 .corner-menu__backdrop {
@@ -378,21 +379,53 @@ select { font-family: inherit; font-size: inherit; }
   gap: var(--space-3);
   margin-top: var(--space-5);
 }
-.activity-search {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-3) var(--space-4);
+/* Name filter — sits in the filter-pill cluster as a single round pill, and
+   unwinds sideways into a search bar on tap. Matches the pill toggles next to
+   it (same border, radius, surface) so it reads as one of the controls. */
+.search {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  width: 43px;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  transition: width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.search.is-open { width: min(280px, 72vw); }
+.search__toggle {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text);
+  font-size: 16px;
+  line-height: 1;
+}
+.search__icon { width: 19px; height: 19px; display: block; }
+.search__field {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-3) 0 var(--space-1);
+  font: inherit;
   font-size: 1rem;
   color: inherit;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--surface-2, #f3f4f6);
+  background: transparent;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.18s ease 0.08s;
 }
-.activity-search::placeholder { color: var(--color-muted); }
-.activity-search:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
+.search.is-open .search__field { opacity: 1; }
+.search__field:focus { outline: none; }
+.search__field::placeholder { color: var(--color-muted); }
 
 .activity-grid__divider {
   grid-column: 1 / -1;
@@ -492,10 +525,16 @@ select { font-family: inherit; font-size: inherit; }
   overflow: hidden;
   min-height: calc(2 * 1.3em);
 }
-.activity-card__fav {
+/* Top-right control cluster: hide (eye) + favourite (star). */
+.activity-card__actions {
   position: absolute;
   top: 4px;
   right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.activity-card__action {
   width: 28px;
   height: 28px;
   display: inline-flex;
@@ -505,18 +544,28 @@ select { font-family: inherit; font-size: inherit; }
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 18px;
   line-height: 1;
   color: var(--color-muted);
   border-radius: 6px;
   transition: color 0.08s ease, background 0.08s ease, transform 0.08s ease;
 }
-.activity-card__fav:hover {
+.activity-card__action:hover {
   background: color-mix(in srgb, var(--color-text) 8%, transparent);
   color: var(--color-text);
 }
-.activity-card__fav:active { transform: scale(0.92); }
+.activity-card__action:active { transform: scale(0.92); }
+.activity-card__fav { font-size: 18px; }
 .activity-card__fav.is-active { color: var(--color-primary); }
+.activity-card__action-icon { width: 16px; height: 16px; display: block; }
+/* Eye starts open (visible); the slash appears once the card is hidden. */
+.activity-card__eye-slash { opacity: 0; transition: opacity 0.08s ease; }
+.activity-card__hide.is-active { color: var(--color-text); }
+.activity-card__hide.is-active .activity-card__eye-slash { opacity: 1; }
+
+/* A hidden card (only seen while "show hidden" is on) is dimmed so it reads
+   as set-aside, and its glyph desaturates toward the parchment. */
+.activity-card--muted { opacity: 0.5; }
+.activity-card--muted:hover { opacity: 0.72; }
 
 /* Narrow phones: descriptions get squeezed in a 2-col grid, so the
    activity catalog becomes a single-column index strip. Glyph stamp
@@ -531,9 +580,11 @@ select { font-family: inherit; font-size: inherit; }
 /* Primary call-to-action card — vermilion field, cream ink, italic display
    type. Distinct as the showpiece while still occupying a grid cell. */
 .activity-card--suggest {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 72px;
   background: var(--color-primary);
   color: var(--color-primary-text);
 }
@@ -1767,7 +1818,33 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   border-color: var(--color-primary);
 }
 
+.header__lede { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.header__glyph {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1;
+  border-radius: 12px;
+  background: var(--tile-stamp, var(--color-bg-2));
+  border: 1.5px solid color-mix(in srgb, var(--tile-stamp, var(--color-border-strong)) 55%, var(--color-border-strong));
+  color: color-mix(in srgb, var(--tile-stamp, var(--color-text)) 30%, var(--color-text));
+  box-shadow: var(--shadow-stamp-sm);
+}
 .header__titles { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.header__rule {
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--tile-stamp, var(--color-border));
+}
 .header__tagline {
   margin: 4px 0 0 0;
   font-family: var(--font-display);

@@ -2143,6 +2143,213 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   text-transform: uppercase;
 }
 
+/* ---- Guide the robot ---- */
+.robot-instruction,
+.robot-hint { margin: 0 auto; max-width: 38ch; }
+
+.robot-board {
+  display: grid;
+  grid-template-columns: repeat(var(--robot-size), 1fr);
+  grid-template-rows: repeat(var(--robot-size), 1fr);
+  gap: 4px;
+  width: min(92vw, 360px, calc(100svh - 360px));
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  padding: 6px;
+  background: var(--color-bg-2);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-stamp-sm);
+}
+.robot-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  font-size: clamp(16px, 6vmin, 30px);
+  line-height: 1;
+  user-select: none;
+}
+.robot-bot { line-height: 1; }
+
+/* Heading caret for the turning tiers: a triangle pinned to the top-centre of
+   the cell, then the whole overlay is rotated about the cell centre so the
+   caret orbits to — and points along — the robot's leading edge. */
+.robot-facing {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1px;
+  font-size: 0.5em;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--color-primary);
+  pointer-events: none;
+}
+.robot-facing--up    { transform: rotate(0deg); }
+.robot-facing--right { transform: rotate(90deg); }
+.robot-facing--down  { transform: rotate(180deg); }
+.robot-facing--left  { transform: rotate(270deg); }
+.robot-cell--wall { background: color-mix(in srgb, var(--color-border-strong) 14%, var(--color-bg-2)); }
+.robot-cell--robot { background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface)); }
+
+.robot-build { align-items: center; }
+.robot-program {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.6rem;
+}
+.robot-program__label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.robot-program__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  /* Horizontal spacing comes from the .robot-gap elements between chips; only
+     the row gap is needed here for wrapping. */
+  gap: var(--space-1) 0;
+  max-width: 420px;
+}
+.robot-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 0.35rem;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.robot-chip:active { opacity: 0.55; }
+
+/* Insertion points between steps. A thin sliver normally; while a palette
+   button is being dragged the whole strip widens its gaps into drop zones, and
+   the one under the pointer lights up. */
+.robot-gap {
+  align-self: stretch;
+  width: 4px;
+  min-height: 1.9rem;
+  border-radius: 3px;
+  transition: width 0.1s ease, background 0.1s ease;
+}
+/* While dragging, every gap shows as a faint slot... */
+.robot-program__chips.is-dragging .robot-gap {
+  width: 8px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+/* ...and the gap under the pointer becomes a bold, glowing insertion bar so the
+   drop point is unmistakable. */
+.robot-program__chips.is-dragging .robot-gap.is-drop {
+  width: 14px;
+  background: var(--color-primary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+.robot-gap--empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 9rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px dashed transparent;
+  border-radius: var(--radius-sm);
+}
+.robot-gap--empty.is-drop {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+.robot-program__empty { font-size: 0.9rem; }
+
+.robot-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 3.2rem);
+  grid-auto-rows: 3.2rem;
+  gap: var(--space-2);
+  justify-content: center;
+}
+.robot-dpad__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-stamp-sm);
+  cursor: grab;
+  touch-action: none; /* claim drags so the page doesn't scroll under them */
+}
+.robot-dpad__btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--color-border-strong); }
+.robot-dpad__btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+
+.robot-controls { justify-content: center; flex-wrap: wrap; margin-top: var(--space-2); }
+.robot-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
+
+/* Printable worksheet — boards tiled two-up, each with a row of boxes beneath
+   for writing the arrow path by hand. */
+.robot-print-sheet {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10mm;
+  justify-content: center;
+  align-content: start;
+}
+.robot-print-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4mm;
+  align-items: center;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.robot-print-board {
+  display: grid;
+  grid-template-columns: repeat(var(--robot-size), 1fr);
+  grid-template-rows: repeat(var(--robot-size), 1fr);
+  border: 2px solid black;
+  width: 78mm;
+  height: 78mm;
+}
+.robot-print-item--easy .robot-print-board { width: 70mm; height: 70mm; }
+.robot-print-cell {
+  border: 1px solid #bbb;
+  border-radius: 0;
+  aspect-ratio: auto;
+  background: #fff;
+  font-size: 7mm;
+}
+.robot-print-cell.robot-cell--wall { background: #e5e5e5; }
+.robot-print-cell .robot-facing { color: #000; }
+.robot-print-write { width: 100%; }
+.robot-print-write__label { display: block; font-size: 10pt; margin-bottom: 1.5mm; }
+.robot-print-write__boxes { display: flex; flex-wrap: wrap; gap: 2mm; }
+.robot-print-box {
+  display: inline-block;
+  width: 8mm;
+  height: 8mm;
+  border: 1px solid #555;
+  border-radius: 1mm;
+}
+
 /* ---- P2P lobby ---- */
 .p2p-code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

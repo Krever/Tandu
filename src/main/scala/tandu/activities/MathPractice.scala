@@ -73,6 +73,11 @@ object MathPractice extends Activity:
   private val emojiPool = Vector("🍎", "🍊", "🐶", "🐱", "⭐", "⚽", "🦋", "🐢", "🐠", "🌸", "🚗", "🎈")
   private def randomEmoji(): String = emojiPool(Random.nextInt(emojiPool.size))
 
+  /** A row of `total` emoji with the last `removed` struck through — the visual
+    * "take away" group, shared by the screen and print renderers. */
+  private def strikeItems(emoji: String, total: Int, removed: Int): Seq[HtmlElement] =
+    (0 until total).map(i => span(cls("mp-strike") := i >= total - removed, emoji))
+
   private def randInRange(min: Int, max: Int): Int =
     if max <= min then min else min + Random.nextInt(max - min + 1)
 
@@ -397,9 +402,7 @@ object MathPractice extends Activity:
         cls := "mp-pic-row",
         div(cls := "mp-operand",
           div(cls := "mp-operand-num", s"$total − $removed"),
-          div(cls := "mp-group",
-            (0 until total).map(i => span(cls("mp-strike") := i >= total - removed, emoji))
-          )
+          div(cls := "mp-group", strikeItems(emoji, total, removed))
         ),
         div(cls := "mp-op", "="),
         div(cls := "mp-op", "?")
@@ -508,7 +511,5 @@ object MathPractice extends Activity:
       div(
         cls := "mp-print-pic",
         span(cls := "mp-print-expr", s"$total − $removed"),
-        span(cls := "mp-print-group",
-          (0 until total).map(i => span(cls("mp-strike") := i >= total - removed, emoji))
-        )
+        span(cls := "mp-print-group", strikeItems(emoji, total, removed))
       )

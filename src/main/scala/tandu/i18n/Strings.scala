@@ -36,7 +36,8 @@ final case class Strings(
     memoryChain: Strings.MemoryChain,
     iSpy: Strings.ISpy,
     maze: Strings.Maze,
-    wordSearch: Strings.WordSearch
+    wordSearch: Strings.WordSearch,
+    guideRobot: Strings.GuideRobot
 )
 
 object Strings:
@@ -227,6 +228,13 @@ object Strings:
       rules: Rules
   )
 
+  final case class GuideRobotOff(
+      printTitle: String,
+      sheetHint: String,
+      writeLabel: String,
+      rules: Rules
+  )
+
   final case class Offline(
       materials: Materials,
       battleships: BattleshipsOff,
@@ -239,7 +247,8 @@ object Strings:
       checkers: CheckersOff,
       sudoku: SudokuOff,
       maze: MazeOff,
-      wordSearch: WordSearchOff
+      wordSearch: WordSearchOff,
+      guideRobot: GuideRobotOff
   )
 
   final case class TttVariant(name: String, description: String)
@@ -557,6 +566,30 @@ object Strings:
       hard: WordSearchVariant
   )
 
+  final case class GuideRobotVariant(name: String, description: String)
+
+  final case class GuideRobot(
+      name: String,
+      description: String,
+      instruction: String,
+      instructionTurns: String,
+      programLabel: String,
+      emptyProgram: String,
+      run: String,
+      undo: String,
+      clear: String,
+      starHint: String,
+      won: String,
+      crashed: String,
+      missed: String,
+      missedStar: String,
+      tryAgain: String,
+      newGame: String,
+      easy: GuideRobotVariant,
+      medium: GuideRobotVariant,
+      hard: GuideRobotVariant
+  )
+
   val en: Strings = Strings(
     appTitle = "Tandu",
     tagline = "Your time together",
@@ -780,6 +813,18 @@ object Strings:
           "Words run in a straight line — across, down, or diagonally, sometimes backwards.",
           "Circle each word as you find it and cross it off the list."
         ))
+      ),
+      guideRobot = GuideRobotOff(
+        printTitle = "Guide the Robot — write the arrow path",
+        sheetHint = "Print the sheet and write the arrows that drive each robot to its flag.",
+        writeLabel = "Write the arrows",
+        rules = Rules("How to play", List(
+          "The robot 🤖 starts on the grid and must reach the flag 🏁.",
+          "On the easy sheet, write arrows (↑ ↓ ← →) — one square per arrow.",
+          "On the harder sheets the robot turns: ↑ forward, ↺ turn left, ↻ turn right.",
+          "Walls 🧱 block the way, so steer around them.",
+          "On the hard sheets, drive over the star ⭐ before the flag."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -968,6 +1013,27 @@ object Strings:
       easy = WordSearchVariant("Easy", "8×8, 6 words, across and down."),
       medium = WordSearchVariant("Medium", "11×11, 8 words, with diagonals."),
       hard = WordSearchVariant("Hard", "13×13, 10 words, every direction.")
+    ),
+    guideRobot = GuideRobot(
+      name = "Guide the Robot",
+      description = "Program the arrows to drive the robot home.",
+      instruction = "Tap the arrows to build a path, then press Run to send the robot off.",
+      instructionTurns = "Tap forward and the turn buttons to steer the robot, then press Run.",
+      programLabel = "Your program",
+      emptyProgram = "Tap the arrows below to add steps.",
+      run = "Run ▶",
+      undo = "Undo",
+      clear = "Clear",
+      starHint = "Drive over the star ⭐ before reaching the flag 🏁.",
+      won = "The robot made it! 🤖",
+      crashed = "Bonk! The robot hit a wall. Try again.",
+      missed = "The robot didn't reach the flag. Try again.",
+      missedStar = "Grab the star ⭐ first! Try again.",
+      tryAgain = "Try again",
+      newGame = "New puzzle",
+      easy = GuideRobotVariant("Easy", "5×5, a clear path to the flag."),
+      medium = GuideRobotVariant("Medium", "6×6 with walls to steer around."),
+      hard = GuideRobotVariant("Hard", "6×6 — grab the star, then the flag.")
     ),
     wordBuilder = WordBuilder(
       name = "Read & Spell",
@@ -1275,6 +1341,18 @@ object Strings:
           "Słowa biegną w linii prostej — w poziomie, pionie lub po skosie, czasem wspak.",
           "Zakreślaj każde znalezione słowo i skreślaj je z listy."
         ))
+      ),
+      guideRobot = GuideRobotOff(
+        printTitle = "Poprowadź robota — zapisz trasę ze strzałek",
+        sheetHint = "Wydrukuj kartkę i zapisz strzałki, które doprowadzą każdego robota do mety.",
+        writeLabel = "Zapisz strzałki",
+        rules = Rules("Jak grać", List(
+          "Robot 🤖 startuje na planszy i musi dotrzeć do mety 🏁.",
+          "Na łatwej kartce zapisz strzałki (↑ ↓ ← →) — jedna kratka na strzałkę.",
+          "Na trudniejszych robot się obraca: ↑ naprzód, ↺ w lewo, ↻ w prawo.",
+          "Ściany 🧱 blokują drogę, więc je omijaj.",
+          "Na trudnych kartkach przejedź przez gwiazdkę ⭐ przed metą."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1463,6 +1541,27 @@ object Strings:
       easy = WordSearchVariant("Łatwy", "8×8, 6 słów, w poziomie i pionie."),
       medium = WordSearchVariant("Średni", "11×11, 8 słów, ze skosami."),
       hard = WordSearchVariant("Trudny", "13×13, 10 słów, w każdą stronę.")
+    ),
+    guideRobot = GuideRobot(
+      name = "Poprowadź robota",
+      description = "Ułóż strzałki i doprowadź robota do mety.",
+      instruction = "Dotykaj strzałek, by ułożyć trasę, a potem naciśnij Start, by wysłać robota.",
+      instructionTurns = "Dotykaj „naprzód” i przycisków obrotu, by sterować robotem, potem naciśnij Start.",
+      programLabel = "Twój program",
+      emptyProgram = "Dotykaj strzałek poniżej, by dodać kroki.",
+      run = "Start ▶",
+      undo = "Cofnij",
+      clear = "Wyczyść",
+      starHint = "Przejedź przez gwiazdkę ⭐ przed dotarciem do mety 🏁.",
+      won = "Robot dotarł! 🤖",
+      crashed = "Bęc! Robot wpadł na ścianę. Spróbuj jeszcze raz.",
+      missed = "Robot nie dotarł do mety. Spróbuj jeszcze raz.",
+      missedStar = "Najpierw zabierz gwiazdkę ⭐! Spróbuj jeszcze raz.",
+      tryAgain = "Spróbuj jeszcze raz",
+      newGame = "Nowa plansza",
+      easy = GuideRobotVariant("Łatwy", "5×5, wolna droga do mety."),
+      medium = GuideRobotVariant("Średni", "6×6 ze ścianami do ominięcia."),
+      hard = GuideRobotVariant("Trudny", "6×6 — zabierz gwiazdkę, potem meta.")
     ),
     wordBuilder = WordBuilder(
       name = "Czytaj i pisz",
@@ -1770,6 +1869,18 @@ object Strings:
           "Las palabras van en línea recta — en horizontal, vertical o diagonal, a veces al revés.",
           "Rodea cada palabra que encuentres y táchala de la lista."
         ))
+      ),
+      guideRobot = GuideRobotOff(
+        printTitle = "Guía al robot — escribe el camino de flechas",
+        sheetHint = "Imprime la hoja y escribe las flechas que llevan a cada robot a su meta.",
+        writeLabel = "Escribe las flechas",
+        rules = Rules("Cómo jugar", List(
+          "El robot 🤖 empieza en la cuadrícula y debe llegar a la meta 🏁.",
+          "En la hoja fácil, escribe flechas (↑ ↓ ← →) — una casilla por flecha.",
+          "En las hojas difíciles el robot gira: ↑ avanzar, ↺ girar a la izquierda, ↻ girar a la derecha.",
+          "Los muros 🧱 cierran el paso, así que esquívalos.",
+          "En las hojas difíciles, pasa por la estrella ⭐ antes de la meta."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1958,6 +2069,27 @@ object Strings:
       easy = WordSearchVariant("Fácil", "8×8, 6 palabras, horizontal y vertical."),
       medium = WordSearchVariant("Medio", "11×11, 8 palabras, con diagonales."),
       hard = WordSearchVariant("Difícil", "13×13, 10 palabras, en todas direcciones.")
+    ),
+    guideRobot = GuideRobot(
+      name = "Guía al robot",
+      description = "Programa las flechas para llevar al robot a la meta.",
+      instruction = "Toca las flechas para crear un camino y pulsa Marcha para enviar al robot.",
+      instructionTurns = "Toca avanzar y los botones de giro para dirigir al robot, y pulsa Marcha.",
+      programLabel = "Tu programa",
+      emptyProgram = "Toca las flechas de abajo para añadir pasos.",
+      run = "Marcha ▶",
+      undo = "Deshacer",
+      clear = "Borrar",
+      starHint = "Pasa por la estrella ⭐ antes de llegar a la meta 🏁.",
+      won = "¡El robot llegó! 🤖",
+      crashed = "¡Pum! El robot chocó con un muro. Inténtalo de nuevo.",
+      missed = "El robot no llegó a la meta. Inténtalo de nuevo.",
+      missedStar = "¡Recoge la estrella ⭐ primero! Inténtalo de nuevo.",
+      tryAgain = "Inténtalo de nuevo",
+      newGame = "Nuevo reto",
+      easy = GuideRobotVariant("Fácil", "5×5, camino libre a la meta."),
+      medium = GuideRobotVariant("Medio", "6×6 con muros que esquivar."),
+      hard = GuideRobotVariant("Difícil", "6×6 — coge la estrella y luego la meta.")
     ),
     wordBuilder = WordBuilder(
       name = "Lee y deletrea",
@@ -2265,6 +2397,18 @@ object Strings:
           "Les mots vont en ligne droite — à l'horizontale, à la verticale ou en diagonale, parfois à l'envers.",
           "Entoure chaque mot trouvé et raye-le de la liste."
         ))
+      ),
+      guideRobot = GuideRobotOff(
+        printTitle = "Guide le robot — écris le chemin en flèches",
+        sheetHint = "Imprimez la feuille et écrivez les flèches qui mènent chaque robot à son arrivée.",
+        writeLabel = "Écris les flèches",
+        rules = Rules("Comment jouer", List(
+          "Le robot 🤖 démarre sur la grille et doit atteindre l'arrivée 🏁.",
+          "Sur la feuille facile, écris des flèches (↑ ↓ ← →) — une case par flèche.",
+          "Sur les feuilles difficiles le robot tourne : ↑ avancer, ↺ tourner à gauche, ↻ tourner à droite.",
+          "Les murs 🧱 bloquent le passage, alors contourne-les.",
+          "Sur les feuilles difficiles, passe sur l'étoile ⭐ avant l'arrivée."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2453,6 +2597,27 @@ object Strings:
       easy = WordSearchVariant("Facile", "8×8, 6 mots, horizontal et vertical."),
       medium = WordSearchVariant("Moyen", "11×11, 8 mots, avec diagonales."),
       hard = WordSearchVariant("Difficile", "13×13, 10 mots, dans tous les sens.")
+    ),
+    guideRobot = GuideRobot(
+      name = "Guide le robot",
+      description = "Programme les flèches pour conduire le robot à l'arrivée.",
+      instruction = "Touche les flèches pour tracer un chemin, puis appuie sur Go pour lancer le robot.",
+      instructionTurns = "Touche avancer et les boutons de rotation pour diriger le robot, puis appuie sur Go.",
+      programLabel = "Ton programme",
+      emptyProgram = "Touche les flèches ci-dessous pour ajouter des pas.",
+      run = "Go ▶",
+      undo = "Annuler",
+      clear = "Effacer",
+      starHint = "Passe sur l'étoile ⭐ avant d'atteindre l'arrivée 🏁.",
+      won = "Le robot est arrivé ! 🤖",
+      crashed = "Boum ! Le robot a heurté un mur. Réessaie.",
+      missed = "Le robot n'a pas atteint l'arrivée. Réessaie.",
+      missedStar = "Attrape d'abord l'étoile ⭐ ! Réessaie.",
+      tryAgain = "Réessayer",
+      newGame = "Nouveau défi",
+      easy = GuideRobotVariant("Facile", "5×5, chemin libre vers l'arrivée."),
+      medium = GuideRobotVariant("Moyen", "6×6 avec des murs à contourner."),
+      hard = GuideRobotVariant("Difficile", "6×6 — attrape l'étoile, puis l'arrivée.")
     ),
     wordBuilder = WordBuilder(
       name = "Lis et écris",
@@ -2760,6 +2925,18 @@ object Strings:
           "Die Wörter verlaufen gerade — waagerecht, senkrecht oder diagonal, manchmal rückwärts.",
           "Kreise jedes gefundene Wort ein und streiche es von der Liste."
         ))
+      ),
+      guideRobot = GuideRobotOff(
+        printTitle = "Führe den Roboter — schreibe den Pfeilweg",
+        sheetHint = "Druckt das Blatt aus und schreibt die Pfeile, die jeden Roboter zu seinem Ziel führen.",
+        writeLabel = "Schreibe die Pfeile",
+        rules = Rules("So wird gespielt", List(
+          "Der Roboter 🤖 startet im Gitter und muss das Ziel 🏁 erreichen.",
+          "Auf dem leichten Blatt schreibe Pfeile (↑ ↓ ← →) — ein Feld pro Pfeil.",
+          "Auf den schweren Blättern dreht sich der Roboter: ↑ vorwärts, ↺ links, ↻ rechts.",
+          "Wände 🧱 versperren den Weg, also weiche ihnen aus.",
+          "Auf den schweren Blättern fahr über den Stern ⭐ vor dem Ziel."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2948,6 +3125,27 @@ object Strings:
       easy = WordSearchVariant("Leicht", "8×8, 6 Wörter, waagerecht und senkrecht."),
       medium = WordSearchVariant("Mittel", "11×11, 8 Wörter, mit Diagonalen."),
       hard = WordSearchVariant("Schwer", "13×13, 10 Wörter, in alle Richtungen.")
+    ),
+    guideRobot = GuideRobot(
+      name = "Führe den Roboter",
+      description = "Programmiere die Pfeile und bring den Roboter ins Ziel.",
+      instruction = "Tippe auf die Pfeile, um einen Weg zu bauen, dann drücke Los, um den Roboter zu starten.",
+      instructionTurns = "Tippe auf Vorwärts und die Drehtasten, um den Roboter zu lenken, dann drücke Los.",
+      programLabel = "Dein Programm",
+      emptyProgram = "Tippe unten auf die Pfeile, um Schritte hinzuzufügen.",
+      run = "Los ▶",
+      undo = "Zurück",
+      clear = "Löschen",
+      starHint = "Fahr über den Stern ⭐, bevor du das Ziel 🏁 erreichst.",
+      won = "Der Roboter hat es geschafft! 🤖",
+      crashed = "Bumm! Der Roboter ist gegen eine Wand gefahren. Versuch es nochmal.",
+      missed = "Der Roboter hat das Ziel nicht erreicht. Versuch es nochmal.",
+      missedStar = "Hol erst den Stern ⭐! Versuch es nochmal.",
+      tryAgain = "Nochmal versuchen",
+      newGame = "Neues Rätsel",
+      easy = GuideRobotVariant("Leicht", "5×5, freier Weg zum Ziel."),
+      medium = GuideRobotVariant("Mittel", "6×6 mit Wänden zum Ausweichen."),
+      hard = GuideRobotVariant("Schwer", "6×6 — hol den Stern, dann das Ziel.")
     ),
     wordBuilder = WordBuilder(
       name = "Lesen & Schreiben",

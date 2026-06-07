@@ -28,7 +28,23 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"]
+        // Audio is deliberately absent here: built-in Freeze Dance loops and any
+        // pasted audio are NOT precached (they'd bloat the install most users
+        // never use). Instead they're cached at runtime, on first play, so the
+        // feature still works offline afterwards.
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === "audio",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "tandu-audio",
+              expiration: { maxEntries: 16, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+              rangeRequests: true
+            }
+          }
+        ]
       },
       manifest: {
         name: "Tandu",

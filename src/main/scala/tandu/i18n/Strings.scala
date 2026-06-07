@@ -37,7 +37,8 @@ final case class Strings(
     iSpy: Strings.ISpy,
     maze: Strings.Maze,
     wordSearch: Strings.WordSearch,
-    guideRobot: Strings.GuideRobot
+    guideRobot: Strings.GuideRobot,
+    freezeDance: Strings.FreezeDance
 )
 
 object Strings:
@@ -568,6 +569,29 @@ object Strings:
 
   final case class GuideRobotVariant(name: String, description: String)
 
+  final case class FreezeDance(
+      name: String,
+      description: String,
+      instruction: String,
+      start: String,
+      stop: String,
+      danceCue: String,
+      freezeCue: String,
+      srcSynth: String,
+      srcSongs: String,
+      synthHint: String,
+      songsHint: String,
+      pasteLabel: String,
+      linkPlaceholder: String,
+      linkLoad: String,
+      linkInvalid: String,
+      ytAdsNote: String,
+      uploadLabel: String,
+      uploadButton: String,
+      freeMusicLabel: String,
+      addOwn: String
+  )
+
   final case class GuideRobot(
       name: String,
       description: String,
@@ -591,6 +615,28 @@ object Strings:
   )
 
   val en: Strings = Strings(
+    freezeDance = FreezeDance(
+      name = "Freeze Dance",
+      description = "Dance to the music — and freeze when it stops!",
+      instruction = "Press Start and dance. When the music stops, freeze! The last one still moving sits out the round.",
+      start = "Start the music ▶",
+      stop = "Stop",
+      danceCue = "Dance! 🕺",
+      freezeCue = "Freeze! 🧊",
+      srcSynth = "Built-in",
+      srcSongs = "Songs",
+      synthHint = "A fresh, playful tune every time — no setup, works offline.",
+      songsHint = "Tap a song to load it — or add your own below.",
+      pasteLabel = "Or paste a link",
+      linkPlaceholder = "YouTube or audio link…",
+      linkLoad = "Load",
+      linkInvalid = "Couldn't read that link. Try a YouTube link or a direct .mp3 link.",
+      ytAdsNote = "Heads up: YouTube may show ads, which can interrupt the game.",
+      uploadLabel = "Or use a file from this device",
+      uploadButton = "Choose a song…",
+      freeMusicLabel = "No file? Free music:",
+      addOwn = "Use a link or file"
+    ),
     appTitle = "Tandu",
     tagline = "Your time together",
     common = Common(
@@ -1119,6 +1165,28 @@ object Strings:
   )
 
   val pl: Strings = Strings(
+    freezeDance = FreezeDance(
+      name = "Tańcz i zastygnij",
+      description = "Tańcz do muzyki — i zastygnij w bezruchu, gdy ucichnie!",
+      instruction = "Naciśnij Start i tańcz. Gdy muzyka cichnie — zastygnij w bezruchu! Kto poruszy się ostatni, pauzuje rundę.",
+      start = "Włącz muzykę ▶",
+      stop = "Stop",
+      danceCue = "Tańcz! 🕺",
+      freezeCue = "Zastygnij! 🧊",
+      srcSynth = "Wbudowana",
+      srcSongs = "Piosenki",
+      synthHint = "Za każdym razem nowa, wesoła melodia — bez konfiguracji, działa offline.",
+      songsHint = "Dotknij piosenki, aby ją wczytać — lub dodaj własną poniżej.",
+      pasteLabel = "Albo wklej link",
+      linkPlaceholder = "Link do YouTube lub audio…",
+      linkLoad = "Wczytaj",
+      linkInvalid = "Nie udało się odczytać linku. Spróbuj linku z YouTube lub bezpośredniego linku .mp3.",
+      ytAdsNote = "Uwaga: YouTube może wyświetlać reklamy, które przerwą zabawę.",
+      uploadLabel = "Albo użyj pliku z tego urządzenia",
+      uploadButton = "Wybierz utwór…",
+      freeMusicLabel = "Brak pliku? Darmowa muzyka:",
+      addOwn = "Użyj linku lub pliku"
+    ),
     appTitle = "Tandu",
     tagline = "Wasz czas razem",
     common = Common(
@@ -1647,6 +1715,28 @@ object Strings:
   )
 
   val es: Strings = Strings(
+    freezeDance = FreezeDance(
+      name = "Baile congelado",
+      description = "¡Baila con la música y congélate cuando pare!",
+      instruction = "Pulsa Empezar y baila. Cuando la música pare, ¡congélate! El último en moverse se salta la ronda.",
+      start = "Poner música ▶",
+      stop = "Parar",
+      danceCue = "¡A bailar! 🕺",
+      freezeCue = "¡Congelado! 🧊",
+      srcSynth = "Integrada",
+      srcSongs = "Canciones",
+      synthHint = "Una melodía divertida y distinta cada vez: sin ajustes, funciona sin conexión.",
+      songsHint = "Toca una canción para cargarla — o añade la tuya abajo.",
+      pasteLabel = "O pega un enlace",
+      linkPlaceholder = "Enlace de YouTube o audio…",
+      linkLoad = "Cargar",
+      linkInvalid = "No se pudo leer el enlace. Prueba un enlace de YouTube o un enlace directo .mp3.",
+      ytAdsNote = "Atención: YouTube puede mostrar anuncios que interrumpan el juego.",
+      uploadLabel = "O usa un archivo de este dispositivo",
+      uploadButton = "Elige una canción…",
+      freeMusicLabel = "¿Sin archivo? Música gratis:",
+      addOwn = "Usar un enlace o archivo"
+    ),
     appTitle = "Tandu",
     tagline = "Vuestro tiempo juntos",
     common = Common(
@@ -2175,6 +2265,28 @@ object Strings:
   )
 
   val fr: Strings = Strings(
+    freezeDance = FreezeDance(
+      name = "Danse statue",
+      description = "Danse sur la musique — et fige-toi quand elle s'arrête !",
+      instruction = "Appuie sur Démarrer et danse. Quand la musique s'arrête, fige-toi ! Le dernier qui bouge passe son tour.",
+      start = "Lancer la musique ▶",
+      stop = "Arrêter",
+      danceCue = "Danse ! 🕺",
+      freezeCue = "Statue ! 🧊",
+      srcSynth = "Intégrée",
+      srcSongs = "Chansons",
+      synthHint = "Un air joyeux et différent à chaque fois — sans réglage, fonctionne hors ligne.",
+      songsHint = "Touche une chanson pour la charger — ou ajoute la tienne ci-dessous.",
+      pasteLabel = "Ou colle un lien",
+      linkPlaceholder = "Lien YouTube ou audio…",
+      linkLoad = "Charger",
+      linkInvalid = "Impossible de lire ce lien. Essaie un lien YouTube ou un lien .mp3 direct.",
+      ytAdsNote = "Attention : YouTube peut afficher des publicités qui interrompent le jeu.",
+      uploadLabel = "Ou utilise un fichier de cet appareil",
+      uploadButton = "Choisir une chanson…",
+      freeMusicLabel = "Pas de fichier ? Musique gratuite :",
+      addOwn = "Utiliser un lien ou un fichier"
+    ),
     appTitle = "Tandu",
     tagline = "Votre temps ensemble",
     common = Common(
@@ -2703,6 +2815,28 @@ object Strings:
   )
 
   val de: Strings = Strings(
+    freezeDance = FreezeDance(
+      name = "Stopptanz",
+      description = "Tanz zur Musik — und friere ein, wenn sie stoppt!",
+      instruction = "Drücke Start und tanze. Wenn die Musik stoppt, einfrieren! Wer sich zuletzt bewegt, setzt eine Runde aus.",
+      start = "Musik starten ▶",
+      stop = "Stopp",
+      danceCue = "Tanzen! 🕺",
+      freezeCue = "Einfrieren! 🧊",
+      srcSynth = "Eingebaut",
+      srcSongs = "Lieder",
+      synthHint = "Jedes Mal eine neue, fröhliche Melodie — ohne Einrichtung, auch offline.",
+      songsHint = "Tippe auf ein Lied, um es zu laden — oder füge unten dein eigenes hinzu.",
+      pasteLabel = "Oder füge einen Link ein",
+      linkPlaceholder = "YouTube- oder Audio-Link…",
+      linkLoad = "Laden",
+      linkInvalid = "Link konnte nicht gelesen werden. Versuche einen YouTube-Link oder einen direkten .mp3-Link.",
+      ytAdsNote = "Hinweis: YouTube kann Werbung zeigen, die das Spiel unterbricht.",
+      uploadLabel = "Oder nutze eine Datei von diesem Gerät",
+      uploadButton = "Lied auswählen…",
+      freeMusicLabel = "Keine Datei? Kostenlose Musik:",
+      addOwn = "Link oder Datei verwenden"
+    ),
     appTitle = "Tandu",
     tagline = "Eure gemeinsame Zeit",
     common = Common(

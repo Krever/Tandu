@@ -1,7 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
+import tandu.{AppState, Kind}
 import tandu.activities.freezedance.*
 import tandu.i18n.Strings
 import tandu.ui.Components.s
@@ -22,6 +22,7 @@ object FreezeDance extends Activity:
   val minPlayers: Int = 1
   val maxPlayers: Int = 8
   val handsFree: Boolean = true
+  override val kind: Kind = Kind.Move
   val glyph: String = "🕺"
   val tint: String = "plum"
 

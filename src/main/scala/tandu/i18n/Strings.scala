@@ -38,7 +38,9 @@ final case class Strings(
     maze: Strings.Maze,
     wordSearch: Strings.WordSearch,
     guideRobot: Strings.GuideRobot,
-    freezeDance: Strings.FreezeDance
+    freezeDance: Strings.FreezeDance,
+    hotPotato: Strings.HotPotato,
+    activeGames: Strings.ActiveGames
 )
 
 object Strings:
@@ -66,6 +68,7 @@ object Strings:
   final case class Filters(
       all: String,
       games: String,
+      move: String,
       learn: String,
       solo: String,
       two: String,
@@ -592,6 +595,37 @@ object Strings:
       addOwn: String
   )
 
+  final case class HotPotato(
+      name: String,
+      description: String,
+      instruction: String,
+      start: String,
+      again: String,
+      stop: String,
+      passCue: String,
+      caughtCue: String
+  )
+
+  /** One game's rules card inside the Active Games hub. `steps` and `tips` are
+    * lists so each game can have however many it needs. */
+  final case class ActiveGameRules(
+      name: String,
+      blurb: String,
+      howTitle: String,
+      steps: List[String],
+      tipsTitle: String,
+      tips: List[String]
+  )
+
+  final case class ActiveGames(
+      name: String,
+      description: String,
+      lava: ActiveGameRules,
+      tag: ActiveGameRules,
+      hideSeek: ActiveGameRules,
+      redLight: ActiveGameRules
+  )
+
   final case class GuideRobot(
       name: String,
       description: String,
@@ -637,6 +671,84 @@ object Strings:
       freeMusicLabel = "No file? Free music:",
       addOwn = "Use a link or file"
     ),
+    hotPotato = HotPotato(
+      name = "Hot Potato",
+      description = "Pass it fast — don't get caught holding it when the music stops!",
+      instruction = "Pass the potato — any small, soft object — around the circle while the music plays. It cuts out at a random moment, and whoever's holding it then is caught. Tap Play again for the next round.",
+      start = "Start the music ▶",
+      again = "Play again",
+      stop = "Stop",
+      passCue = "Pass it on! 🥔",
+      caughtCue = "Caught! 💥"
+    ),
+    activeGames = ActiveGames(
+      name = "Active Games",
+      description = "Classic run-around games to play right now — no equipment, no setup.",
+      lava = ActiveGameRules(
+        name = "The Floor is Lava",
+        blurb = "Whatever you do, stay off the floor.",
+        howTitle = "How to play",
+        steps = List(
+          "Someone shouts \"the floor is lava!\" — from that second, touching the floor is forbidden.",
+          "Everyone scrambles to get their feet off the ground: onto a sofa, a cushion, a chair.",
+          "Anyone who touches the floor is out. The last one still safe wins the round."
+        ),
+        tipsTitle = "Make it your own",
+        tips = List(
+          "Agree first which furniture counts as safe and which is out of bounds.",
+          "Scatter cushions as stepping stones and try to cross the whole room without touching down.",
+          "Safety first: clear sharp corners and don't climb on anything that can tip over."
+        )
+      ),
+      tag = ActiveGameRules(
+        name = "Tag",
+        blurb = "One player is \"it\" and chases the rest.",
+        howTitle = "How to play",
+        steps = List(
+          "Pick who's \"it\" — a quick countdown or a chorus of \"not it!\" settles it.",
+          "\"It\" chases everyone else and tries to tag a player with a touch.",
+          "Whoever gets tagged is the new \"it\". Agree on the boundaries before you start."
+        ),
+        tipsTitle = "Fun variants",
+        tips = List(
+          "Freeze tag: a tagged player freezes until a free teammate crawls under their legs.",
+          "Chain tag: everyone tagged joins hands with \"it\", and the chain keeps growing.",
+          "Shadow tag: instead of touching, \"it\" stomps on your shadow — best in bright sun."
+        )
+      ),
+      hideSeek = ActiveGameRules(
+        name = "Hide and Seek",
+        blurb = "One seeker counts while everyone hides.",
+        howTitle = "How to play",
+        steps = List(
+          "One player is the seeker. They cover their eyes and count to twenty out loud.",
+          "Everyone else scatters and hides while the counting goes on.",
+          "\"Ready or not, here I come!\" — the seeker hunts until everyone is found."
+        ),
+        tipsTitle = "Fun variants",
+        tips = List(
+          "Sardines: one person hides and everyone seeks — when you find them, squeeze in and hide too.",
+          "Agree where hiding is allowed, so nobody waits forever in a spot no one checks.",
+          "Last one found becomes the next seeker."
+        )
+      ),
+      redLight = ActiveGameRules(
+        name = "Red Light, Green Light",
+        blurb = "Creep forward — but freeze on red.",
+        howTitle = "How to play",
+        steps = List(
+          "One player is the traffic light and stands at the far end with their back turned.",
+          "On \"green light!\" everyone creeps forward; on \"red light!\" the light spins around.",
+          "Anyone caught moving goes back to the start. First to tag the light wins and becomes it."
+        ),
+        tipsTitle = "Make it your own",
+        tips = List(
+          "The light can play with the timing — a long green, then a sudden red to catch sneaky feet.",
+          "Try it in slow motion, or hopping on one leg, for extra giggles.",
+          "Loads of space outdoors is best, but a long hallway works too."
+        )
+      )
+    ),
     appTitle = "Tandu",
     tagline = "Your time together",
     common = Common(
@@ -660,6 +772,7 @@ object Strings:
     filters = Filters(
       all = "All",
       games = "Games",
+      move = "Move",
       learn = "Learn",
       solo = "Solo",
       two = "Two",
@@ -1187,6 +1300,84 @@ object Strings:
       freeMusicLabel = "Brak pliku? Darmowa muzyka:",
       addOwn = "Użyj linku lub pliku"
     ),
+    hotPotato = HotPotato(
+      name = "Gorący ziemniak",
+      description = "Podawaj szybko — nie daj się złapać z nim w rękach, gdy muzyka ucichnie!",
+      instruction = "Podawajcie ziemniaka — dowolny mały, miękki przedmiot — w kółko, gdy gra muzyka. Urwie się w losowym momencie, a kto go wtedy trzyma, ten złapany. Naciśnij „Zagraj jeszcze raz”, by zacząć kolejną rundę.",
+      start = "Włącz muzykę ▶",
+      again = "Zagraj jeszcze raz",
+      stop = "Stop",
+      passCue = "Podawaj dalej! 🥔",
+      caughtCue = "Złapany! 💥"
+    ),
+    activeGames = ActiveGames(
+      name = "Gry ruchowe",
+      description = "Klasyczne gry do biegania od ręki — bez sprzętu, bez przygotowań.",
+      lava = ActiveGameRules(
+        name = "Podłoga to lawa",
+        blurb = "Cokolwiek robisz, nie dotykaj podłogi.",
+        howTitle = "Jak grać",
+        steps = List(
+          "Ktoś krzyczy „podłoga to lawa!” — od tej sekundy nie wolno dotykać podłogi.",
+          "Wszyscy w pośpiechu odrywają stopy od ziemi: na kanapę, poduszkę, krzesło.",
+          "Kto dotknie podłogi, odpada. Wygrywa ten, kto jako ostatni zostanie bezpieczny."
+        ),
+        tipsTitle = "Zróbcie to po swojemu",
+        tips = List(
+          "Ustalcie najpierw, które meble są bezpieczne, a co jest poza zasięgiem.",
+          "Rozłóżcie poduszki jak kamienie do przeskakiwania i spróbujcie przejść przez pokój, nie dotykając podłogi.",
+          "Bezpieczeństwo przede wszystkim: usuńcie ostre rogi i nie wchodźcie na nic, co może się przewrócić."
+        )
+      ),
+      tag = ActiveGameRules(
+        name = "Berek",
+        blurb = "Jedna osoba goni — to „berek”.",
+        howTitle = "Jak grać",
+        steps = List(
+          "Wybierzcie, kto jest berkiem — szybkie odliczanie albo chóralne „nie ja!” załatwia sprawę.",
+          "Berek goni pozostałych i próbuje kogoś klepnąć.",
+          "Kto zostanie klepnięty, ten jest nowym berkiem. Ustalcie granice pola przed startem."
+        ),
+        tipsTitle = "Ciekawe odmiany",
+        tips = List(
+          "Berek-zamrażacz: klepnięty zastyga, dopóki wolny kolega nie przejdzie mu pod nogami.",
+          "Berek-łańcuch: każdy złapany łapie berka za rękę i łańcuch rośnie.",
+          "Berek-cień: zamiast dotykać, berek nadeptuje twój cień — najlepiej w słońcu."
+        )
+      ),
+      hideSeek = ActiveGameRules(
+        name = "Chowany",
+        blurb = "Jeden szuka, reszta się chowa.",
+        howTitle = "Jak grać",
+        steps = List(
+          "Jedna osoba szuka. Zasłania oczy i głośno liczy do dwudziestu.",
+          "Reszta w tym czasie rozbiega się i chowa.",
+          "„Pora na mnie, szukam!” — szukający szuka, aż znajdzie wszystkich."
+        ),
+        tipsTitle = "Ciekawe odmiany",
+        tips = List(
+          "Sardynki: jedna osoba się chowa, a reszta szuka — gdy ją znajdziesz, wciśnij się obok i chowaj razem z nią.",
+          "Ustalcie, gdzie wolno się chować, żeby nikt nie czekał w nieskończoność w miejscu, którego nikt nie sprawdza.",
+          "Kto zostanie znaleziony ostatni, szuka w kolejnej rundzie."
+        )
+      ),
+      redLight = ActiveGameRules(
+        name = "Raz, dwa, trzy — Baba Jaga patrzy",
+        blurb = "Skradaj się do przodu — i zastygnij, gdy patrzy.",
+        howTitle = "Jak grać",
+        steps = List(
+          "Jedna osoba to Baba Jaga i stoi na drugim końcu, tyłem do reszty.",
+          "Gdy mówi „raz, dwa, trzy”, wszyscy skradają się naprzód; na „Baba Jaga patrzy!” odwraca się.",
+          "Kto się wtedy poruszy, wraca na start. Kto pierwszy dotknie Baby Jagi, wygrywa."
+        ),
+        tipsTitle = "Zróbcie to po swojemu",
+        tips = List(
+          "Baba Jaga może bawić się tempem — długo czekać, a potem nagle się odwrócić, by złapać niecierpliwych.",
+          "Spróbujcie w zwolnionym tempie albo skacząc na jednej nodze — będzie więcej śmiechu.",
+          "Najlepiej dużo miejsca na dworze, ale długi korytarz też się sprawdzi."
+        )
+      )
+    ),
     appTitle = "Tandu",
     tagline = "Wasz czas razem",
     common = Common(
@@ -1210,6 +1401,7 @@ object Strings:
     filters = Filters(
       all = "Wszystkie",
       games = "Gry",
+      move = "Ruch",
       learn = "Nauka",
       solo = "Solo",
       two = "Dwóch",
@@ -1737,6 +1929,84 @@ object Strings:
       freeMusicLabel = "¿Sin archivo? Música gratis:",
       addOwn = "Usar un enlace o archivo"
     ),
+    hotPotato = HotPotato(
+      name = "La patata caliente",
+      description = "¡Pásala rápido y que no te pille con ella cuando pare la música!",
+      instruction = "Id pasando la patata —cualquier objeto pequeño y blando— en círculo mientras suena la música. Se corta en un momento al azar, y quien la tenga en ese instante queda pillado. Toca Jugar otra vez para la siguiente ronda.",
+      start = "Poner música ▶",
+      again = "Jugar otra vez",
+      stop = "Parar",
+      passCue = "¡Pásala! 🥔",
+      caughtCue = "¡Pillado! 💥"
+    ),
+    activeGames = ActiveGames(
+      name = "Juegos de movimiento",
+      description = "Juegos de toda la vida para corretear ahora mismo: sin material y sin preparativos.",
+      lava = ActiveGameRules(
+        name = "El suelo es lava",
+        blurb = "Hagas lo que hagas, no toques el suelo.",
+        howTitle = "Cómo se juega",
+        steps = List(
+          "Alguien grita «¡el suelo es lava!» y, desde ese instante, está prohibido tocar el suelo.",
+          "Todos corren a subirse a algo: un sofá, un cojín, una silla.",
+          "Quien toca el suelo queda eliminado. Gana el último que siga a salvo."
+        ),
+        tipsTitle = "Hazlo a tu manera",
+        tips = List(
+          "Acordad primero qué muebles valen como zona segura y cuáles quedan fuera.",
+          "Repartid cojines como piedras y cruzad la habitación entera sin pisar el suelo.",
+          "Seguridad ante todo: apartad las esquinas peligrosas y no os subáis a nada que pueda volcar."
+        )
+      ),
+      tag = ActiveGameRules(
+        name = "El pilla-pilla",
+        blurb = "Uno la liga y persigue a los demás.",
+        howTitle = "Cómo se juega",
+        steps = List(
+          "Elegid quién la liga — un conteo rápido o un coro de «¡yo no!» lo decide.",
+          "Quien la liga persigue a los demás e intenta tocar a alguien.",
+          "A quien toque, se la liga. Acordad los límites del terreno antes de empezar."
+        ),
+        tipsTitle = "Variantes divertidas",
+        tips = List(
+          "Pilla-pilla congelado: el tocado se queda congelado hasta que un compañero pasa por debajo de sus piernas.",
+          "Pilla-pilla en cadena: cada uno que es tocado se da la mano con quien la liga y la cadena crece.",
+          "Pilla-pilla de sombras: en vez de tocar, hay que pisar la sombra del otro — mejor a pleno sol."
+        )
+      ),
+      hideSeek = ActiveGameRules(
+        name = "El escondite",
+        blurb = "Uno cuenta mientras los demás se esconden.",
+        howTitle = "Cómo se juega",
+        steps = List(
+          "Una persona se la queda: se tapa los ojos y cuenta en voz alta hasta veinte.",
+          "Los demás se esconden mientras tanto.",
+          "«¡Listos o no, allá voy!» — quien cuenta busca hasta encontrar a todos."
+        ),
+        tipsTitle = "Variantes divertidas",
+        tips = List(
+          "Sardinas: solo uno se esconde y los demás buscan — cuando lo encuentres, métete con él sin que se note.",
+          "Acordad dónde se puede esconder, para que nadie espere eternamente en un sitio que nadie mira.",
+          "El último en ser encontrado se la queda en la ronda siguiente."
+        )
+      ),
+      redLight = ActiveGameRules(
+        name = "Un, dos, tres, al escondite inglés",
+        blurb = "Avanza a hurtadillas… y congélate cuando se gire.",
+        howTitle = "Cómo se juega",
+        steps = List(
+          "Una persona se la queda y se pone al fondo, de espaldas a los demás.",
+          "Mientras dice «un, dos, tres, al escondite inglés», todos avanzan; al terminar, se gira de golpe.",
+          "A quien pille moviéndose, vuelve a la salida. El primero en tocarle gana y se la queda."
+        ),
+        tipsTitle = "Hazlo a tu manera",
+        tips = List(
+          "Quien la liga puede jugar con el ritmo — recitar despacio y girarse de repente para pillar pies traviesos.",
+          "Probad a cámara lenta o a la pata coja, para reír más.",
+          "Lo mejor es mucho espacio al aire libre, pero un pasillo largo también vale."
+        )
+      )
+    ),
     appTitle = "Tandu",
     tagline = "Vuestro tiempo juntos",
     common = Common(
@@ -1760,6 +2030,7 @@ object Strings:
     filters = Filters(
       all = "Todas",
       games = "Juegos",
+      move = "Moverse",
       learn = "Aprender",
       solo = "Solo",
       two = "Dos",
@@ -2287,6 +2558,84 @@ object Strings:
       freeMusicLabel = "Pas de fichier ? Musique gratuite :",
       addOwn = "Utiliser un lien ou un fichier"
     ),
+    hotPotato = HotPotato(
+      name = "La patate chaude",
+      description = "Fais-la passer vite — et ne te fais pas prendre avec quand la musique s'arrête !",
+      instruction = "Faites passer la patate — n'importe quel petit objet mou — autour du cercle pendant que la musique joue. Elle s'arrête à un moment au hasard, et celui qui la tient à cet instant est pris. Touche Rejouer pour la manche suivante.",
+      start = "Lancer la musique ▶",
+      again = "Rejouer",
+      stop = "Arrêter",
+      passCue = "Fais-la passer ! 🥔",
+      caughtCue = "Pris ! 💥"
+    ),
+    activeGames = ActiveGames(
+      name = "Jeux de mouvement",
+      description = "Des jeux classiques pour gigoter tout de suite — sans matériel, sans préparation.",
+      lava = ActiveGameRules(
+        name = "Le sol, c'est de la lave",
+        blurb = "Quoi que tu fasses, ne touche pas le sol.",
+        howTitle = "Comment jouer",
+        steps = List(
+          "Quelqu'un crie « le sol, c'est de la lave ! » — à partir de cette seconde, interdit de toucher le sol.",
+          "Tout le monde se dépêche de lever les pieds : sur un canapé, un coussin, une chaise.",
+          "Celui qui touche le sol est éliminé. Le dernier encore à l'abri gagne la manche."
+        ),
+        tipsTitle = "À ta façon",
+        tips = List(
+          "Mettez-vous d'accord d'abord : quels meubles sont sûrs et lesquels sont interdits.",
+          "Disposez des coussins comme des pierres et traversez toute la pièce sans poser le pied par terre.",
+          "Sécurité avant tout : écartez les coins pointus et ne grimpez sur rien qui puisse basculer."
+        )
+      ),
+      tag = ActiveGameRules(
+        name = "Le loup",
+        blurb = "Un joueur est le loup et poursuit les autres.",
+        howTitle = "Comment jouer",
+        steps = List(
+          "Choisissez qui est le loup — un petit décompte ou un « c'est pas moi ! » général tranche.",
+          "Le loup poursuit les autres et essaie d'en toucher un.",
+          "Celui qui est touché devient le nouveau loup. Fixez les limites du terrain avant de commencer."
+        ),
+        tipsTitle = "Variantes amusantes",
+        tips = List(
+          "Loup glacé : le joueur touché est figé jusqu'à ce qu'un camarade libre passe sous ses jambes.",
+          "Loup chaîne : chaque joueur touché donne la main au loup, et la chaîne s'allonge.",
+          "Loup ombre : au lieu de toucher, le loup marche sur ton ombre — idéal en plein soleil."
+        )
+      ),
+      hideSeek = ActiveGameRules(
+        name = "Cache-cache",
+        blurb = "Un chercheur compte pendant que les autres se cachent.",
+        howTitle = "Comment jouer",
+        steps = List(
+          "Un joueur est le chercheur : il se cache les yeux et compte jusqu'à vingt à voix haute.",
+          "Les autres se cachent pendant le décompte.",
+          "« Prêts ou pas, j'arrive ! » — le chercheur cherche jusqu'à trouver tout le monde."
+        ),
+        tipsTitle = "Variantes amusantes",
+        tips = List(
+          "Sardine : une seule personne se cache et tous les autres cherchent — quand tu la trouves, glisse-toi à côté en douce.",
+          "Convenez où l'on a le droit de se cacher, pour que personne n'attende des heures dans un coin que personne ne fouille.",
+          "Le dernier trouvé devient le prochain chercheur."
+        )
+      ),
+      redLight = ActiveGameRules(
+        name = "Un, deux, trois, soleil",
+        blurb = "Avance en douce — et fige-toi à « soleil ».",
+        howTitle = "Comment jouer",
+        steps = List(
+          "Un joueur est le meneur et se place au fond, dos tourné.",
+          "Il dit « un, deux, trois… soleil ! » puis se retourne d'un coup ; pendant le décompte, les autres avancent.",
+          "Celui qui bouge encore à « soleil » retourne au départ. Le premier à toucher le meneur gagne."
+        ),
+        tipsTitle = "À ta façon",
+        tips = List(
+          "Le meneur peut jouer avec le rythme — compter lentement, puis se retourner d'un coup pour piéger les pieds pressés.",
+          "Essayez au ralenti, ou à cloche-pied, pour rire encore plus.",
+          "Le mieux, c'est beaucoup d'espace dehors, mais un long couloir fait l'affaire."
+        )
+      )
+    ),
     appTitle = "Tandu",
     tagline = "Votre temps ensemble",
     common = Common(
@@ -2310,6 +2659,7 @@ object Strings:
     filters = Filters(
       all = "Toutes",
       games = "Jeux",
+      move = "Bouger",
       learn = "Apprendre",
       solo = "Solo",
       two = "Deux",
@@ -2837,6 +3187,84 @@ object Strings:
       freeMusicLabel = "Keine Datei? Kostenlose Musik:",
       addOwn = "Link oder Datei verwenden"
     ),
+    hotPotato = HotPotato(
+      name = "Heiße Kartoffel",
+      description = "Gib sie schnell weiter — und lass dich nicht damit erwischen, wenn die Musik stoppt!",
+      instruction = "Reicht die Kartoffel — irgendeinen kleinen, weichen Gegenstand — im Kreis herum, solange die Musik spielt. Sie stoppt in einem zufälligen Moment, und wer sie dann hält, ist erwischt. Tippe auf „Nochmal spielen“ für die nächste Runde.",
+      start = "Musik starten ▶",
+      again = "Nochmal spielen",
+      stop = "Stopp",
+      passCue = "Weitergeben! 🥔",
+      caughtCue = "Erwischt! 💥"
+    ),
+    activeGames = ActiveGames(
+      name = "Bewegungsspiele",
+      description = "Klassische Lauf- und Tobespiele für sofort — ohne Material, ohne Aufbau.",
+      lava = ActiveGameRules(
+        name = "Der Boden ist Lava",
+        blurb = "Was du auch tust — berühr nicht den Boden.",
+        howTitle = "So wird gespielt",
+        steps = List(
+          "Jemand ruft „der Boden ist Lava!“ — ab dieser Sekunde ist der Boden tabu.",
+          "Alle bringen schnell ihre Füße vom Boden weg: aufs Sofa, ein Kissen, einen Stuhl.",
+          "Wer den Boden berührt, scheidet aus. Wer als Letzter in Sicherheit bleibt, gewinnt die Runde."
+        ),
+        tipsTitle = "Macht es zu eurem Spiel",
+        tips = List(
+          "Legt vorher fest, welche Möbel sicher sind und was tabu ist.",
+          "Verteilt Kissen als Trittsteine und versucht, durchs ganze Zimmer zu kommen, ohne aufzutreten.",
+          "Sicherheit zuerst: räumt scharfe Ecken weg und klettert auf nichts, was umkippen kann."
+        )
+      ),
+      tag = ActiveGameRules(
+        name = "Fangen",
+        blurb = "Einer ist der Fänger und jagt die anderen.",
+        howTitle = "So wird gespielt",
+        steps = List(
+          "Wählt, wer fängt — ein kurzes Abzählen oder ein lautes „nicht ich!“ entscheidet.",
+          "Der Fänger jagt die anderen und versucht, jemanden abzuschlagen.",
+          "Wer abgeschlagen wird, ist der neue Fänger. Legt vorher die Grenzen des Spielfelds fest."
+        ),
+        tipsTitle = "Lustige Varianten",
+        tips = List(
+          "Versteinerungs-Fangen: Wer abgeschlagen ist, erstarrt, bis ein freier Mitspieler unter seinen Beinen durchkriecht.",
+          "Ketten-Fangen: Jeder Gefangene fasst den Fänger an der Hand, und die Kette wird länger.",
+          "Schatten-Fangen: Statt zu berühren, tritt der Fänger auf deinen Schatten — am besten bei Sonne."
+        )
+      ),
+      hideSeek = ActiveGameRules(
+        name = "Verstecken",
+        blurb = "Einer sucht, alle anderen verstecken sich.",
+        howTitle = "So wird gespielt",
+        steps = List(
+          "Eine Person ist der Sucher: Sie hält sich die Augen zu und zählt laut bis zwanzig.",
+          "Alle anderen verstecken sich währenddessen.",
+          "„Ich komme!“ — der Sucher sucht, bis er alle gefunden hat."
+        ),
+        tipsTitle = "Lustige Varianten",
+        tips = List(
+          "Sardinen: Nur einer versteckt sich, alle anderen suchen — wer ihn findet, quetscht sich heimlich dazu.",
+          "Macht aus, wo man sich verstecken darf, damit niemand ewig in einer Ecke wartet, die keiner absucht.",
+          "Wer zuletzt gefunden wird, sucht in der nächsten Runde."
+        )
+      ),
+      redLight = ActiveGameRules(
+        name = "Ochs am Berg",
+        blurb = "Schleich dich nach vorn — und erstarre, wenn er sich umdreht.",
+        howTitle = "So wird gespielt",
+        steps = List(
+          "Eine Person ist der Rufer und steht am anderen Ende, mit dem Rücken zu den anderen.",
+          "Beim Spruch „eins, zwei, drei — Ochs am Berg!“ schleichen alle vor; danach dreht sich der Rufer blitzschnell um.",
+          "Wer sich dann noch bewegt, muss zurück zum Start. Wer den Rufer zuerst berührt, gewinnt."
+        ),
+        tipsTitle = "Macht es zu eurem Spiel",
+        tips = List(
+          "Der Rufer kann mit dem Tempo spielen — langsam sprechen und sich dann plötzlich umdrehen, um hektische Füße zu erwischen.",
+          "Probiert es in Zeitlupe oder auf einem Bein — das gibt noch mehr Gelächter.",
+          "Am besten viel Platz draußen, aber ein langer Flur tut's auch."
+        )
+      )
+    ),
     appTitle = "Tandu",
     tagline = "Eure gemeinsame Zeit",
     common = Common(
@@ -2860,6 +3288,7 @@ object Strings:
     filters = Filters(
       all = "Alle",
       games = "Spiele",
+      move = "Bewegung",
       learn = "Lernen",
       solo = "Solo",
       two = "Zwei",

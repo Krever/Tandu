@@ -40,11 +40,12 @@ object HomePage:
         .combineWith(revealHidden.signal)
         .map((h, reveal) => if reveal then Set.empty else h)
 
-    // Three display groups, in render order: screen-based games, hands-free
-    // games, and learning activities. Hands-free is split out of Games so the
-    // long catalog is easier to scan. The free-text query filters by name in
-    // the active language across all groups.
-    val visible: Signal[(List[Activity], List[Activity], List[Activity])] =
+    // Four display groups, in render order: screen-based games, calm hands-free
+    // games, get-up-and-move games, and learning activities. Move is pulled out
+    // first (its games are also hands-free) so the physical games don't drown in
+    // the calm verbal ones. The free-text query filters by name in the active
+    // language across all groups.
+    val visible: Signal[(List[Activity], List[Activity], List[Activity], List[Activity])] =
       playersFilter.signal
         .combineWith(handsFreeOnly.signal)
         .combineWith(kindFilter.signal)
@@ -59,9 +60,10 @@ object HomePage:
           val matched =
             if needle.isEmpty then base
             else base.filter(_.name(str).toLowerCase.contains(needle))
-          val (free, rest)   = matched.partition(_.handsFree)
-          val (games, learn) = rest.partition(_.kind == Kind.Games)
-          (games, free, learn)
+          val (move, notMove) = matched.partition(_.kind == Kind.Move)
+          val (free, rest)    = notMove.partition(_.handsFree)
+          val (games, learn)  = rest.partition(_.kind == Kind.Games)
+          (games, free, move, learn)
         }
 
     div(
@@ -96,8 +98,8 @@ object HomePage:
         ),
         div(
           cls := "activity-grid",
-          children <-- visible.map { (games, free, learn) =>
-            val total = games.size + free.size + learn.size
+          children <-- visible.map { (games, free, move, learn) =>
+            val total = games.size + free.size + move.size + learn.size
             if total == 0 then
               val message =
                 if query.now().trim.nonEmpty then s(_.filters.noMatches)
@@ -123,6 +125,7 @@ object HomePage:
               val sections = List(
                 (s(_.filters.games),     games),
                 (s(_.filters.handsFree), free),
+                (s(_.filters.move),      move),
                 (s(_.filters.learn),     learn)
               ).filter(_._2.nonEmpty)
               val showLabels = sections.size > 1

@@ -10,7 +10,6 @@ trait Activity:
   def description(s: Strings): String
   def minPlayers: Int
   def maxPlayers: Int
-  def handsFree: Boolean
   def kind: Kind = Kind.Games
 
   /** Home-grid presentation. Declared here (not in a sidecar map) so the

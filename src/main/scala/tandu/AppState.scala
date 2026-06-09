@@ -8,10 +8,18 @@ object AppState:
   val lang: Var[Lang] =
     Var(Storage.loadLangCode().flatMap(Lang.fromCode).getOrElse(Lang.detect()))
 
-  val playersFilter: Var[Option[Players]] = Var(None)
-  val handsFreeOnly: Var[Boolean]         = Var(false)
-  val kindFilter: Var[Kind] =
-    Var(Storage.loadKind().flatMap(Kind.fromString).getOrElse(Kind.All))
+  // Which party sizes are shown. Additive multi-select, mirroring `kinds`: all
+  // selected is the neutral default (any size); an activity passes if it fits
+  // any selected size. Ephemeral — resets to "all" on each fresh visit home.
+  val players: Var[Set[Players]] = Var(Players.values.toSet)
+
+  // Which activity kinds are shown. Additive multi-select: all selected is the
+  // neutral default (show everything); deselecting a kind hides its activities.
+  // Unknown/empty persisted values fall back to "all" so the grid is never blank
+  // on load.
+  val kinds: Var[Set[Kind]] =
+    val restored = Storage.loadKinds().map(_.flatMap(Kind.fromString)).getOrElse(Set.empty)
+    Var(if restored.isEmpty then Kind.values.toSet else restored)
 
   val favourites: Var[Set[String]] = Var(Storage.loadFavourites())
   val favouritesOnly: Var[Boolean] = Var(Storage.loadFavouritesOnly())
@@ -40,7 +48,7 @@ object AppState:
     org.scalajs.dom.document.documentElement.setAttribute("lang", l.code)
   }(using unsafeWindowOwner)
 
-  val _ = kindFilter.signal.foreach(k => Storage.saveKind(k.toString))(using unsafeWindowOwner)
+  val _ = kinds.signal.foreach(ks => Storage.saveKinds(ks.map(_.toString)))(using unsafeWindowOwner)
 
   val _ = favourites.signal.foreach(Storage.saveFavourites)(using unsafeWindowOwner)
   val _ = favouritesOnly.signal.foreach(Storage.saveFavouritesOnly)(using unsafeWindowOwner)

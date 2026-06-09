@@ -15,7 +15,6 @@ object WordBuilder extends Activity:
   def description(s: Strings): String = s.wordBuilder.description
   val minPlayers: Int = 1
   val maxPlayers: Int = 1
-  val handsFree: Boolean = false
   val glyph: String = "🔤"
   val tint: String = "teal"
   override val kind: Kind = Kind.Learn

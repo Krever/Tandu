@@ -12,7 +12,6 @@ object Chess extends Activity:
   def description(s: Strings): String = s.chess.description
   val minPlayers: Int = 2
   val maxPlayers: Int = 2
-  val handsFree: Boolean = false
   val glyph: String = "♞"
   val tint: String = "sky"
 

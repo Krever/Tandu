@@ -18,7 +18,6 @@ object ActiveGames extends Activity:
   def description(s: Strings): String = s.activeGames.description
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = true
   override val kind: Kind = Kind.Move
   val glyph: String = "🏃"
   val tint: String = "olive"

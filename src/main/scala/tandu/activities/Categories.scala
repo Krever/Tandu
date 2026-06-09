@@ -1,7 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
+import tandu.{AppState, Kind}
 import tandu.audio.Speech
 import tandu.i18n.{Lang, Strings}
 import tandu.tools.Timer
@@ -14,7 +14,7 @@ object Categories extends Activity:
   def description(s: Strings): String = s.categoriesGame.description
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = true
+  override val kind: Kind = Kind.OnTheGo
   val glyph: String = "◫"
   val tint: String = "olive"
 

@@ -14,7 +14,6 @@ object Checkers extends Activity:
   def description(s: Strings): String = s.checkers.description
   val minPlayers: Int = 2
   val maxPlayers: Int = 2
-  val handsFree: Boolean = false
   val glyph: String = "●"
   val tint: String = "mustard"
 

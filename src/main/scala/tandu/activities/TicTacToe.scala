@@ -12,7 +12,6 @@ object TicTacToe extends Activity:
   def description(s: Strings): String = s.ticTacToe.description
   val minPlayers: Int = 2
   val maxPlayers: Int = 2
-  val handsFree: Boolean = false
   val glyph: String = "✕"
   val tint: String = "rose"
 

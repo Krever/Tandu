@@ -21,7 +21,6 @@ object FreezeDance extends Activity:
   def description(s: Strings): String = s.freezeDance.description
   val minPlayers: Int = 1
   val maxPlayers: Int = 8
-  val handsFree: Boolean = true
   override val kind: Kind = Kind.Move
   val glyph: String = "🕺"
   val tint: String = "plum"

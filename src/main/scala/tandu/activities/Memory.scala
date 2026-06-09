@@ -15,7 +15,6 @@ object Memory extends Activity:
   def description(s: Strings): String = s.memory.description
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = false
   val glyph: String = "◉"
   val tint: String = "teal"
 

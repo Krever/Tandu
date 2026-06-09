@@ -12,7 +12,6 @@ object Hangman extends Activity:
   def description(s: Strings): String = s.hangman.description
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = false
   val glyph: String = "Ⓐ"
   val tint: String = "peach"
 

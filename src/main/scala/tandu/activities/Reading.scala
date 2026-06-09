@@ -2,7 +2,7 @@ package tandu.activities
 
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.L.svg as S
-import tandu.AppState
+import tandu.{AppState, Kind}
 import tandu.i18n.{Lang, Strings}
 import tandu.ui.Components.s
 
@@ -18,7 +18,7 @@ object Reading extends Activity:
   def description(s: Strings): String = s.reading.description
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = false
+  override val kind: Kind = Kind.Learn
   val glyph: String = "📖"
   val tint: String = "plum"
 

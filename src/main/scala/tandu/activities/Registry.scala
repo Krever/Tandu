@@ -10,17 +10,15 @@ object Registry:
   def byId(id: String): Option[Activity] = all.find(_.id == id)
 
   def filtered(
-      partySize: Option[Players],
-      handsFreeOnly: Boolean,
-      kind: Kind,
+      players: Set[Players],
+      kinds: Set[Kind],
       favouritesOnly: Boolean,
       favourites: Set[String],
       hidden: Set[String]
   ): List[Activity] =
     all
-      .filter(a => kind == Kind.All || a.kind == kind)
-      .filter(a => partySize.forall(fitsParty(a, _)))
-      .filter(a => !handsFreeOnly || a.handsFree)
+      .filter(a => kinds.contains(a.kind))
+      .filter(a => players.isEmpty || players.exists(fitsParty(a, _)))
       .filter(a => !favouritesOnly || favourites.contains(a.id))
       .filterNot(a => hidden.contains(a.id))
 

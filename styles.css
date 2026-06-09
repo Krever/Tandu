@@ -306,6 +306,67 @@ select { font-family: inherit; font-size: inherit; }
 }
 .pill-eye { width: 18px; height: 18px; display: block; }
 
+/* Kind filter — additive multi-select, grouped as one rounded track (matching
+   the .pill-toggle shell) so the four options read as a single control. Each
+   option carries a leading checkbox: ticked ink box = selected, empty box =
+   excluded. Only the small boxes carry ink, so the default (all selected) stays
+   light — no block of fill. The checkbox distinguishes this multi-select from
+   the single-select .pill-toggle beside it. */
+.checkbox-track {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.checkbox-track__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: var(--space-2) var(--space-3);
+  min-height: 40px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: color 0.14s ease, opacity 0.14s ease;
+}
+/* The checkbox: ticked ink box when selected. The tick is an SVG background (not
+   text) so it stays decorative — it must not leak into the button's accessible
+   name, which has to remain just the kind label. */
+.checkbox-track__opt::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--color-text);
+  background-color: var(--color-text);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fbf4e2' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 12 10 18 20 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+/* Excluded: empty box + muted, dimmed label. */
+.checkbox-track__opt:not(.is-active) {
+  color: var(--color-muted);
+  opacity: 0.65;
+}
+.checkbox-track__opt:not(.is-active)::before {
+  background-color: transparent;
+  background-image: none;
+  border-color: var(--color-muted);
+}
+@media (hover: hover) {
+  .checkbox-track__opt:not(.is-active):hover { color: var(--color-text); opacity: 0.9; }
+}
+
 .corner-menu { position: relative; }
 .corner-menu__backdrop {
   position: fixed;

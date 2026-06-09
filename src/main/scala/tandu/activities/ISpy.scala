@@ -1,6 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
+import tandu.Kind
 import tandu.i18n.Strings
 import tandu.ui.Components.s
 
@@ -10,7 +11,7 @@ object ISpy extends Activity:
   def description(s: Strings): String = s.iSpy.description
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = true
+  override val kind: Kind = Kind.OnTheGo
   val glyph: String = "🔍"
   val tint: String = "rose"
 

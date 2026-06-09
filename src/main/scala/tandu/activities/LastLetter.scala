@@ -1,7 +1,7 @@
 package tandu.activities
 
 import com.raquo.laminar.api.L.*
-import tandu.AppState
+import tandu.{AppState, Kind}
 import tandu.i18n.{Lang, Strings}
 import tandu.audio.Speech
 import tandu.ui.Components
@@ -13,7 +13,7 @@ object LastLetter extends Activity:
   def description(s: Strings): String = s.lastLetter.description
   val minPlayers: Int = 2
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = true
+  override val kind: Kind = Kind.OnTheGo
   val glyph: String = "Z"
   val tint: String = "peach"
 

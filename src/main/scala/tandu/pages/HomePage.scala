@@ -10,9 +10,8 @@ import tandu.ui.Components.s
 object HomePage:
 
   def render(): HtmlElement =
-    val playersFilter   = AppState.playersFilter
-    val handsFreeOnly   = AppState.handsFreeOnly
-    val kindFilter      = AppState.kindFilter
+    val players         = AppState.players
+    val kinds           = AppState.kinds
     val favourites      = AppState.favourites
     val favouritesOnly  = AppState.favouritesOnly
 
@@ -40,29 +39,28 @@ object HomePage:
         .combineWith(revealHidden.signal)
         .map((h, reveal) => if reveal then Set.empty else h)
 
-    // Four display groups, in render order: screen-based games, calm hands-free
-    // games, get-up-and-move games, and learning activities. Move is pulled out
-    // first (its games are also hands-free) so the physical games don't drown in
-    // the calm verbal ones. The free-text query filters by name in the active
-    // language across all groups.
+    // Four display groups, in render order, one per Kind: screen/board games,
+    // on-the-go (calm, hands-free verbal games), get-up-and-move, and learning.
+    // The free-text query filters by name in the active language across all
+    // groups.
     val visible: Signal[(List[Activity], List[Activity], List[Activity], List[Activity])] =
-      playersFilter.signal
-        .combineWith(handsFreeOnly.signal)
-        .combineWith(kindFilter.signal)
+      players.signal
+        .combineWith(kinds.signal)
         .combineWith(favouritesOnly.signal)
         .combineWith(favourites.signal)
         .combineWith(excluded)
         .combineWith(query.signal)
         .combineWith(AppState.strings)
-        .map { (p, hf, kind, favOnly, favs, hid, q, str) =>
-          val base = Registry.filtered(p, hf, kind, favOnly, favs, hid)
+        .map { (p, ks, favOnly, favs, hid, q, str) =>
+          val base = Registry.filtered(p, ks, favOnly, favs, hid)
           val needle = q.trim.toLowerCase
           val matched =
             if needle.isEmpty then base
             else base.filter(_.name(str).toLowerCase.contains(needle))
-          val (move, notMove) = matched.partition(_.kind == Kind.Move)
-          val (free, rest)    = notMove.partition(_.handsFree)
-          val (games, learn)  = rest.partition(_.kind == Kind.Games)
+          val games = matched.filter(_.kind == Kind.Games)
+          val free  = matched.filter(_.kind == Kind.OnTheGo)
+          val move  = matched.filter(_.kind == Kind.Move)
+          val learn = matched.filter(_.kind == Kind.Learn)
           (games, free, move, learn)
         }
 
@@ -86,9 +84,8 @@ object HomePage:
         div(
           cls := "row",
           styleAttr := "gap: 0.5rem; flex-wrap: wrap; align-items: center;",
-          kindPill(kindFilter),
-          playersPill(playersFilter),
-          handsFreePill(handsFreeOnly),
+          kindChips(kinds),
+          playersChips(players),
           favouritesPill(favouritesOnly),
           // Only offered once something is hidden — keeps the cluster clean for
           // everyone who never hides anything.
@@ -108,14 +105,13 @@ object HomePage:
             else
               val suggest = Components.suggestCard(
                 s(_.home.suggestActivity), {
-                  val p       = playersFilter.now()
-                  val hf      = handsFreeOnly.now()
-                  val k       = kindFilter.now()
+                  val p       = players.now()
+                  val ks      = kinds.now()
                   val favOnly = favouritesOnly.now()
                   val favs    = favourites.now()
                   // Suggestions never surface a hidden activity, regardless of
                   // the reveal toggle.
-                  val pool    = Registry.filtered(p, hf, k, favOnly, favs, AppState.hidden.now())
+                  val pool    = Registry.filtered(p, ks, favOnly, favs, AppState.hidden.now())
                   val pick    = Registry.pickRandom(pool)
                   spin.set(Some(SuggestSpin.build(pool, pick)))
                 }
@@ -123,10 +119,10 @@ object HomePage:
               // Label each non-empty section, but only when more than one is
               // shown — a lone group needs no divider.
               val sections = List(
-                (s(_.filters.games),     games),
-                (s(_.filters.handsFree), free),
-                (s(_.filters.move),      move),
-                (s(_.filters.learn),     learn)
+                (s(_.filters.games),   games),
+                (s(_.filters.onTheGo), free),
+                (s(_.filters.move),    move),
+                (s(_.filters.learn),   learn)
               ).filter(_._2.nonEmpty)
               val showLabels = sections.size > 1
               val body = sections.flatMap { (label, list) =>
@@ -233,16 +229,41 @@ object HomePage:
       p(cls := "muted", child.text <-- message)
     )
 
-  private def kindPill(filter: Var[Kind]): HtmlElement =
-    val options: List[(Kind, Signal[String])] =
-      Kind.values.toList.map(k => (k, s(k.label)))
-    Components.segmentedToggle("pill-toggle no-print", "pill-btn", options, filter)
+  /** A grouped, additive multi-select track of checkbox options. Every option is
+    * selected by default (the neutral "show everything" state); tapping toggles
+    * one in or out. The last active option is locked (tap is a no-op) so the grid
+    * can never be filtered down to nothing. Shared by the kind and players
+    * filters so they look and behave identically. */
+  private def checkboxTrack[A](
+      options: List[(A, Signal[String])],
+      selected: Var[Set[A]]
+  ): HtmlElement =
+    div(
+      cls := "checkbox-track no-print",
+      role := "group",
+      options.map { (value, label) =>
+        val active = selected.signal.map(_.contains(value))
+        button(
+          cls := "checkbox-track__opt",
+          cls("is-active") <-- active,
+          tpe := "button",
+          aria.pressed <-- active.map(_.toString),
+          child.text <-- label,
+          onClick --> { _ =>
+            selected.update { cur =>
+              if cur.contains(value) then (if cur.size == 1 then cur else cur - value)
+              else cur + value
+            }
+          }
+        )
+      }
+    )
 
-  private def playersPill(filter: Var[Option[Players]]): HtmlElement =
-    val options: List[(Option[Players], Signal[String])] =
-      (None, s(_.filters.all)) ::
-        Players.values.toList.map(p => (Some(p), s(p.label)))
-    Components.segmentedToggle("pill-toggle no-print", "pill-btn", options, filter)
+  private def kindChips(selected: Var[Set[Kind]]): HtmlElement =
+    checkboxTrack(Kind.values.toList.map(k => (k, s(k.label))), selected)
+
+  private def playersChips(selected: Var[Set[Players]]): HtmlElement =
+    checkboxTrack(Players.values.toList.map(p => (p, s(p.label))), selected)
 
   private def togglePill(
       toggle: Var[Boolean],
@@ -258,9 +279,6 @@ object HomePage:
         onClick --> (_ => toggle.update(!_))
       )
     )
-
-  private def handsFreePill(toggle: Var[Boolean]): HtmlElement =
-    togglePill(toggle, "pill-btn", child.text <-- s(_.filters.handsFree))
 
   private def favouritesPill(toggle: Var[Boolean]): HtmlElement =
     togglePill(toggle, "pill-btn pill-btn--icon", aria.label <-- s(_.filters.favourites), "★")

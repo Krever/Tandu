@@ -66,14 +66,13 @@ object Strings:
   )
 
   final case class Filters(
-      all: String,
       games: String,
       move: String,
       learn: String,
       solo: String,
       two: String,
       group: String,
-      handsFree: String,
+      onTheGo: String,
       favourites: String,
       addToFavourites: String,
       removeFromFavourites: String,
@@ -770,14 +769,13 @@ object Strings:
       installApp = "Install app"
     ),
     filters = Filters(
-      all = "All",
       games = "Games",
       move = "Move",
       learn = "Learn",
       solo = "Solo",
       two = "Two",
       group = "3+",
-      handsFree = "Hands-free",
+      onTheGo = "On the go",
       favourites = "Favourites",
       addToFavourites = "Add to favourites",
       removeFromFavourites = "Remove from favourites",
@@ -1399,14 +1397,13 @@ object Strings:
       installApp = "Zainstaluj aplikację"
     ),
     filters = Filters(
-      all = "Wszystkie",
       games = "Gry",
       move = "Ruch",
       learn = "Nauka",
       solo = "Solo",
       two = "Dwóch",
       group = "3+",
-      handsFree = "Bez rąk",
+      onTheGo = "W drodze",
       favourites = "Ulubione",
       addToFavourites = "Dodaj do ulubionych",
       removeFromFavourites = "Usuń z ulubionych",
@@ -2028,14 +2025,13 @@ object Strings:
       installApp = "Instalar app"
     ),
     filters = Filters(
-      all = "Todas",
       games = "Juegos",
       move = "Moverse",
       learn = "Aprender",
       solo = "Solo",
       two = "Dos",
       group = "3+",
-      handsFree = "Manos libres",
+      onTheGo = "En camino",
       favourites = "Favoritos",
       addToFavourites = "Añadir a favoritos",
       removeFromFavourites = "Quitar de favoritos",
@@ -2657,14 +2653,13 @@ object Strings:
       installApp = "Installer l'app"
     ),
     filters = Filters(
-      all = "Toutes",
       games = "Jeux",
       move = "Bouger",
       learn = "Apprendre",
       solo = "Solo",
       two = "Deux",
       group = "3+",
-      handsFree = "Mains libres",
+      onTheGo = "En route",
       favourites = "Favoris",
       addToFavourites = "Ajouter aux favoris",
       removeFromFavourites = "Retirer des favoris",
@@ -3286,14 +3281,13 @@ object Strings:
       installApp = "App installieren"
     ),
     filters = Filters(
-      all = "Alle",
       games = "Spiele",
       move = "Bewegung",
       learn = "Lernen",
       solo = "Solo",
       two = "Zwei",
       group = "3+",
-      handsFree = "Ohne Hände",
+      onTheGo = "Unterwegs",
       favourites = "Favoriten",
       addToFavourites = "Zu Favoriten hinzufügen",
       removeFromFavourites = "Aus Favoriten entfernen",

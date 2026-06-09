@@ -23,7 +23,6 @@ object HotPotato extends Activity:
   def description(s: Strings): String = s.hotPotato.description
   val minPlayers: Int = 3
   val maxPlayers: Int = Int.MaxValue
-  val handsFree: Boolean = true
   override val kind: Kind = Kind.Move
   val glyph: String = "🥔"
   val tint: String = "vermilion"

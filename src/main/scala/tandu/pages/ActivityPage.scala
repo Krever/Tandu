@@ -1,8 +1,8 @@
 package tandu.pages
 
 import com.raquo.laminar.api.L.*
-import tandu.{AppState, Page, Routing}
-import tandu.activities.{Activity, Registry}
+import tandu.{AppState, Kind, Page, Routing}
+import tandu.activities.{Activity, Players, Registry}
 import tandu.ui.{Components, SuggestSpin}
 import tandu.ui.Components.s
 
@@ -35,11 +35,18 @@ object ActivityPage:
     * the active filters shown beneath so the draw's scope is clear. */
   private def suggestBar(spin: Var[Option[SuggestSpin.Reel]]): HtmlElement =
     val filtersLabel: Signal[String] =
-      AppState.playersFilter.signal
-        .combineWith(AppState.handsFreeOnly.signal)
+      AppState.players.signal
+        .combineWith(AppState.kinds.signal)
         .combineWith(AppState.strings)
-        .map { case (p, hf, str) =>
-          val parts = List(p.map(_.label(str)), Option.when(hf)(str.filters.handsFree)).flatten
+        .map { case (ps, ks, str) =>
+          // Name a filter only when narrowed; all-selected is the neutral scope.
+          def narrowed[A](sel: Set[A], all: Seq[A], label: A => String): Option[String] =
+            if sel.size == all.size then None
+            else Some(all.filter(sel.contains).map(label).mkString(", "))
+          val parts = List(
+            narrowed(ps, Players.values.toIndexedSeq, _.label(str)),
+            narrowed(ks, Kind.values.toIndexedSeq, _.label(str))
+          ).flatten
           parts.mkString(" · ")
         }
     div(
@@ -49,9 +56,8 @@ object ActivityPage:
         cls := "activity-resuggest",
         onClick --> { _ =>
           val pool = Registry.filtered(
-            AppState.playersFilter.now(),
-            AppState.handsFreeOnly.now(),
-            AppState.kindFilter.now(),
+            AppState.players.now(),
+            AppState.kinds.now(),
             AppState.favouritesOnly.now(),
             AppState.favourites.now(),
             AppState.hidden.now()

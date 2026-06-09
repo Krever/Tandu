@@ -17,7 +17,6 @@ object Maze extends Activity:
   def description(s: Strings): String = s.maze.description
   val minPlayers: Int = 1
   val maxPlayers: Int = 1
-  val handsFree: Boolean = false
   val glyph: String = "🐭"
   val tint: String = "peach"
 

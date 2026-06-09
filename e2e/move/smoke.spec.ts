@@ -46,15 +46,19 @@ test("active games: hub lists games and opens a rules card", async ({ page }) =>
   await expect(page.locator(".rules-card .rules-list li").first()).toBeVisible()
 })
 
-// The Move filter pill should surface the movement games (and only those).
-test("home: Move filter shows the movement category", async ({ page }) => {
+// The kind filter is additive: every kind is shown by default, and tapping a
+// chip toggles it off. Isolating the movement category means deselecting the
+// other three; the movement games should then be the only ones left.
+test("home: narrowing to Move shows only the movement category", async ({ page }) => {
   await page.goto("/")
 
-  await page.getByRole("button", { name: /^Move$/ }).click()
+  await page.getByRole("button", { name: /^Games$/ }).click()
+  await page.getByRole("button", { name: /^On the go$/ }).click()
+  await page.getByRole("button", { name: /^Learn$/ }).click()
 
   await expect(page.getByRole("button", { name: /Freeze Dance/ })).toBeVisible()
   await expect(page.getByRole("button", { name: /Hot Potato/ })).toBeVisible()
   await expect(page.getByRole("button", { name: /Active Games/ })).toBeVisible()
-  // A non-movement game should be filtered out.
+  // A non-movement game should now be filtered out.
   await expect(page.getByRole("button", { name: /Sudoku/ })).toHaveCount(0)
 })

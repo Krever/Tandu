@@ -6,6 +6,7 @@ import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
+import tandu.ui.DomExt.*
 
 import scala.collection.mutable
 import scala.scalajs.js
@@ -273,7 +274,7 @@ object Maze extends Activity:
         onPointerDown --> { ev =>
           dragging = true
           val el = ev.currentTarget.asInstanceOf[dom.Element]
-          val _ = el.asInstanceOf[js.Dynamic].setPointerCapture(ev.pointerId)
+          el.setPointerCapture(ev.pointerId)
           dragRect = el.getBoundingClientRect()
           downX = ev.clientX; downY = ev.clientY
           downTime = js.Date.now(); downTrail = state.now().trail.length

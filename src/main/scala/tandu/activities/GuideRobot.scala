@@ -6,6 +6,7 @@ import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
+import tandu.ui.DomExt.*
 
 import scala.collection.mutable
 import scala.scalajs.js
@@ -403,8 +404,7 @@ object GuideRobot extends Activity:
           if phase.now() == Phase.Editing then
             moved = false
             downX = ev.clientX; downY = ev.clientY
-            try
-              val _ = ev.currentTarget.asInstanceOf[js.Dynamic].setPointerCapture(ev.pointerId)
+            try ev.currentTarget.asInstanceOf[dom.Element].setPointerCapture(ev.pointerId)
             catch case _: Throwable => ()
         },
         onPointerMove --> { ev =>

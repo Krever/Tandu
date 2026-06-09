@@ -6,6 +6,7 @@ import tandu.{AppState, Page, Routing}
 import tandu.i18n.{Lang, Strings}
 import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
 import tandu.ui.Components.s
+import tandu.ui.DomExt.*
 
 import scala.collection.mutable
 import scala.scalajs.js
@@ -226,7 +227,7 @@ object WordSearch extends Activity:
           if !state.now().won then
             dragging = true
             val el = ev.currentTarget.asInstanceOf[dom.Element]
-            val _ = el.asInstanceOf[js.Dynamic].setPointerCapture(ev.pointerId)
+            el.setPointerCapture(ev.pointerId)
             dragRect = el.getBoundingClientRect()
             anchor = cellAt(dragRect, ev.clientX, ev.clientY)
             state.update(_.copy(selection = Vector(anchor)))

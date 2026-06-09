@@ -6,8 +6,8 @@ import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
 import tandu.ui.{Components, Mode, ModeChooser}
 import tandu.ui.Components.s
+import tandu.ui.DomExt.*
 
-import scala.scalajs.js
 import scala.util.Random
 
 /** A drag-and-drop jigsaw.
@@ -435,7 +435,7 @@ object Jigsaw extends Activity:
           // Capture AFTER re-inserting: removing the node from the DOM releases
           // pointer capture, so capturing first would lose it immediately and
           // fast drags that outrun the piece would stop firing pointermove.
-          val _ = g.asInstanceOf[js.Dynamic].setPointerCapture(ev.pointerId)
+          g.setPointerCapture(ev.pointerId)
       },
       onPointerMove --> { ev =>
         if dragging then

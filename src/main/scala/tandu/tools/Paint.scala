@@ -4,8 +4,7 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.i18n.Strings
 import tandu.ui.Components.s
-
-import scala.scalajs.js
+import tandu.ui.DomExt.*
 
 object Paint extends Tool:
   val id = "paint"
@@ -92,8 +91,7 @@ object Paint extends Tool:
     canvasEl.amend(
       onPointerDown --> { e =>
         e.preventDefault()
-        // Not yet in scala-js-dom's HTMLCanvasElement facade.
-        val _ = cv.asInstanceOf[js.Dynamic].setPointerCapture(e.pointerId)
+        cv.setPointerCapture(e.pointerId)
         drawing = true
         val (x, y, brush) = at(e)
         lastX = x

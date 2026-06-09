@@ -3214,3 +3214,61 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 /* Placed after the display:flex rule so the hidden attr wins (same gotcha as
    the freeze stage). */
 .potato-stage[hidden] { display: none; }
+
+/* ---------- Jigsaw ---------- */
+.jigsaw-svg {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  aspect-ratio: 600 / 1140;   /* board (600) + gap + tray, see Jigsaw.scala */
+  overflow: visible;          /* let edge tabs straddle the board border */
+  touch-action: none;         /* claim drags so the page doesn't scroll under them */
+  user-select: none;
+}
+.jigsaw-svg.is-solved { aspect-ratio: 1 / 1; }   /* tray cropped away once done */
+.jigsaw-frame {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong);
+  stroke-width: 2;
+  stroke-dasharray: 7 7;
+  opacity: 0.6;
+}
+.jigsaw-ghost {
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.jigsaw-tray-divider {
+  stroke: var(--color-border);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 7;
+  opacity: 0.7;
+}
+.jigsaw-piece {
+  cursor: grab;
+  filter: drop-shadow(0 1.5px 1.5px rgba(0, 0, 0, 0.3));
+}
+.jigsaw-piece:active { cursor: grabbing; }
+.jigsaw-piece.is-placed {
+  pointer-events: none;
+  filter: none;
+}
+.jigsaw-piece-edge {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.28);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.jigsaw-piece.is-placed .jigsaw-piece-edge { stroke: rgba(0, 0, 0, 0.05); }
+.jigsaw-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.jigsaw-controls { margin-top: var(--space-2); }

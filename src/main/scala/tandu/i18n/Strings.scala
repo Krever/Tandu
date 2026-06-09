@@ -40,7 +40,8 @@ final case class Strings(
     guideRobot: Strings.GuideRobot,
     freezeDance: Strings.FreezeDance,
     hotPotato: Strings.HotPotato,
-    activeGames: Strings.ActiveGames
+    activeGames: Strings.ActiveGames,
+    jigsaw: Strings.Jigsaw
 )
 
 object Strings:
@@ -449,6 +450,22 @@ object Strings:
       hard: SudokuVariant
   )
 
+  final case class JigsawVariant(name: String, description: String)
+
+  final case class Jigsaw(
+      name: String,
+      description: String,
+      instruction: String,
+      newPicture: String,
+      shuffle: String,
+      peek: String,
+      photo: String,
+      won: String,
+      easy: JigsawVariant,
+      medium: JigsawVariant,
+      hard: JigsawVariant
+  )
+
   final case class WordBuilderLevel(name: String, description: String)
 
   final case class WordBuilder(
@@ -648,6 +665,19 @@ object Strings:
   )
 
   val en: Strings = Strings(
+    jigsaw = Jigsaw(
+      name = "Jigsaw",
+      description = "Fit the pieces together to rebuild the picture.",
+      instruction = "Drag the pieces onto the board to finish the picture.",
+      newPicture = "New picture",
+      shuffle = "Shuffle",
+      peek = "Peek",
+      photo = "Your photo",
+      won = "You did it! 🎉",
+      easy = JigsawVariant("Easy", "9 pieces — a gentle start."),
+      medium = JigsawVariant("Medium", "16 pieces — a real puzzle."),
+      hard = JigsawVariant("Hard", "25 pieces — for patient builders.")
+    ),
     freezeDance = FreezeDance(
       name = "Freeze Dance",
       description = "Dance to the music — and freeze when it stops!",
@@ -1276,6 +1306,19 @@ object Strings:
   )
 
   val pl: Strings = Strings(
+    jigsaw = Jigsaw(
+      name = "Puzzle",
+      description = "Złóż obrazek z kawałków.",
+      instruction = "Przeciągaj kawałki na planszę, aby ułożyć obrazek.",
+      newPicture = "Nowy obrazek",
+      shuffle = "Wymieszaj",
+      peek = "Podejrzyj",
+      photo = "Twoje zdjęcie",
+      won = "Udało się! 🎉",
+      easy = JigsawVariant("Łatwe", "9 kawałków — łagodny start."),
+      medium = JigsawVariant("Średnie", "16 kawałków — prawdziwa układanka."),
+      hard = JigsawVariant("Trudne", "25 kawałków — dla cierpliwych.")
+    ),
     freezeDance = FreezeDance(
       name = "Tańcz i zastygnij",
       description = "Tańcz do muzyki — i zastygnij w bezruchu, gdy ucichnie!",
@@ -1904,6 +1947,19 @@ object Strings:
   )
 
   val es: Strings = Strings(
+    jigsaw = Jigsaw(
+      name = "Puzle",
+      description = "Une las piezas para recomponer la imagen.",
+      instruction = "Arrastra las piezas al tablero para completar la imagen.",
+      newPicture = "Nueva imagen",
+      shuffle = "Mezclar",
+      peek = "Ver pista",
+      photo = "Tu foto",
+      won = "¡Lo lograste! 🎉",
+      easy = JigsawVariant("Fácil", "9 piezas — un comienzo suave."),
+      medium = JigsawVariant("Medio", "16 piezas — un puzle de verdad."),
+      hard = JigsawVariant("Difícil", "25 piezas — para los pacientes.")
+    ),
     freezeDance = FreezeDance(
       name = "Baile congelado",
       description = "¡Baila con la música y congélate cuando pare!",
@@ -2532,6 +2588,19 @@ object Strings:
   )
 
   val fr: Strings = Strings(
+    jigsaw = Jigsaw(
+      name = "Puzzle",
+      description = "Assemble les pièces pour reconstituer l'image.",
+      instruction = "Fais glisser les pièces sur le plateau pour compléter l'image.",
+      newPicture = "Nouvelle image",
+      shuffle = "Mélanger",
+      peek = "Aperçu",
+      photo = "Ta photo",
+      won = "Bravo ! 🎉",
+      easy = JigsawVariant("Facile", "9 pièces — un début tout doux."),
+      medium = JigsawVariant("Moyen", "16 pièces — un vrai puzzle."),
+      hard = JigsawVariant("Difficile", "25 pièces — pour les patients.")
+    ),
     freezeDance = FreezeDance(
       name = "Danse statue",
       description = "Danse sur la musique — et fige-toi quand elle s'arrête !",
@@ -3160,6 +3229,19 @@ object Strings:
   )
 
   val de: Strings = Strings(
+    jigsaw = Jigsaw(
+      name = "Puzzle",
+      description = "Füge die Teile zum Bild zusammen.",
+      instruction = "Zieh die Teile auf das Brett, um das Bild zu vervollständigen.",
+      newPicture = "Neues Bild",
+      shuffle = "Mischen",
+      peek = "Spickeln",
+      photo = "Dein Foto",
+      won = "Geschafft! 🎉",
+      easy = JigsawVariant("Leicht", "9 Teile — ein sanfter Start."),
+      medium = JigsawVariant("Mittel", "16 Teile — ein echtes Puzzle."),
+      hard = JigsawVariant("Schwer", "25 Teile — für Geduldige.")
+    ),
     freezeDance = FreezeDance(
       name = "Stopptanz",
       description = "Tanz zur Musik — und friere ein, wenn sie stoppt!",

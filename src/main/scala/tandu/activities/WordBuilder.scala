@@ -342,14 +342,12 @@ object WordBuilder extends Activity:
   ): HtmlElement =
     div(
       cls := "stack-lg",
+      // No speak button here: hearing the word would give the answer away —
+      // the point of this mode is to read it.
       div(
-        cls := "wb-word-row",
-        div(
-          cls := "wb-word",
-          cls("wb-word--correct") <-- roundSig.map(_.isCorrect),
-          child.text <-- roundSig.map(_.target)
-        ),
-        Components.speakBtn(roundSig.map(_.entry.word))
+        cls := "wb-word",
+        cls("wb-word--correct") <-- roundSig.map(_.isCorrect),
+        child.text <-- roundSig.map(_.target)
       ),
       picChoicesView(roundSig, wrongPickSig, onPick)
     )

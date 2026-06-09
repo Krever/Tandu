@@ -43,7 +43,8 @@ final case class Strings(
     hotPotato: Strings.HotPotato,
     activeGames: Strings.ActiveGames,
     jigsaw: Strings.Jigsaw,
-    drawAndGuess: Strings.DrawAndGuess
+    drawAndGuess: Strings.DrawAndGuess,
+    dotToDot: Strings.DotToDot
 )
 
 object Strings:
@@ -248,6 +249,12 @@ object Strings:
       rules: Rules
   )
 
+  final case class DotToDotOff(
+      printTitle: String,
+      sheetHint: String,
+      rules: Rules
+  )
+
   final case class WordSearchOff(
       printTitle: String,
       sheetHint: String,
@@ -274,6 +281,7 @@ object Strings:
       checkers: CheckersOff,
       sudoku: SudokuOff,
       maze: MazeOff,
+      dotToDot: DotToDotOff,
       wordSearch: WordSearchOff,
       guideRobot: GuideRobotOff
   )
@@ -593,6 +601,14 @@ object Strings:
       easy: MazeVariant,
       medium: MazeVariant,
       hard: MazeVariant
+  )
+
+  final case class DotToDot(
+      name: String,
+      description: String,
+      instruction: String,
+      won: String,
+      newGame: String
   )
 
   final case class WordSearchVariant(name: String, description: String)
@@ -1033,6 +1049,15 @@ object Strings:
           "Stuck in a dead-end? Back up and try another turn."
         ))
       ),
+      dotToDot = DotToDotOff(
+        printTitle = "Dot to Dot — connect the numbers",
+        sheetHint = "Print the sheet and connect the dots with a pencil, starting at 1. Join the last dot back to 1 to finish the picture.",
+        rules = Rules("How to play", List(
+          "Find dot number 1 and draw a line to dot 2, then 3, and so on.",
+          "When you reach the last dot, connect it back to dot 1.",
+          "A picture appears — colour it in if you like!"
+        ))
+      ),
       wordSearch = WordSearchOff(
         printTitle = "Word Search — find the hidden words",
         sheetHint = "Print the sheet and circle each word you find. The word list sits below the grid.",
@@ -1220,6 +1245,13 @@ object Strings:
       easy = MinesweeperVariant("Easy", "9×9 with 10 mines."),
       medium = MinesweeperVariant("Medium", "12×12 with 25 mines."),
       hard = MinesweeperVariant("Hard", "16×12 with 40 mines.")
+    ),
+    dotToDot = DotToDot(
+      name = "Dot to Dot",
+      description = "Connect the numbered dots to reveal a picture.",
+      instruction = "Tap the dots in order, starting at 1 — watch the picture appear.",
+      won = "You revealed the picture! ✨",
+      newGame = "New picture"
     ),
     maze = Maze(
       name = "Maze",
@@ -1693,6 +1725,15 @@ object Strings:
           "Ślepa uliczka? Cofnij się i spróbuj innej drogi."
         ))
       ),
+      dotToDot = DotToDotOff(
+        printTitle = "Połącz kropki — od 1 do końca",
+        sheetHint = "Wydrukuj kartkę i łącz kropki ołówkiem, zaczynając od 1. Na końcu połącz ostatnią kropkę z pierwszą, by dokończyć obrazek.",
+        rules = Rules("Jak grać", List(
+          "Znajdź kropkę z numerem 1 i poprowadź linię do kropki 2, potem 3 i tak dalej.",
+          "Gdy dojdziesz do ostatniej kropki, połącz ją z kropką 1.",
+          "Pojawi się obrazek — możesz go pokolorować!"
+        ))
+      ),
       wordSearch = WordSearchOff(
         printTitle = "Wykreślanka — znajdź ukryte słowa",
         sheetHint = "Wydrukuj kartkę i zakreślaj znalezione słowa. Lista słów jest pod planszą.",
@@ -1880,6 +1921,13 @@ object Strings:
       easy = MinesweeperVariant("Łatwy", "9×9 z 10 minami."),
       medium = MinesweeperVariant("Średni", "12×12 z 25 minami."),
       hard = MinesweeperVariant("Trudny", "16×12 z 40 minami.")
+    ),
+    dotToDot = DotToDot(
+      name = "Połącz kropki",
+      description = "Łącz ponumerowane kropki, by odkryć obrazek.",
+      instruction = "Dotykaj kropek po kolei, zaczynając od 1 — obrazek sam się pojawi.",
+      won = "Obrazek odkryty! ✨",
+      newGame = "Nowy obrazek"
     ),
     maze = Maze(
       name = "Labirynt",
@@ -2353,6 +2401,15 @@ object Strings:
           "¿Sin salida? Retrocede y prueba otro camino."
         ))
       ),
+      dotToDot = DotToDotOff(
+        printTitle = "Une los puntos — del 1 hasta el final",
+        sheetHint = "Imprime la hoja y une los puntos con un lápiz, empezando por el 1. Al final, une el último punto con el 1 para terminar el dibujo.",
+        rules = Rules("Cómo jugar", List(
+          "Busca el punto número 1 y traza una línea hasta el 2, luego el 3, y así sucesivamente.",
+          "Cuando llegues al último punto, únelo con el punto 1.",
+          "Aparecerá un dibujo — ¡coloréalo si quieres!"
+        ))
+      ),
       wordSearch = WordSearchOff(
         printTitle = "Sopa de letras — encuentra las palabras",
         sheetHint = "Imprime la hoja y rodea cada palabra que encuentres. La lista está debajo de la cuadrícula.",
@@ -2540,6 +2597,13 @@ object Strings:
       easy = MinesweeperVariant("Fácil", "9×9 con 10 minas."),
       medium = MinesweeperVariant("Medio", "12×12 con 25 minas."),
       hard = MinesweeperVariant("Difícil", "16×12 con 40 minas.")
+    ),
+    dotToDot = DotToDot(
+      name = "Une los puntos",
+      description = "Une los puntos numerados para descubrir un dibujo.",
+      instruction = "Toca los puntos en orden, empezando por el 1 — verás aparecer el dibujo.",
+      won = "¡Has descubierto el dibujo! ✨",
+      newGame = "Nuevo dibujo"
     ),
     maze = Maze(
       name = "Laberinto",
@@ -3013,6 +3077,15 @@ object Strings:
           "Cul-de-sac ? Reviens en arrière et essaie un autre tournant."
         ))
       ),
+      dotToDot = DotToDotOff(
+        printTitle = "Points à relier — du 1 jusqu'au bout",
+        sheetHint = "Imprimez la feuille et reliez les points au crayon, en partant du 1. À la fin, reliez le dernier point au 1 pour terminer le dessin.",
+        rules = Rules("Comment jouer", List(
+          "Trouve le point numéro 1 et trace une ligne jusqu'au 2, puis au 3, et ainsi de suite.",
+          "Arrivé au dernier point, relie-le au point 1.",
+          "Un dessin apparaît — colorie-le si tu veux !"
+        ))
+      ),
       wordSearch = WordSearchOff(
         printTitle = "Mots mêlés — trouve les mots cachés",
         sheetHint = "Imprimez la feuille et entourez chaque mot trouvé. La liste est sous la grille.",
@@ -3200,6 +3273,13 @@ object Strings:
       easy = MinesweeperVariant("Facile", "9×9 avec 10 mines."),
       medium = MinesweeperVariant("Moyen", "12×12 avec 25 mines."),
       hard = MinesweeperVariant("Difficile", "16×12 avec 40 mines.")
+    ),
+    dotToDot = DotToDot(
+      name = "Points à relier",
+      description = "Relie les points numérotés pour découvrir un dessin.",
+      instruction = "Touche les points dans l'ordre, en commençant par le 1 — le dessin va apparaître.",
+      won = "Tu as découvert le dessin ! ✨",
+      newGame = "Nouveau dessin"
     ),
     maze = Maze(
       name = "Labyrinthe",
@@ -3673,6 +3753,15 @@ object Strings:
           "Sackgasse? Geh zurück und versuch eine andere Abzweigung."
         ))
       ),
+      dotToDot = DotToDotOff(
+        printTitle = "Punkte verbinden — von 1 bis zum Ende",
+        sheetHint = "Druckt das Blatt aus und verbindet die Punkte mit einem Stift, beginnend bei 1. Verbindet zum Schluss den letzten Punkt wieder mit der 1, um das Bild zu vollenden.",
+        rules = Rules("So wird gespielt", List(
+          "Finde den Punkt mit der Nummer 1 und ziehe eine Linie zur 2, dann zur 3 und so weiter.",
+          "Beim letzten Punkt angekommen, verbinde ihn wieder mit Punkt 1.",
+          "Ein Bild erscheint — male es aus, wenn du magst!"
+        ))
+      ),
       wordSearch = WordSearchOff(
         printTitle = "Wortsuche — finde die versteckten Wörter",
         sheetHint = "Druckt das Blatt aus und kreist jedes gefundene Wort ein. Die Wortliste steht unter dem Gitter.",
@@ -3860,6 +3949,13 @@ object Strings:
       easy = MinesweeperVariant("Leicht", "9×9 mit 10 Minen."),
       medium = MinesweeperVariant("Mittel", "12×12 mit 25 Minen."),
       hard = MinesweeperVariant("Schwer", "16×12 mit 40 Minen.")
+    ),
+    dotToDot = DotToDot(
+      name = "Punkte verbinden",
+      description = "Verbinde die nummerierten Punkte und entdecke ein Bild.",
+      instruction = "Tippe die Punkte der Reihe nach an, beginnend bei 1 — ein Bild erscheint.",
+      won = "Du hast das Bild entdeckt! ✨",
+      newGame = "Neues Bild"
     ),
     maze = Maze(
       name = "Labyrinth",

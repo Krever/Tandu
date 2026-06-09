@@ -42,7 +42,8 @@ final case class Strings(
     freezeDance: Strings.FreezeDance,
     hotPotato: Strings.HotPotato,
     activeGames: Strings.ActiveGames,
-    jigsaw: Strings.Jigsaw
+    jigsaw: Strings.Jigsaw,
+    drawAndGuess: Strings.DrawAndGuess
 )
 
 object Strings:
@@ -136,6 +137,21 @@ object Strings:
       name: String,
       description: String,
       clear: String
+  )
+
+  final case class DrawAndGuess(
+      name: String,
+      description: String,
+      handoff: String,
+      showWord: String,
+      yourWordIs: String,
+      secretHint: String,
+      startDrawing: String,
+      peek: String,
+      guessed: String,
+      giveUp: String,
+      theWordWas: String,
+      nextRound: String
   )
 
   final case class Materials(
@@ -672,6 +688,20 @@ object Strings:
   )
 
   val en: Strings = Strings(
+    drawAndGuess = DrawAndGuess(
+      name = "Draw & Guess",
+      description = "Draw the secret word and let the others guess it.",
+      handoff = "Hand the device to the artist — only they get to peek!",
+      showWord = "Show my word",
+      yourWordIs = "Your secret word:",
+      secretHint = "Don't say it — draw it!",
+      startDrawing = "Start drawing",
+      peek = "Peek",
+      guessed = "They got it! 🎉",
+      giveUp = "Show the word",
+      theWordWas = "The word was:",
+      nextRound = "Next artist"
+    ),
     jigsaw = Jigsaw(
       name = "Jigsaw",
       description = "Fit the pieces together to rebuild the picture.",
@@ -1318,6 +1348,20 @@ object Strings:
   )
 
   val pl: Strings = Strings(
+    drawAndGuess = DrawAndGuess(
+      name = "Kalambury",
+      description = "Narysuj tajne słowo, a reszta niech zgaduje.",
+      handoff = "Podaj urządzenie osobie rysującej — tylko ona może podejrzeć!",
+      showWord = "Pokaż moje słowo",
+      yourWordIs = "Twoje tajne słowo:",
+      secretHint = "Nie mów — narysuj!",
+      startDrawing = "Zacznij rysować",
+      peek = "Podejrzyj",
+      guessed = "Zgadli! 🎉",
+      giveUp = "Pokaż słowo",
+      theWordWas = "To było słowo:",
+      nextRound = "Następny artysta"
+    ),
     jigsaw = Jigsaw(
       name = "Puzzle",
       description = "Złóż obrazek z kawałków.",
@@ -1964,6 +2008,20 @@ object Strings:
   )
 
   val es: Strings = Strings(
+    drawAndGuess = DrawAndGuess(
+      name = "Dibuja y adivina",
+      description = "Dibuja la palabra secreta y deja que los demás adivinen.",
+      handoff = "Pasa el dispositivo al artista — ¡solo él puede mirar!",
+      showWord = "Mostrar mi palabra",
+      yourWordIs = "Tu palabra secreta:",
+      secretHint = "No la digas — ¡dibújala!",
+      startDrawing = "Empezar a dibujar",
+      peek = "Espiar",
+      guessed = "¡Lo adivinaron! 🎉",
+      giveUp = "Mostrar la palabra",
+      theWordWas = "La palabra era:",
+      nextRound = "Siguiente artista"
+    ),
     jigsaw = Jigsaw(
       name = "Puzle",
       description = "Une las piezas para recomponer la imagen.",
@@ -2610,6 +2668,20 @@ object Strings:
   )
 
   val fr: Strings = Strings(
+    drawAndGuess = DrawAndGuess(
+      name = "Dessiner c'est gagné",
+      description = "Dessine le mot secret et laisse les autres deviner.",
+      handoff = "Passe l'appareil à l'artiste — lui seul peut regarder !",
+      showWord = "Voir mon mot",
+      yourWordIs = "Ton mot secret :",
+      secretHint = "Ne le dis pas — dessine-le !",
+      startDrawing = "Commencer à dessiner",
+      peek = "Jeter un œil",
+      guessed = "Trouvé ! 🎉",
+      giveUp = "Montrer le mot",
+      theWordWas = "Le mot était :",
+      nextRound = "Artiste suivant"
+    ),
     jigsaw = Jigsaw(
       name = "Puzzle",
       description = "Assemble les pièces pour reconstituer l'image.",
@@ -3256,6 +3328,20 @@ object Strings:
   )
 
   val de: Strings = Strings(
+    drawAndGuess = DrawAndGuess(
+      name = "Montagsmaler",
+      description = "Male das geheime Wort und lass die anderen raten.",
+      handoff = "Gib das Gerät dem Künstler — nur er darf schauen!",
+      showWord = "Mein Wort zeigen",
+      yourWordIs = "Dein geheimes Wort:",
+      secretHint = "Nicht sagen — malen!",
+      startDrawing = "Los geht's",
+      peek = "Spicken",
+      guessed = "Erraten! 🎉",
+      giveUp = "Wort zeigen",
+      theWordWas = "Das Wort war:",
+      nextRound = "Nächster Künstler"
+    ),
     jigsaw = Jigsaw(
       name = "Puzzle",
       description = "Füge die Teile zum Bild zusammen.",

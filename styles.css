@@ -2016,6 +2016,22 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   background: currentColor;
 }
 
+/* Draw & Guess */
+.draw-guess__word {
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.draw-guess__peek { flex: 1; }
+.draw-guess__peek.is-peeking {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+.draw-guess__guessed { flex: 1; }
+
 .header__lede { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
 .header__glyph {
   flex: 0 0 auto;
@@ -2508,8 +2524,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 
 .wb { display: flex; flex-direction: column; align-items: stretch; }
 
-.wb-picture-row,
-.wb-word-row {
+.wb-picture-row {
   display: flex;
   align-items: center;
   justify-content: center;

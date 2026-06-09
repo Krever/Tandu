@@ -9,6 +9,7 @@ import scala.util.Random
 
 object Dice extends Tool:
   val id = "dice"
+  val glyph = "⚀"
   def name(s: Strings): String = s.dice.name
   def description(s: Strings): String = s.dice.description
 

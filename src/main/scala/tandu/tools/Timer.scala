@@ -10,6 +10,7 @@ import scala.scalajs.js
 
 object Timer extends Tool:
   val id = "timer"
+  val glyph = "⏱"
   def name(s: Strings): String = s.timer.name
   def description(s: Strings): String = s.timer.description
 

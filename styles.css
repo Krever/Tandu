@@ -1953,6 +1953,69 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   border-color: var(--color-primary);
 }
 
+/* Paint */
+.paint {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.paint__canvas {
+  display: block;
+  width: 100%;
+  height: min(60vh, 480px);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  /* Paper background comes from the buffer fill (PaperColor in Paint.scala). */
+  /* The canvas owns its touches entirely — no scroll/zoom while drawing. */
+  touch-action: none;
+  cursor: crosshair;
+}
+.paint__palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+.paint__swatch {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-strong);
+  background: var(--swatch);
+  cursor: pointer;
+}
+.paint__swatch.is-active {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.paint__sizes { display: flex; gap: var(--space-2); }
+.paint__size {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.paint__size.is-active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+}
+.paint__size-dot {
+  border-radius: 50%;
+  background: currentColor;
+}
+
 .header__lede { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
 .header__glyph {
   flex: 0 0 auto;

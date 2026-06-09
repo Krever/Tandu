@@ -139,15 +139,11 @@ object HomePage:
         div(
           cls := "stack",
           Tools.all.map: t =>
-            val glyph = t.id match
-              case "dice"  => "⚀"
-              case "timer" => "⏱"
-              case _       => "✦"
             Components.tile(
               s(t.name),
               s(t.description),
               Routing.go(Page.Tool(t.id)),
-              glyph = glyph
+              glyph = t.glyph
             )
         )
       )

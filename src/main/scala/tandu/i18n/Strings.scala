@@ -12,6 +12,7 @@ final case class Strings(
     mode: Strings.Mode,
     printable: Strings.Printable,
     timer: Strings.Timer,
+    paint: Strings.Paint,
     offline: Strings.Offline,
     ticTacToe: Strings.TicTacToe,
     battleships: Strings.Battleships,
@@ -129,6 +130,12 @@ object Strings:
       start: String,
       pause: String,
       restart: String
+  )
+
+  final case class Paint(
+      name: String,
+      description: String,
+      clear: String
   )
 
   final case class Materials(
@@ -854,6 +861,11 @@ object Strings:
       pause = "Pause",
       restart = "Restart"
     ),
+    paint = Paint(
+      name = "Paint",
+      description = "Draw with your finger — pick a colour and go",
+      clear = "Clear"
+    ),
     offline = Offline(
       materials = Materials(
         paperPen = "paper + pen",
@@ -1494,6 +1506,11 @@ object Strings:
       start = "Start",
       pause = "Pauza",
       restart = "Restart"
+    ),
+    paint = Paint(
+      name = "Malowanie",
+      description = "Rysuj palcem — wybierz kolor i do dzieła",
+      clear = "Wyczyść"
     ),
     offline = Offline(
       materials = Materials(
@@ -2136,6 +2153,11 @@ object Strings:
       pause = "Pausa",
       restart = "Reiniciar"
     ),
+    paint = Paint(
+      name = "Pintar",
+      description = "Dibuja con el dedo: elige un color y adelante",
+      clear = "Borrar"
+    ),
     offline = Offline(
       materials = Materials(
         paperPen = "papel + bolígrafo",
@@ -2777,6 +2799,11 @@ object Strings:
       pause = "Pause",
       restart = "Redémarrer"
     ),
+    paint = Paint(
+      name = "Peinture",
+      description = "Dessine avec ton doigt : choisis une couleur et c'est parti",
+      clear = "Effacer"
+    ),
     offline = Offline(
       materials = Materials(
         paperPen = "papier + stylo",
@@ -3417,6 +3444,11 @@ object Strings:
       start = "Start",
       pause = "Pause",
       restart = "Neustart"
+    ),
+    paint = Paint(
+      name = "Malen",
+      description = "Male mit dem Finger – wähle eine Farbe und los",
+      clear = "Löschen"
     ),
     offline = Offline(
       materials = Materials(

@@ -3497,3 +3497,120 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 }
 .lt-print-glyph--trace { fill: #cdcdcd; }
 .lt-print-glyph--faint { fill: #e4e4e4; }
+
+/* Seek & Find — busy emoji scene; tap (or print and circle) the targets.
+   The board's aspect-ratio must match SeekAndFind.scala's 100×120 viewBox
+   so the pointer hit areas line up with what's drawn. */
+.snf-board {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  aspect-ratio: 100 / 120;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  touch-action: manipulation;   /* taps shouldn't arm double-tap zoom */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.snf-item { cursor: pointer; }
+.snf-hit { fill: transparent; }            /* generous invisible tap target */
+/* Wobble lives on an inner group so it doesn't fight the item's own
+   translate/rotate transform attribute. */
+.snf-emoji { transform-box: fill-box; transform-origin: center; }
+.snf-item.is-miss .snf-emoji { animation: snf-wobble 0.35s ease-in-out 1; }
+@keyframes snf-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-14deg); }
+  75% { transform: rotate(14deg); }
+}
+.snf-ring {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1.1;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.snf-item.is-found .snf-ring { opacity: 1; animation: snf-pop 0.25s ease-out 1; }
+@keyframes snf-pop {
+  from { transform: scale(0.5); }
+  to   { transform: scale(1); }
+}
+
+/* Target legend — one chip per target: the emoji plus a fill-in dot per
+   copy to find. Reads with zero words or numerals. */
+.snf-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+.snf-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-stamp-sm);
+}
+.snf-chip.is-done { opacity: 0.55; }
+.snf-chip__emoji { font-size: 24px; line-height: 1; }
+.snf-dots { display: flex; gap: 4px; }
+.snf-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border-strong);
+}
+.snf-dot.is-on { background: var(--color-primary); border-color: var(--color-primary); }
+
+/* Counting mode */
+.snf-question { text-align: center; font-size: 26px; font-weight: 700; }
+.snf-answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+.snf-answer { min-width: 64px; font-size: 22px; font-variant-numeric: tabular-nums; }
+.snf-answer:disabled { opacity: 0.4; }
+.snf-answer.is-wrong { animation: snf-wobble 0.35s ease-in-out 1; }
+
+/* Print sheets — one big field per A4 page under a legend strip; the
+   counting sheet adds write-in boxes below the field. */
+.snf-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
+.snf-print-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4mm;
+  margin-bottom: 4mm;
+}
+.snf-print-legend__label { font-size: 13pt; font-weight: 700; }
+.snf-print-chip { font-size: 17pt; white-space: nowrap; }
+.snf-print-field {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1.5px solid black;
+  border-radius: 2mm;
+}
+.snf-count-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10mm;
+  margin-top: 6mm;
+}
+.snf-count-cell { display: flex; align-items: center; gap: 3mm; font-size: 20pt; }
+.snf-count-box {
+  width: 13mm;
+  height: 13mm;
+  border: 1.5px solid black;
+  border-radius: 2mm;
+}
+.snf-print-emoji { width: 9mm; height: 9mm; vertical-align: middle; }

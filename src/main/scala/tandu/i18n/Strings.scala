@@ -45,7 +45,8 @@ final case class Strings(
     jigsaw: Strings.Jigsaw,
     drawAndGuess: Strings.DrawAndGuess,
     dotToDot: Strings.DotToDot,
-    letterTracing: Strings.LetterTracing
+    letterTracing: Strings.LetterTracing,
+    seekAndFind: Strings.SeekAndFind
 )
 
 object Strings:
@@ -270,6 +271,16 @@ object Strings:
       rules: Rules
   )
 
+  final case class SeekAndFindOff(
+      printTitle: String,
+      countPrintTitle: String,
+      sheetHint: String,
+      findLabel: String,
+      countLabel: String,
+      countSheetName: String,
+      rules: Rules
+  )
+
   final case class Offline(
       materials: Materials,
       battleships: BattleshipsOff,
@@ -284,7 +295,8 @@ object Strings:
       maze: MazeOff,
       dotToDot: DotToDotOff,
       wordSearch: WordSearchOff,
-      guideRobot: GuideRobotOff
+      guideRobot: GuideRobotOff,
+      seekAndFind: SeekAndFindOff
   )
 
   final case class TttVariant(name: String, description: String)
@@ -721,6 +733,25 @@ object Strings:
       hard: GuideRobotVariant
   )
 
+  final case class SeekAndFind(
+      name: String,
+      description: String,
+      seekMode: String,
+      seekModeDesc: String,
+      countMode: String,
+      countModeDesc: String,
+      instruction: String,
+      countInstruction: String,
+      /** Counting question; `{}` is replaced by the emoji being counted. */
+      howMany: String,
+      won: String,
+      countWon: String,
+      newGame: String,
+      easy: String,
+      medium: String,
+      hard: String
+  )
+
   val en: Strings = Strings(
     drawAndGuess = DrawAndGuess(
       name = "Draw & Guess",
@@ -1097,6 +1128,19 @@ object Strings:
           "Walls 🧱 block the way, so steer around them.",
           "On the hard sheets, drive over the star ⭐ before the flag."
         ))
+      ),
+      seekAndFind = SeekAndFindOff(
+        printTitle = "Seek & Find — find and circle",
+        countPrintTitle = "Seek & Find — count and write",
+        sheetHint = "Print a sheet and circle every picture from the list — or count them and write the numbers.",
+        findLabel = "Find and circle:",
+        countLabel = "Count each picture and write the number in its box:",
+        countSheetName = "Counting",
+        rules = Rules("How to play", List(
+          "Look at the list at the top of the sheet.",
+          "Find every matching picture in the big scene and circle it.",
+          "On the counting sheet, count each kind of picture and write the number in its box."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1286,6 +1330,23 @@ object Strings:
       random = "Random",
       printTitle = "Handwriting — worksheet",
       printHint = "Pick a set, then print a sheet and trace with a pencil."
+    ),
+    seekAndFind = SeekAndFind(
+      name = "Seek & Find",
+      description = "Spot the hidden pictures in a busy scene.",
+      seekMode = "Find them all",
+      seekModeDesc = "Tap every picture from the list.",
+      countMode = "How many?",
+      countModeDesc = "Count the pictures and pick the number.",
+      instruction = "Find and tap every picture from the list above.",
+      countInstruction = "Count carefully, then tap the right number.",
+      howMany = "How many {}?",
+      won = "You found them all! 👀",
+      countWon = "That's right! 🎉",
+      newGame = "New scene",
+      easy = "Easy",
+      medium = "Medium",
+      hard = "Hard"
     ),
     maze = Maze(
       name = "Maze",
@@ -1789,6 +1850,19 @@ object Strings:
           "Ściany 🧱 blokują drogę, więc je omijaj.",
           "Na trudnych kartkach przejedź przez gwiazdkę ⭐ przed metą."
         ))
+      ),
+      seekAndFind = SeekAndFindOff(
+        printTitle = "Wyszukiwanka — znajdź i zakreśl",
+        countPrintTitle = "Wyszukiwanka — policz i zapisz",
+        sheetHint = "Wydrukuj kartkę i zakreśl wszystkie obrazki z listy — albo policz je i wpisz liczby.",
+        findLabel = "Znajdź i zakreśl:",
+        countLabel = "Policz obrazki każdego rodzaju i wpisz liczbę w okienko:",
+        countSheetName = "Liczenie",
+        rules = Rules("Jak grać", List(
+          "Spójrz na listę u góry kartki.",
+          "Odszukaj w scenie każdy pasujący obrazek i zakreśl go.",
+          "Na kartce z liczeniem policz obrazki każdego rodzaju i wpisz liczbę w okienko."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -1978,6 +2052,23 @@ object Strings:
       random = "Losowo",
       printTitle = "Pisanie po śladzie — karta do druku",
       printHint = "Wybierz zestaw, wydrukuj kartę i pisz po śladzie ołówkiem."
+    ),
+    seekAndFind = SeekAndFind(
+      name = "Wyszukiwanka",
+      description = "Wypatrz ukryte obrazki w zatłoczonej scenie.",
+      seekMode = "Znajdź wszystkie",
+      seekModeDesc = "Stuknij każdy obrazek z listy.",
+      countMode = "Ile ich jest?",
+      countModeDesc = "Policz obrazki i wybierz liczbę.",
+      instruction = "Znajdź i stuknij wszystkie obrazki z listy powyżej.",
+      countInstruction = "Policz uważnie, a potem stuknij właściwą liczbę.",
+      howMany = "Ile jest {}?",
+      won = "Znalazłeś wszystkie! 👀",
+      countWon = "Zgadza się! 🎉",
+      newGame = "Nowa plansza",
+      easy = "Łatwy",
+      medium = "Średni",
+      hard = "Trudny"
     ),
     maze = Maze(
       name = "Labirynt",
@@ -2481,6 +2572,19 @@ object Strings:
           "Los muros 🧱 cierran el paso, así que esquívalos.",
           "En las hojas difíciles, pasa por la estrella ⭐ antes de la meta."
         ))
+      ),
+      seekAndFind = SeekAndFindOff(
+        printTitle = "Busca y encuentra — encuentra y rodea",
+        countPrintTitle = "Busca y encuentra — cuenta y escribe",
+        sheetHint = "Imprime una hoja y rodea todos los dibujos de la lista — o cuéntalos y escribe los números.",
+        findLabel = "Busca y rodea:",
+        countLabel = "Cuenta cada dibujo y escribe el número en su casilla:",
+        countSheetName = "Contar",
+        rules = Rules("Cómo jugar", List(
+          "Mira la lista en la parte de arriba de la hoja.",
+          "Encuentra cada dibujo de la lista en la escena y rodéalo.",
+          "En la hoja de contar, cuenta cada tipo de dibujo y escribe el número en su casilla."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -2670,6 +2774,23 @@ object Strings:
       random = "Al azar",
       printTitle = "Caligrafía — hoja",
       printHint = "Elige un grupo, imprime una hoja y repasa con un lápiz."
+    ),
+    seekAndFind = SeekAndFind(
+      name = "Busca y encuentra",
+      description = "Descubre los dibujos escondidos en una escena llena de cosas.",
+      seekMode = "Encuéntralos todos",
+      seekModeDesc = "Toca cada dibujo de la lista.",
+      countMode = "¿Cuántos hay?",
+      countModeDesc = "Cuenta los dibujos y elige el número.",
+      instruction = "Busca y toca todos los dibujos de la lista de arriba.",
+      countInstruction = "Cuenta con atención y luego toca el número correcto.",
+      howMany = "¿Cuántos {} hay?",
+      won = "¡Los encontraste todos! 👀",
+      countWon = "¡Correcto! 🎉",
+      newGame = "Nueva escena",
+      easy = "Fácil",
+      medium = "Medio",
+      hard = "Difícil"
     ),
     maze = Maze(
       name = "Laberinto",
@@ -3173,6 +3294,19 @@ object Strings:
           "Les murs 🧱 bloquent le passage, alors contourne-les.",
           "Sur les feuilles difficiles, passe sur l'étoile ⭐ avant l'arrivée."
         ))
+      ),
+      seekAndFind = SeekAndFindOff(
+        printTitle = "Cherche et trouve — trouve et entoure",
+        countPrintTitle = "Cherche et trouve — compte et écris",
+        sheetHint = "Imprimez la feuille et entourez toutes les images de la liste — ou comptez-les et écrivez les nombres.",
+        findLabel = "Cherche et entoure :",
+        countLabel = "Compte chaque image et écris le nombre dans sa case :",
+        countSheetName = "Comptage",
+        rules = Rules("Comment jouer", List(
+          "Regarde la liste en haut de la feuille.",
+          "Trouve chaque image de la liste dans la scène et entoure-la.",
+          "Sur la feuille de comptage, compte chaque sorte d'image et écris le nombre dans sa case."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -3362,6 +3496,23 @@ object Strings:
       random = "Au hasard",
       printTitle = "Écriture — fiche",
       printHint = "Choisis un groupe, imprime une fiche et repasse au crayon."
+    ),
+    seekAndFind = SeekAndFind(
+      name = "Cherche et trouve",
+      description = "Repère les images cachées dans une scène bien remplie.",
+      seekMode = "Trouve-les toutes",
+      seekModeDesc = "Touche chaque image de la liste.",
+      countMode = "Combien y en a-t-il ?",
+      countModeDesc = "Compte les images et choisis le nombre.",
+      instruction = "Cherche et touche toutes les images de la liste ci-dessus.",
+      countInstruction = "Compte bien, puis touche le bon nombre.",
+      howMany = "Combien de {} ?",
+      won = "Tu les as toutes trouvées ! 👀",
+      countWon = "C'est exact ! 🎉",
+      newGame = "Nouvelle scène",
+      easy = "Facile",
+      medium = "Moyen",
+      hard = "Difficile"
     ),
     maze = Maze(
       name = "Labyrinthe",
@@ -3865,6 +4016,19 @@ object Strings:
           "Wände 🧱 versperren den Weg, also weiche ihnen aus.",
           "Auf den schweren Blättern fahr über den Stern ⭐ vor dem Ziel."
         ))
+      ),
+      seekAndFind = SeekAndFindOff(
+        printTitle = "Wimmelbild — finde und kreise ein",
+        countPrintTitle = "Wimmelbild — zähle und schreibe",
+        sheetHint = "Druckt ein Blatt aus und kreist alle Bilder aus der Liste ein — oder zählt sie und schreibt die Zahlen auf.",
+        findLabel = "Finde und kreise ein:",
+        countLabel = "Zähle jedes Bild und schreibe die Zahl in das Kästchen:",
+        countSheetName = "Zählen",
+        rules = Rules("So wird gespielt", List(
+          "Schau dir die Liste oben auf dem Blatt an.",
+          "Finde jedes Bild aus der Liste in der Szene und kreise es ein.",
+          "Auf dem Zählblatt zählst du jede Bildsorte und schreibst die Zahl ins Kästchen."
+        ))
       )
     ),
     ticTacToe = TicTacToe(
@@ -4054,6 +4218,23 @@ object Strings:
       random = "Zufällig",
       printTitle = "Schreiben üben — Arbeitsblatt",
       printHint = "Wähle eine Gruppe, drucke ein Blatt und spure mit dem Stift nach."
+    ),
+    seekAndFind = SeekAndFind(
+      name = "Wimmelbild",
+      description = "Entdecke die versteckten Bilder im großen Gewimmel.",
+      seekMode = "Finde alle",
+      seekModeDesc = "Tippe jedes Bild aus der Liste an.",
+      countMode = "Wie viele?",
+      countModeDesc = "Zähle die Bilder und wähle die Zahl.",
+      instruction = "Finde und tippe alle Bilder aus der Liste oben an.",
+      countInstruction = "Zähle genau und tippe dann auf die richtige Zahl.",
+      howMany = "Wie viele {} siehst du?",
+      won = "Du hast alle gefunden! 👀",
+      countWon = "Richtig! 🎉",
+      newGame = "Neue Szene",
+      easy = "Leicht",
+      medium = "Mittel",
+      hard = "Schwer"
     ),
     maze = Maze(
       name = "Labyrinth",

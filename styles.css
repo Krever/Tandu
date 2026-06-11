@@ -3466,3 +3466,34 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   border: 0;
 }
 .jigsaw-controls { margin-top: var(--space-2); }
+
+/* Letter Tracing — in-app canvas + printable handwriting sheets.
+   The canvas mirrors .paint__canvas (the guide glyph and ruled lines are
+   painted into the buffer by LetterTracing.scala). Print rows are SVG so
+   glyph baselines sit exactly on the drawn rules. */
+.lt-canvas {
+  display: block;
+  width: 100%;
+  height: min(55vh, 440px);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  touch-action: none;
+}
+.lt-counter {
+  min-width: 4.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-print-sheet { display: flex; flex-direction: column; gap: 8px; }
+.lt-print-row { display: block; width: 100%; height: auto; }
+.lt-print-rule { stroke: #8a8a8a; stroke-width: 1.5; }
+.lt-print-rule--mid { stroke: #b5b5b5; stroke-width: 1; stroke-dasharray: 7 6; }
+.lt-print-glyph {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 75px;
+  font-weight: 600;
+  fill: #222;
+}
+.lt-print-glyph--trace { fill: #cdcdcd; }
+.lt-print-glyph--faint { fill: #e4e4e4; }

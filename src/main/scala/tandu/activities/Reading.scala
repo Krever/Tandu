@@ -18,7 +18,7 @@ object Reading extends Activity:
   def description(s: Strings): String = s.reading.description
   val minPlayers: Int = 1
   val maxPlayers: Int = Int.MaxValue
-  override val kind: Kind = Kind.Learn
+  override val kind: Kind = Kind.Games
   val glyph: String = "📖"
   val tint: String = "plum"
 

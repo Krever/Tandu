@@ -44,7 +44,8 @@ final case class Strings(
     activeGames: Strings.ActiveGames,
     jigsaw: Strings.Jigsaw,
     drawAndGuess: Strings.DrawAndGuess,
-    dotToDot: Strings.DotToDot
+    dotToDot: Strings.DotToDot,
+    letterTracing: Strings.LetterTracing
 )
 
 object Strings:
@@ -612,6 +613,20 @@ object Strings:
       instruction: String,
       won: String,
       newGame: String
+  )
+
+  final case class LetterTracing(
+      name: String,
+      description: String,
+      instruction: String,
+      previous: String,
+      next: String,
+      upper: String,
+      lower: String,
+      numbers: String,
+      random: String,
+      printTitle: String,
+      printHint: String
   )
 
   final case class WordSearchVariant(name: String, description: String)
@@ -1258,6 +1273,19 @@ object Strings:
       instruction = "Tap the dots in order, starting at 1 — watch the picture appear.",
       won = "You revealed the picture! ✨",
       newGame = "New picture"
+    ),
+    letterTracing = LetterTracing(
+      name = "Handwriting",
+      description = "Trace letters and numbers.",
+      instruction = "Trace the gray shape with your finger.",
+      previous = "Previous",
+      next = "Next",
+      upper = "Big letters",
+      lower = "Small letters",
+      numbers = "Numbers",
+      random = "Random",
+      printTitle = "Handwriting — worksheet",
+      printHint = "Pick a set, then print a sheet and trace with a pencil."
     ),
     maze = Maze(
       name = "Maze",
@@ -1938,6 +1966,19 @@ object Strings:
       won = "Obrazek odkryty! ✨",
       newGame = "Nowy obrazek"
     ),
+    letterTracing = LetterTracing(
+      name = "Pisanie po śladzie",
+      description = "Ćwicz pisanie liter i cyfr.",
+      instruction = "Pisz palcem po szarym wzorze.",
+      previous = "Poprzedni",
+      next = "Następny",
+      upper = "Wielkie litery",
+      lower = "Małe litery",
+      numbers = "Cyfry",
+      random = "Losowo",
+      printTitle = "Pisanie po śladzie — karta do druku",
+      printHint = "Wybierz zestaw, wydrukuj kartę i pisz po śladzie ołówkiem."
+    ),
     maze = Maze(
       name = "Labirynt",
       description = "Pomóż myszce znaleźć ser.",
@@ -2616,6 +2657,19 @@ object Strings:
       instruction = "Toca los puntos en orden, empezando por el 1 — verás aparecer el dibujo.",
       won = "¡Has descubierto el dibujo! ✨",
       newGame = "Nuevo dibujo"
+    ),
+    letterTracing = LetterTracing(
+      name = "Caligrafía",
+      description = "Repasa letras y números.",
+      instruction = "Repasa la forma gris con el dedo.",
+      previous = "Anterior",
+      next = "Siguiente",
+      upper = "Mayúsculas",
+      lower = "Minúsculas",
+      numbers = "Números",
+      random = "Al azar",
+      printTitle = "Caligrafía — hoja",
+      printHint = "Elige un grupo, imprime una hoja y repasa con un lápiz."
     ),
     maze = Maze(
       name = "Laberinto",
@@ -3296,6 +3350,19 @@ object Strings:
       won = "Tu as découvert le dessin ! ✨",
       newGame = "Nouveau dessin"
     ),
+    letterTracing = LetterTracing(
+      name = "Écriture",
+      description = "Repasse les lettres et les chiffres.",
+      instruction = "Repasse la forme grise avec ton doigt.",
+      previous = "Précédent",
+      next = "Suivant",
+      upper = "Majuscules",
+      lower = "Minuscules",
+      numbers = "Chiffres",
+      random = "Au hasard",
+      printTitle = "Écriture — fiche",
+      printHint = "Choisis un groupe, imprime une fiche et repasse au crayon."
+    ),
     maze = Maze(
       name = "Labyrinthe",
       description = "Aide la souris à trouver le fromage.",
@@ -3974,6 +4041,19 @@ object Strings:
       instruction = "Tippe die Punkte der Reihe nach an, beginnend bei 1 — ein Bild erscheint.",
       won = "Du hast das Bild entdeckt! ✨",
       newGame = "Neues Bild"
+    ),
+    letterTracing = LetterTracing(
+      name = "Schreiben üben",
+      description = "Buchstaben und Zahlen nachspuren.",
+      instruction = "Fahre die graue Form mit dem Finger nach.",
+      previous = "Zurück",
+      next = "Weiter",
+      upper = "Große Buchstaben",
+      lower = "Kleine Buchstaben",
+      numbers = "Zahlen",
+      random = "Zufällig",
+      printTitle = "Schreiben üben — Arbeitsblatt",
+      printHint = "Wähle eine Gruppe, drucke ein Blatt und spure mit dem Stift nach."
     ),
     maze = Maze(
       name = "Labyrinth",

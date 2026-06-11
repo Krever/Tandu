@@ -1773,9 +1773,14 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .sudoku-cell.is-selected { background: color-mix(in srgb, var(--color-primary) 30%, var(--color-surface)); box-shadow: inset 0 0 0 3px var(--color-primary); z-index: 1; }
 .sudoku-cell.is-conflict { color: var(--color-hit); }
 .sudoku-cell.is-conflict.is-selected { box-shadow: inset 0 0 0 3px var(--color-hit); }
-.sudoku-cell--c3, .sudoku-cell--c6 { border-left: 2px solid var(--color-text); }
-.sudoku-cell--r3, .sudoku-cell--r6 { border-top: 2px solid var(--color-text); }
+.sudoku-cell--boxl { border-left: 2px solid var(--color-text); }
+.sudoku-cell--boxt { border-top: 2px solid var(--color-text); }
 .sudoku-cell__value { line-height: 1; }
+/* Emoji variants: fewer, bigger cells. */
+.sudoku-board--4 { width: min(100%, 360px, calc(100svh - 260px)); }
+.sudoku-board--4 .sudoku-cell { font-size: clamp(26px, 9vmin, 44px); }
+.sudoku-board--6 { width: min(100%, 420px, calc(100svh - 260px)); }
+.sudoku-board--6 .sudoku-cell { font-size: clamp(20px, 6vmin, 32px); }
 .sudoku-pencil {
   width: 100%;
   height: 100%;
@@ -1813,9 +1818,17 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   min-height: 40px;
 }
 .sudoku-pad__btn:active { transform: scale(0.97); }
+.sudoku-pad__btn:disabled { opacity: 0.35; cursor: default; }
+.sudoku-pad__btn:disabled:active { transform: none; }
 .sudoku-pad__btn.is-pencil { background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface)); }
 .sudoku-pad__btn--erase { color: var(--color-muted); }
+.sudoku-pad--emoji .sudoku-pad__btn { font-size: 24px; }
 .sudoku-controls { gap: var(--space-2); }
+.sudoku-controls .btn.is-active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
 .sudoku-print-actions {
   max-width: 360px;
   margin-left: auto;
@@ -1851,8 +1864,20 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   min-width: 0;
   min-height: 0;
 }
-.sudoku-print-cell--c3, .sudoku-print-cell--c6 { border-left: 2px solid black; }
-.sudoku-print-cell--r3, .sudoku-print-cell--r6 { border-top: 2px solid black; }
+.sudoku-print-cell--boxl { border-left: 2px solid black; }
+.sudoku-print-cell--boxt { border-top: 2px solid black; }
+/* Emoji variants: legend above each board, board shrunk to leave room for it
+   inside the same 75mm sheet slot. */
+.sudoku-print-puzzle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2mm;
+}
+.sudoku-print-legend { font-size: 13pt; line-height: 1; letter-spacing: 1.5mm; }
+.sudoku-print-board--4, .sudoku-print-board--6 { width: 65mm; height: 65mm; }
+.sudoku-print-board--4 .sudoku-print-cell { font-size: 18pt; }
+.sudoku-print-board--6 .sudoku-print-cell { font-size: 13pt; }
 
 /* Minesweeper */
 .ms-board {

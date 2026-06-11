@@ -476,6 +476,9 @@ object Strings:
       newGame: String,
       undo: String,
       pencil: String,
+      assist: String,
+      emoji4: SudokuVariant,
+      emoji6: SudokuVariant,
       easy: SudokuVariant,
       medium: SudokuVariant,
       hard: SudokuVariant
@@ -1227,6 +1230,9 @@ object Strings:
       newGame = "New game",
       undo = "Undo",
       pencil = "Pencil",
+      assist = "Helper",
+      emoji4 = SudokuVariant("Emoji 4×4", "Four pictures — perfect for little solvers."),
+      emoji6 = SudokuVariant("Emoji 6×6", "Six pictures — one step up."),
       easy = SudokuVariant("Easy", "More clues — a friendly start."),
       medium = SudokuVariant("Medium", "Fewer clues — a real challenge."),
       hard = SudokuVariant("Hard", "Sparse clues — for sharp solvers.")
@@ -1903,6 +1909,9 @@ object Strings:
       newGame = "Nowa gra",
       undo = "Cofnij",
       pencil = "Notatka",
+      assist = "Podpowiedzi",
+      emoji4 = SudokuVariant("Emoji 4×4", "Cztery obrazki — idealne dla maluchów."),
+      emoji6 = SudokuVariant("Emoji 6×6", "Sześć obrazków — o krok dalej."),
       easy = SudokuVariant("Łatwe", "Więcej podpowiedzi — przyjazny start."),
       medium = SudokuVariant("Średnie", "Mniej podpowiedzi — prawdziwe wyzwanie."),
       hard = SudokuVariant("Trudne", "Mało podpowiedzi — dla wytrawnych.")
@@ -2579,6 +2588,9 @@ object Strings:
       newGame = "Nueva partida",
       undo = "Deshacer",
       pencil = "Lápiz",
+      assist = "Ayuda",
+      emoji4 = SudokuVariant("Emoji 4×4", "Cuatro dibujos — perfecto para peques."),
+      emoji6 = SudokuVariant("Emoji 6×6", "Seis dibujos — un paso más."),
       easy = SudokuVariant("Fácil", "Más pistas — un buen comienzo."),
       medium = SudokuVariant("Medio", "Menos pistas — un reto real."),
       hard = SudokuVariant("Difícil", "Pocas pistas — para expertos.")
@@ -3255,6 +3267,9 @@ object Strings:
       newGame = "Nouvelle partie",
       undo = "Annuler",
       pencil = "Crayon",
+      assist = "Aide",
+      emoji4 = SudokuVariant("Émoji 4×4", "Quatre images — parfait pour les petits."),
+      emoji6 = SudokuVariant("Émoji 6×6", "Six images — un cran au-dessus."),
       easy = SudokuVariant("Facile", "Plus d'indices — un démarrage doux."),
       medium = SudokuVariant("Moyen", "Moins d'indices — un vrai défi."),
       hard = SudokuVariant("Difficile", "Peu d'indices — pour les experts.")
@@ -3931,6 +3946,9 @@ object Strings:
       newGame = "Neues Spiel",
       undo = "Rückgängig",
       pencil = "Notiz",
+      assist = "Hilfe",
+      emoji4 = SudokuVariant("Emoji 4×4", "Vier Bilder — perfekt für kleine Knobler."),
+      emoji6 = SudokuVariant("Emoji 6×6", "Sechs Bilder — eine Stufe höher."),
       easy = SudokuVariant("Leicht", "Mehr Hinweise — sanfter Einstieg."),
       medium = SudokuVariant("Mittel", "Weniger Hinweise — echte Herausforderung."),
       hard = SudokuVariant("Schwer", "Wenige Hinweise — für Profis.")

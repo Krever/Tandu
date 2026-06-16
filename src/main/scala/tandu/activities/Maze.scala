@@ -181,7 +181,7 @@ object Maze extends Activity:
 
   val variants: List[Variant] = List(
     Variant("easy",   10, 10, 0.30, 4, _.maze.easy.name,   _.maze.easy.description),
-    Variant("medium", 16, 16, 0.0,  2, _.maze.medium.name, _.maze.medium.description),
+    Variant("medium", 16, 16, 0.0,  4, _.maze.medium.name, _.maze.medium.description),
     Variant("hard",   24, 24, 0.0,  1, _.maze.hard.name,   _.maze.hard.description)
   )
 
@@ -393,6 +393,15 @@ object Maze extends Activity:
     p.trail.reverse.map((r, c) => s"${cx(c)},${cy(r)}").mkString(" ")
 
   // ---------- print ----------
+
+  /** One printed page's worth of mazes (the variant's usual per-page batch),
+    * as a bare body for composed documents like workbooks. */
+  def printSheetBody(v: Variant, rng: Random = new Random()): HtmlElement =
+    div(
+      cls := "maze-print-sheet",
+      cls("maze-print-sheet--single") := v.perPage == 1,
+      List.fill(v.perPage)(printableMaze(v, generate(v.rows, v.cols, v.braid, rng)))
+    )
 
   private def renderOffline(): HtmlElement =
     // Each printed batch is a single variant, so the sheet's column count and

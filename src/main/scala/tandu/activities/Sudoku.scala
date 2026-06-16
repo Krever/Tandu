@@ -76,6 +76,18 @@ object Sudoku extends Activity:
     if v.emoji then emojiThemes(rng.nextInt(emojiThemes.size)).take(v.size)
     else (1 to v.size).map(_.toString).toVector
 
+  /** Print symbols: a kid can't *draw* an emoji into an empty cell, so paper
+    * picture-sudoku uses simple drawable shapes instead. Ordered easiest-first
+    * so the 4×4 takes the four most basic strokes (circle, triangle, square,
+    * plus) and the 6×6 adds an X and a diamond — all far easier for a small
+    * hand than a star or a heart. */
+  private val printShapes: Vector[String] =
+    Vector("●", "▲", "■", "✚", "✕", "◆")
+
+  private def printSymbolsFor(v: Variant): Vector[String] =
+    if v.emoji then printShapes.take(v.size)
+    else (1 to v.size).map(_.toString).toVector
+
   // ---------- generator ----------
 
   private def boxOf(v: Variant, r: Int, c: Int): Int =
@@ -117,29 +129,43 @@ object Sudoku extends Activity:
     val _ = go(0)
     grid
 
-  /** Count solutions of `grid` up to `cap` (used to verify uniqueness). */
+  /** Count solutions of `grid` up to `cap` (used to verify uniqueness).
+    *
+    * Uses the most-constrained-variable heuristic: each step branches on the
+    * empty cell with the fewest legal candidates (a cell with zero is an
+    * immediate dead end). On the sparse grids the hard generator produces this
+    * is dramatically faster than scanning to the first empty cell — naive
+    * first-empty backtracking spent ~500ms per hard puzzle, MRV a few ms. */
   private def countSolutions(v: Variant, grid: Array[Array[Int]], cap: Int): Int =
     var count = 0
     def go(): Boolean =
-      // Find first empty
-      var r = -1; var c = -1
+      // Pick the empty cell with the fewest candidates (MRV).
+      var bestR = -1; var bestC = -1
+      var bestMask = 0
+      var bestCount = Int.MaxValue
       var rr = 0
-      var found = false
-      while rr < v.size && !found do
+      while rr < v.size && bestCount != 0 do
         var cc = 0
-        while cc < v.size && !found do
-          if grid(rr)(cc) == 0 then { r = rr; c = cc; found = true }
+        while cc < v.size && bestCount != 0 do
+          if grid(rr)(cc) == 0 then
+            var mask = 0; var cnt = 0; var n = 1
+            while n <= v.size do
+              if isSafe(v, grid, rr, cc, n) then { mask |= (1 << n); cnt += 1 }
+              n += 1
+            if cnt < bestCount then { bestCount = cnt; bestR = rr; bestC = cc; bestMask = mask }
           cc += 1
         rr += 1
-      if !found then
+      if bestR == -1 then
+        // No empty cell remained — a full, valid solution.
         count += 1
         return count >= cap
+      if bestCount == 0 then return false // dead end: some cell has no candidate
       var n = 1
       while n <= v.size do
-        if isSafe(v, grid, r, c, n) then
-          grid(r)(c) = n
-          if go() then { grid(r)(c) = 0; return true }
-          grid(r)(c) = 0
+        if (bestMask & (1 << n)) != 0 then
+          grid(bestR)(bestC) = n
+          if go() then { grid(bestR)(bestC) = 0; return true }
+          grid(bestR)(bestC) = 0
         n += 1
       false
     val _ = go()
@@ -229,13 +255,24 @@ object Sudoku extends Activity:
 
   private final case class PrintPuzzle(variant: Variant, grid: Grid, symbols: Vector[String])
 
+  /** One printed page's worth of puzzles (the same six-up sheet the offline
+    * mode prints), as a bare body for composed documents like workbooks. */
+  def printSheetBody(v: Variant): HtmlElement =
+    div(
+      cls := "sudoku-print-sheet",
+      List.fill(6) {
+        val rng = new Random()
+        printablePuzzle(PrintPuzzle(v, generate(v, rng)._1, printSymbolsFor(v)))
+      }
+    )
+
   private def renderOffline(): HtmlElement =
     val puzzles: Var[List[PrintPuzzle]] = Var(Nil)
 
     def printBatch(v: Variant): Unit =
       puzzles.set(List.fill(6) {
         val rng = new Random()
-        PrintPuzzle(v, generate(v, rng)._1, symbolsFor(v, rng))
+        PrintPuzzle(v, generate(v, rng)._1, printSymbolsFor(v))
       })
       val _ = js.timers.setTimeout(50)(Printable.print())
 

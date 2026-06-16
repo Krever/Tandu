@@ -666,6 +666,102 @@ object DotToDot extends Activity:
 
   // ---------- print ----------
 
+  /** One printed page of two puzzles (the offline mode's usual sheet), as a
+    * bare body for composed documents like workbooks. */
+  def printSheetBody(rng: Random = new Random()): HtmlElement =
+    val first = makePuzzle(rng)
+    div(
+      cls := "dots-print-sheet",
+      List(first, makePuzzle(rng, avoid = first.emoji)).map(printablePuzzle)
+    )
+
+  // ---------- coloring pages ----------
+  //
+  // Not surfaced anywhere yet: the outlines this produces aren't good enough
+  // for a coloring book (the detail layer reads as noise at print size).
+  // Kept for a future quality pass — see docs/workbook.md.
+
+  /** A coloring page reuses the same emoji → silhouette pipeline, but keeps a
+    * fine RDP tolerance so the outline stays smooth and skips the numbered
+    * dots entirely: the outline plus the interior detail layer prints as line
+    * art to colour in. */
+  final case class Coloring(
+      emoji: String,
+      outline: Vector[(Double, Double)],
+      detailUrl: String,
+      imgX: Double,
+      imgY: Double,
+      imgSize: Double
+  )
+
+  private def traceColoring(emoji: String): Option[Coloring] =
+    val r = rasterize(emoji)
+    val mask = alphaMask(r.data)
+    val (comp, size) = largestComponent(mask)
+    if size < Raster * Raster * 0.04 then None
+    else
+      val contour = traceBoundary(comp)
+      if contour.size < 80 then None
+      else
+        val pts = rdpClosed(contour.map((x, y) => (x.toDouble, y.toDouble)), 1.6)
+        // The same scale-into-view transform as `assemble`, minus the dots.
+        val minX = pts.map(_._1).min
+        val maxX = pts.map(_._1).max
+        val minY = pts.map(_._2).min
+        val maxY = pts.map(_._2).max
+        val k = (View - 2 * Pad) / math.max(maxX - minX, maxY - minY).max(1e-9)
+        val offX = (View - (maxX - minX) * k) / 2
+        val offY = (View - (maxY - minY) * k) / 2
+        Some(Coloring(
+          emoji,
+          pts.map((x, y) => ((x - minX) * k + offX, (y - minY) * k + offY)),
+          detailLayer(r.data, mask, comp),
+          imgX = (0 - minX) * k + offX,
+          imgY = (0 - minY) * k + offY,
+          imgSize = Raster * k
+        ))
+
+  /** Coloring is far less demanding than dot placement (no dot-count budget),
+    * so it has its own attempt loop and ignores `knownBad`. */
+  def makeColoring(rng: Random, avoid: String = ""): Coloring =
+    var attempts = 0
+    var result: Option[Coloring] = None
+    while result.isEmpty && attempts < 30 do
+      val e = emojis(rng.nextInt(emojis.size))
+      if e != avoid then result = traceColoring(e)
+      attempts += 1
+    result.getOrElse {
+      val star = starPuzzle()
+      Coloring("⭐", star.dots.map(d => (d.x, d.y)), "", 0, 0, 0)
+    }
+
+  /** One printed coloring page, as a bare body for composed documents like
+    * workbooks. */
+  def coloringSheetBody(rng: Random = new Random()): HtmlElement =
+    val c = makeColoring(rng)
+    div(
+      cls := "dots-coloring-board",
+      dataAttr("emoji") := c.emoji,
+      svg.svg(
+        svg.cls := "dots-coloring-svg",
+        svg.viewBox := s"0 0 ${View.toInt} ${View.toInt}",
+        if c.detailUrl.nonEmpty then
+          svg.image(
+            svg.cls := "dots-detail",
+            svg.x := fmt(c.imgX),
+            svg.y := fmt(c.imgY),
+            svg.width := fmt(c.imgSize),
+            svg.height := fmt(c.imgSize),
+            svg.href := c.detailUrl
+          )
+        else emptyNode,
+        svg.polygon(
+          svg.cls := "dots-coloring-outline",
+          svg.points := c.outline.map((x, y) => s"${fmt(x)},${fmt(y)}").mkString(" ")
+        )
+      )
+    )
+
   private def renderOffline(): HtmlElement =
     val sheets: Var[List[Puzzle]] = Var(Nil)
     val rng = new Random()

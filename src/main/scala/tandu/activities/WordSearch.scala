@@ -56,8 +56,8 @@ object WordSearch extends Activity:
   )
 
   val variants: List[Variant] = List(
-    Variant("easy",   8,  6,  7,  Vector(E, S),                 2, _.wordSearch.easy.name,   _.wordSearch.easy.description),
-    Variant("medium", 11, 8,  9,  Vector(E, S, SE, W, N),       2, _.wordSearch.medium.name, _.wordSearch.medium.description),
+    Variant("easy",   8,  6,  7,  Vector(E, S),                 4, _.wordSearch.easy.name,   _.wordSearch.easy.description),
+    Variant("medium", 11, 8,  9,  Vector(E, S, SE, W, N),       4, _.wordSearch.medium.name, _.wordSearch.medium.description),
     Variant("hard",   13, 10, 11, Vector(E, S, W, N, SE, SW, NE, NW), 1, _.wordSearch.hard.name, _.wordSearch.hard.description)
   )
 
@@ -332,6 +332,15 @@ object WordSearch extends Activity:
     )
 
   // ---------- print ----------
+
+  /** One printed page's worth of puzzles (the variant's usual per-page batch),
+    * as a bare body for composed documents like workbooks. */
+  def printSheetBody(v: Variant, lang: Lang, rng: Random = new Random()): HtmlElement =
+    div(
+      cls := "word-search-print-sheet",
+      cls("word-search-print-sheet--single") := v.perPage == 1,
+      List.fill(v.perPage)(printablePuzzle(v, generate(v, lang, rng)))
+    )
 
   private def renderOffline(): HtmlElement =
     val puzzles: Var[List[(Variant, Puzzle)]] = Var(Nil)

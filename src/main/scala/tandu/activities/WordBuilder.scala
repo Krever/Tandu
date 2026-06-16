@@ -380,6 +380,16 @@ object WordBuilder extends Activity:
 
   // ---------- print ----------
 
+  /** One printed worksheet's rows, as a bare body for composed documents like
+    * workbooks. */
+  def printSheetBody(level: Level, lang: Lang): HtmlElement =
+    val pool = WordBuilderBank.entriesInRange(lang, level.minLen, level.maxLen)
+    val picks = Random.shuffle(pool.toList).take(WorksheetRows).toVector
+    div(
+      cls := "wb-print-sheet",
+      picks.map(e => printableRow(randomRound(lang, level, e, pool)))
+    )
+
   private def renderPrint(): HtmlElement =
     val rounds: Var[Vector[Round]] = Var(Vector.empty)
 

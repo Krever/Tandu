@@ -136,6 +136,10 @@ object HomePage:
       sectionTag(
         cls := "stack",
         h2(cls := "h2", child.text <-- s(_.home.tools)),
+        // The workbook builder is itself a tool, so it heads this group rather
+        // than crowding the activity filters: a richer "make a book" hero that
+        // stays the most prominent thing here without competing with the grid.
+        workbookHero(),
         div(
           cls := "stack",
           Tools.all.map: t =>
@@ -147,6 +151,27 @@ object HomePage:
             )
         )
       )
+    )
+
+  /** The feature card at the head of the Tools group: a paper-fan motif and a
+    * primary call-to-action so "compose a book" reads as the standout tool,
+    * decoupled from the activity filters that used to sit above it. The whole
+    * card is the button; the pill is an affordance, not a separate target. */
+  private def workbookHero(): HtmlElement =
+    button(
+      cls := "workbook-hero no-print",
+      span(
+        cls := "workbook-hero__fan",
+        aria.hidden := true,
+        span(), span(), span()
+      ),
+      div(
+        cls := "workbook-hero__body",
+        div(cls := "workbook-hero__title", child.text <-- s(_.workbook.bannerTitle)),
+        div(cls := "workbook-hero__desc", child.text <-- s(_.workbook.bannerSubtitle))
+      ),
+      span(cls := "workbook-hero__go", child.text <-- s(str => s"${str.workbook.createBook} ›")),
+      onClick --> (_ => Routing.go(Page.Workbook()))
     )
 
   /** Collapsible name filter. Lives as a pill button until tapped, then the

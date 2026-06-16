@@ -1652,13 +1652,16 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .printable__footer { margin-top: var(--space-4); font-size: 11px; text-align: center; border-top: 1px solid #ddd; padding-top: var(--space-2); }
 
 /* Battleships printable — both players on one A4 page; parent cuts in half */
-.bs-print-sheet { display: flex; flex-direction: column; gap: var(--space-3); }
-.bs-print-player { display: flex; flex-direction: column; gap: var(--space-2); }
-.bs-print-player__title { font-size: 18px; font-weight: 700; margin: 0; }
-.bs-print-fleet { font-size: 12px; }
+.bs-print-sheet { display: flex; flex-direction: column; gap: var(--space-2); }
+.bs-print-player { display: flex; flex-direction: column; gap: var(--space-1); }
+.bs-print-player__title { font-size: 14px; font-weight: 700; margin: 0; }
+.bs-print-fleet { font-size: 11px; }
+/* Fixed grid width: with 1fr columns the cells balloon and two player
+   blocks overflow the page. 78mm × 2 keeps both players on one sheet. */
 .bs-print-grids {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 78mm);
+  justify-content: center;
   gap: var(--space-4);
 }
 .bs-print-grid { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -2120,7 +2123,9 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   .printable {
     display: flex;
     flex-direction: column;
-    min-height: calc(297mm - 20mm);
+    /* 2mm under the page body: exactly-full sheets round over in print
+       and spill a phantom empty page. */
+    min-height: calc(297mm - 22mm);
   }
   .printable__footer { margin-top: auto; }
 }
@@ -3614,3 +3619,562 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   border-radius: 2mm;
 }
 .snf-print-emoji { width: 9mm; height: 9mm; vertical-align: middle; }
+
+/* ---- Workbook — generated, personalized, disposable activity book ---- */
+
+/* Workbook hero: the feature card heading the Tools group. A little fan of
+   "pages" plus a primary CTA so "compose a book" stays the standout tool,
+   without competing with the activity grid the way the old in-grid banner did. */
+.workbook-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  text-align: left;
+  background: linear-gradient(120deg, var(--color-surface), var(--color-bg-2));
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-stamp);
+  cursor: pointer;
+}
+.workbook-hero:active { transform: translate(2px, 2px); box-shadow: var(--shadow-stamp-sm); }
+
+/* The fanned page stack — three sheets, the front one tinted like a cover. */
+.workbook-hero__fan { position: relative; width: 64px; height: 60px; flex: none; }
+.workbook-hero__fan span {
+  position: absolute;
+  width: 42px;
+  height: 54px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow-stamp-sm);
+}
+.workbook-hero__fan span:nth-child(1) { transform: rotate(-14deg) translate(2px, 2px); }
+.workbook-hero__fan span:nth-child(2) { transform: rotate(-2deg); }
+.workbook-hero__fan span:nth-child(3) { transform: rotate(11deg) translate(8px, -2px); background: var(--tint-mustard); }
+
+.workbook-hero__body { flex: 1; min-width: 0; }
+.workbook-hero__title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+.workbook-hero__desc { font-size: 13.5px; color: var(--color-muted); max-width: 34ch; }
+.workbook-hero__go {
+  margin-left: auto;
+  flex: none;
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-weight: 700;
+  font-size: 14px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  padding: 9px 18px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-stamp-sm);
+}
+
+/* Builder: the preset panel, folded behind an explicit start/replace toggle. */
+.wbk-presets-toggle { color: var(--color-muted); }
+.wbk-presets__row { flex-wrap: wrap; gap: var(--space-2); }
+.wbk-preset-chip {
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 14px;
+}
+.wbk-preset-chip.is-active {
+  background: var(--color-border-strong);
+  color: var(--color-surface);
+}
+/* Books list: one card per saved book, identified by its emoji + name. */
+.wbk-empty { margin: var(--space-4) 0 var(--space-2); max-width: 36ch; margin-left: auto; margin-right: auto; }
+.wbk-book-card {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+.wbk-book-card__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: none;
+  background: none;
+  padding: var(--space-1) 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.wbk-book-card__emoji { font-size: 30px; line-height: 1; }
+.wbk-book-card__body { flex: 1; min-width: 0; }
+.wbk-book-card__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.wbk-book-card__name--unnamed {
+  color: var(--color-muted);
+  font-style: italic;
+  font-weight: 500;
+}
+.wbk-book-card__chev { font-size: 22px; font-weight: 700; color: var(--color-muted); }
+.wbk-book-card__delete {
+  align-self: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 15px;
+  cursor: pointer;
+}
+.wbk-book-card__delete:hover {
+  border-color: var(--color-hit);
+  color: var(--color-hit);
+}
+
+/* Drag-to-reorder grip at the row's end. touch-action: none claims the
+   gesture so the page doesn't scroll under a touch drag. */
+.wbk-row__drag {
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  margin: -4px -6px -4px -2px; /* grow the target without growing the row */
+  cursor: grab;
+  touch-action: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.wbk-row__drag:active { cursor: grabbing; }
+.wbk-row__grip { width: 18px; height: 18px; }
+/* While a card is in flight it rides above its shifting neighbours. */
+.wbk-row.is-dragging {
+  position: relative;
+  z-index: 5;
+  box-shadow: var(--shadow-md);
+  transition: none;
+}
+.is-dragging-list .wbk-row:not(.is-dragging) { transition: transform 150ms ease; }
+
+/* Editor: share + delete, quiet until hovered, and held well clear of
+   the Print zone — destructive actions don't share its neighbourhood. */
+.wbk-secondary-actions { justify-content: center; flex-wrap: wrap; }
+.stack > .wbk-secondary { margin-top: var(--space-6); }
+.wbk-presets__row { justify-content: center; }
+.wbk-share-book { color: var(--color-muted); }
+.wbk-delete-book { color: var(--color-muted); }
+.wbk-delete-book:hover { color: var(--color-hit); border-color: var(--color-hit); }
+
+/* Printed paper pages — plain, lined (10mm) and squared (5mm). SVG strokes
+   because browsers skip CSS backgrounds when printing. */
+.wbk-paper {
+  width: 190mm;
+  height: 235mm;
+  margin: 0 auto;
+}
+.wbk-paper-svg { width: 100%; height: 100%; display: block; }
+.wbk-paper-line { stroke: #b9b3a6; stroke-width: 0.25; }
+.wbk-paper--lined .wbk-paper-line { stroke-width: 0.35; }
+
+/* The destructive confirm in the delete modal. */
+.wbk-confirm-delete {
+  background: var(--color-hit);
+  border-color: var(--color-hit);
+  color: white;
+}
+
+/* Builder: inputs */
+.wbk-input {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 15px;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.wbk-input:disabled { opacity: 0.45; }
+.wbk-input::placeholder { color: var(--color-muted); }
+
+/* Builder: identity card — the book's picture as a tap-to-change button
+   beside its name. */
+.wbk-identity__line { gap: var(--space-2); }
+.wbk-emoji-current {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  line-height: 1;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.wbk-emoji-current.is-open { box-shadow: var(--shadow-stamp-sm); }
+.wbk-emoji-row {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-1) 0;
+}
+.wbk-emoji-btn {
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+.wbk-emoji-btn.is-active { border-color: var(--color-border-strong); background: var(--color-surface); }
+
+/* Builder: composition rows */
+.wbk-row { padding: var(--space-2) var(--space-3); }
+.wbk-row__line { gap: var(--space-2); }
+.wbk-row__main {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: none;
+  background: none;
+  padding: var(--space-1) 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+/* Eye + count/toggle cluster, pinned to the row's end so the variant
+   dropdown can sit on the left, right next to the title. */
+.wbk-row__end {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.wbk-row__glyph {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  border-radius: 10px;
+  background: var(--tile-stamp, var(--color-bg-2));
+  border: 1.5px solid color-mix(in srgb, var(--tile-stamp, var(--color-border-strong)) 55%, var(--color-border-strong));
+}
+.wbk-row__glyph--emoji { font-size: 20px; background: var(--color-bg-2); }
+.wbk-row__name { min-width: 0; font-weight: 600; font-size: 15px; }
+.wbk-row__peek {
+  display: inline-flex;
+  color: var(--color-muted);
+  border: none;
+  background: none;
+  padding: 4px;
+  cursor: pointer;
+}
+.wbk-row__peek.is-open { color: var(--color-primary); }
+.wbk-row__eye { width: 22px; height: 22px; display: block; }
+.wbk-row__eye-slash { display: none; }
+/* Cover off: the pinned row stays, dimmed, so the page is one tap away. */
+.wbk-row--cover.is-off .wbk-row__main { opacity: 0.45; }
+.wbk-toggle {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 28px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.wbk-toggle__knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: transform 150ms ease, background 150ms ease;
+}
+.wbk-toggle.is-on { background: var(--tint-sky); }
+.wbk-toggle.is-on .wbk-toggle__knob {
+  transform: translateX(17px);
+  background: var(--color-border-strong);
+}
+.wbk-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.wbk-stepper__btn {
+  border: none;
+  background: none;
+  font-size: 18px;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  color: inherit;
+}
+.wbk-stepper__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.wbk-stepper__count { min-width: 1.5ch; text-align: center; font-weight: 700; }
+
+/* Variant dropdown on the row line — step two of page selection, switched
+   with the preview open. Wraps below the name on narrow screens. */
+.wbk-row__stack > * + * { margin-top: var(--space-2); }
+.wbk-row__line { flex-wrap: wrap; }
+.wbk-variant-select {
+  appearance: none;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  padding: 4px 30px 4px 12px;
+  background: var(--color-surface);
+  font-size: 14px;
+  color: inherit;
+  cursor: pointer;
+  /* A small chevron so the closed select reads as a dropdown. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%231a1410' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* Builder: tap-to-peek sample page. The page body renders at print size
+   (mm units) and is zoomed down; narrow screens scroll it. */
+.wbk-preview {
+  margin-top: var(--space-2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  overflow: auto;
+  max-height: 420px;
+}
+.wbk-preview__page { zoom: 0.45; padding: 8mm; }
+
+/* Builder: add-pages grid */
+.wbk-add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: var(--space-2);
+}
+.wbk-add-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+.wbk-add-chip:hover { border-color: var(--color-border-strong); }
+.wbk-add-chip.is-added { border-color: var(--color-border-strong); }
+.wbk-add-chip__name { flex: 1; min-width: 0; }
+/* Pages of this kind already in the book. */
+.wbk-add-chip__badge {
+  flex: 0 0 auto;
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+  color: var(--color-surface);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Builder: the print dock. Sticky, so the one real action stays in reach
+   while the composition scrolls; it settles into the flow at the end. The
+   gradient lets list cards slide visibly underneath. */
+.wbk-print-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  padding: var(--space-4) 0 var(--space-3);
+  background: linear-gradient(to top, var(--color-bg) 72%, transparent);
+}
+
+/* Printed cover page */
+.wbk-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10mm;
+  min-height: 240mm;
+}
+/* Modest size on purpose: raster emoji look bad rendered large. */
+.wbk-cover__emoji { font-size: 40mm; line-height: 1; }
+.wbk-cover__name {
+  font-family: var(--font-display);
+  font-size: 36pt;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.wbk-cover__date { font-size: 14pt; color: #555; }
+.wbk-cover__brand {
+  margin-top: 14mm;
+  font-size: 11pt;
+  color: #888;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Printed coloring page: the dot-to-dot silhouette, smooth and dot-free,
+   with the faint interior line-art to anchor recognition. */
+.dots-coloring-board {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180mm;
+  height: 220mm;
+  margin: 0 auto;
+}
+.dots-coloring-svg { width: 100%; height: 100%; overflow: visible; }
+.dots-coloring-outline {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.7;
+  stroke-linejoin: round;
+}
+
+/* Printed blank tic-tac-toe boards: classic # marks, no outer border.
+   Twenty to a page (4×5) — games are short, paper isn't free. */
+.wbk-ttt-sheet {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7mm 8mm;
+  justify-items: center;
+  align-content: start;
+  padding-top: 2mm;
+}
+.wbk-ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 13.5mm);
+  grid-template-rows: repeat(3, 13.5mm);
+}
+.wbk-ttt-cell { border: 0 solid black; }
+.wbk-ttt-cell:not(:nth-child(3n)) { border-right-width: 0.6mm; }
+.wbk-ttt-cell:nth-child(-n+6) { border-bottom-width: 0.6mm; }
+
+/* Paper tool: the print buttons mirror the activities' offline modes. */
+.paper-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
+
+/* ---- Workbook polish pass ---- */
+
+/* Unfold-on-open: previews, the emoji picker and the add grid rise into
+   place instead of snapping. */
+@keyframes wbk-unfold {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+}
+.wbk-preview, .wbk-emoji-row, .wbk-add-grid, .wbk-presets__row { animation: wbk-unfold 180ms ease-out; }
+.wbk-row__peek, .wbk-emoji-current { transition: color 120ms ease, box-shadow 120ms ease; }
+
+/* Empty-list set-piece: a fanned stack of miniature pages. */
+.wbk-empty-art {
+  position: relative;
+  height: 150px;
+  margin-top: var(--space-5);
+}
+.wbk-empty-page {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 86px;
+  height: 112px;
+  padding: 10px;
+  background: #fdfaf2;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow-stamp-sm);
+}
+.wbk-empty-page--0 { transform: translateX(-50%) translateX(-58px) rotate(-7deg); }
+.wbk-empty-page--1 { transform: translateX(-50%) rotate(1deg); top: 0; z-index: 1; }
+.wbk-empty-page--2 { transform: translateX(-50%) translateX(58px) rotate(7deg); }
+.wbk-empty-page__glyph { font-size: 20px; line-height: 1; display: block; margin-bottom: 8px; }
+.wbk-empty-page__line {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--color-border);
+  margin-top: 7px;
+}
+.wbk-empty-page__line--short { width: 60%; }
+/* The right page peeks out from behind the middle one — its glyph lives in
+   the corner that stays visible. */
+.wbk-empty-page--2 .wbk-empty-page__glyph { text-align: right; }
+
+/* Book card: what's inside, one glyph per kind. */
+.wbk-book-card__strip { margin-top: 3px; display: flex; gap: 6px; }
+.wbk-book-card__strip-glyph { font-size: 13px; line-height: 1; opacity: 0.8; }
+
+/* Narrow screens: a deliberate two-line row grammar — line one names the
+   page (glyph, kind, variant), line two holds the controls, right-aligned,
+   identically on every row. Beats flex-wrap deciding per row. */
+@media (max-width: 480px) {
+  .wbk-row__end {
+    flex-basis: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+  .wbk-add-grid { grid-template-columns: repeat(2, 1fr); }
+  .wbk-add-chip { font-size: 13px; gap: var(--space-1); }
+  .wbk-add-chip .wbk-row__glyph { width: 30px; height: 30px; font-size: 15px; }
+  /* Narrow screens: let the CTA wrap to its own full-width row under the copy
+     so the title/desc keep their space. */
+  .workbook-hero { flex-wrap: wrap; gap: var(--space-3); padding: var(--space-4); }
+  .workbook-hero__go { margin-left: 0; width: 100%; text-align: center; }
+}
+
+/* The preset toggle's restart arrow, at proper icon size. */
+.wbk-reset-icon { width: 17px; height: 17px; flex: 0 0 auto; }
+
+/* Printed gomoku boards: two blank 10×10 grids, five-in-a-row paper. */
+.wbk-gomoku-sheet {
+  display: grid;
+  gap: 10mm;
+  justify-items: center;
+  align-content: start;
+  padding-top: 2mm;
+}
+.wbk-gomoku-board {
+  display: grid;
+  grid-template-columns: repeat(10, 11mm);
+  grid-template-rows: repeat(10, 11mm);
+  border: 0.5mm solid black;
+}
+.wbk-gomoku-cell { border: 0 solid #999; }
+.wbk-gomoku-cell:not(:nth-child(10n)) { border-right-width: 0.3mm; }
+.wbk-gomoku-cell:nth-child(-n+90) { border-bottom-width: 0.3mm; }

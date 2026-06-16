@@ -67,7 +67,11 @@ object MathPractice extends Activity:
   )
 
   private val DefaultLevel = levels.head
-  private val WorksheetRows = 20
+  // Rows must fit one A4 page within the printable wrapper (~277mm). 16 sat
+  // right at the edge: number-only rows fit, but picture rows (counting,
+  // add/subtract-with-objects) render a touch taller and tipped a sliver onto
+  // a phantom second page. 14 keeps the tallest picture-heavy variant clear.
+  private val WorksheetRows = 14
 
   private val emojiPool = Vector("🍎", "🍊", "🐶", "🐱", "⭐", "⚽", "🦋", "🐢", "🐠", "🌸", "🚗", "🎈")
   private def randomEmoji(): String = emojiPool(Random.nextInt(emojiPool.size))
@@ -415,6 +419,16 @@ object MathPractice extends Activity:
       )
 
   // ---------- print ----------
+
+  /** One printed worksheet's rows, as a bare body for composed documents like
+    * workbooks. Recognize is skipped just like the offline mode's sheets. */
+  def printSheetBody(level: Level): HtmlElement =
+    val printable = level.kinds.filter(_ != TaskKind.Recognize)
+    val pickable = if printable.isEmpty then level.kinds else printable
+    div(
+      cls := "mp-print-sheet",
+      (1 to WorksheetRows).map(_ => printableRow(genTask(level, pickable(Random.nextInt(pickable.size)))))
+    )
 
   private def renderPrint(): HtmlElement =
     val tasks: Var[Vector[Task]] = Var(Vector.empty)

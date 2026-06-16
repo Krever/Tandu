@@ -2,7 +2,7 @@ package tandu
 
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
-import tandu.pages.{ActivityPage, HomePage, ToolPage}
+import tandu.pages.{ActivityPage, HomePage, ToolPage, WorkbookPage}
 
 @main def main(): Unit =
   Pwa.init()
@@ -24,12 +24,19 @@ import tandu.pages.{ActivityPage, HomePage, ToolPage}
         case Page.Home            => Page.Home
         case Page.Activity(id, _) => Page.Activity(id, Nil)
         case t @ Page.Tool(_)     => t
+        // List ↔ editor ↔ shared-import stay within one mount; the page
+        // subscribes to the sub-route itself (same idea as activity
+        // sub-choosers).
+        case Page.Workbook(_)       => Page.Workbook(None)
+        case Page.WorkbookShared(_) => Page.Workbook(None)
       }
       .distinct
       .map {
-        case Page.Home            => HomePage.render()
-        case Page.Activity(id, _) => ActivityPage.render(id)
-        case Page.Tool(id)        => ToolPage.render(id)
+        case Page.Home              => HomePage.render()
+        case Page.Activity(id, _)   => ActivityPage.render(id)
+        case Page.Tool(id)          => ToolPage.render(id)
+        case Page.Workbook(_)       => WorkbookPage.render()
+        case Page.WorkbookShared(_) => WorkbookPage.render()
       }
   )
   val _ = render(container, app)

@@ -274,14 +274,19 @@ object Battleships extends Activity:
       }
     )
 
+  /** Both players' paper grids (the maps sheet body), as a bare body for
+    * composed documents like workbooks. */
+  def printSheetBody(): HtmlElement =
+    div(
+      cls := "bs-print-sheet",
+      printPlayerGrids(playerNum = 1),
+      printPlayerGrids(playerNum = 2)
+    )
+
   private def printableMaps(): HtmlElement =
     Printable.render(
       title = _.offline.battleships.printTitle,
-      body = div(
-        cls := "bs-print-sheet",
-        printPlayerGrids(playerNum = 1),
-        printPlayerGrids(playerNum = 2)
-      )
+      body = printSheetBody()
     )
 
   private def printableRules(): HtmlElement =

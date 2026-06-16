@@ -11,6 +11,10 @@ enum Page:
   case Home
   case Activity(id: String, path: List[String] = Nil)
   case Tool(id: String)
+  case Workbook(book: Option[Int] = None)
+  /** A shared workbook recipe arriving as a link; `payload` is the encoded
+    * recipe, imported on visit (see WorkbookPage). */
+  case WorkbookShared(payload: String)
 
 object Routing:
 
@@ -29,6 +33,26 @@ object Routing:
       pattern = root / "activity" / segment[String] / remainingSegments
     )
 
+  // The books list is a value-equality static route (it must not swallow the
+  // editor pages); the editor route is total over Page.Workbook, so order
+  // matters: list first, editor as the fallback for Some(idx).
+  private val routeWorkbookList: Route[Page.Workbook, Unit] =
+    Route.staticPartial(Page.Workbook(None), root / "workbook" / endOfSegments)
+
+  private val routeWorkbookEditor: Route[Page.Workbook, Int] =
+    Route[Page.Workbook, Int](
+      encode = _.book.getOrElse(0),
+      decode = i => Page.Workbook(Some(i)),
+      pattern = root / "workbook" / segment[Int] / endOfSegments
+    )
+
+  private val routeWorkbookShared: Route[Page.WorkbookShared, String] =
+    Route[Page.WorkbookShared, String](
+      encode = _.payload,
+      decode = p => Page.WorkbookShared(p),
+      pattern = root / "workbook" / "shared" / segment[String] / endOfSegments
+    )
+
   private val routeTool: Route[Page.Tool, String] =
     Route[Page.Tool, String](
       encode = _.id,
@@ -41,9 +65,15 @@ object Routing:
     case Page.Activity(i, Nil)   => s"a:$i"
     case Page.Activity(i, path)  => s"a:$i/${path.mkString("/")}"
     case Page.Tool(i)            => s"t:$i"
+    case Page.Workbook(None)     => "w"
+    case Page.Workbook(Some(i))  => s"w:$i"
+    case Page.WorkbookShared(p)  => s"ws:$p"
 
   private def deserialize(s: String): Page =
     if s == "h" then Page.Home
+    else if s == "w" then Page.Workbook(None)
+    else if s.startsWith("ws:") then Page.WorkbookShared(s.drop(3))
+    else if s.startsWith("w:") then Page.Workbook(s.drop(2).toIntOption)
     else if s.startsWith("a:") then
       val parts = s.drop(2).split("/").toList
       parts match
@@ -53,7 +83,7 @@ object Routing:
     else Page.Home
 
   val router: Router[Page] = new Router[Page](
-    routes = List(routeHome, routeActivity, routeTool),
+    routes = List(routeHome, routeWorkbookList, routeWorkbookShared, routeWorkbookEditor, routeActivity, routeTool),
     serializePage = serialize,
     deserializePage = deserialize,
     getPageTitle = _ => "Tandu",
@@ -74,3 +104,5 @@ object Routing:
       Registry.byId(id).map(a => s"${a.name(s)} — ${s.appTitle}").getOrElse(s.appTitle)
     case Page.Tool(id)        =>
       Tools.byId(id).map(t => s"${t.name(s)} — ${s.appTitle}").getOrElse(s.appTitle)
+    case Page.Workbook(_)        => s"${s.workbook.name} — ${s.appTitle}"
+    case Page.WorkbookShared(_)  => s"${s.workbook.name} — ${s.appTitle}"

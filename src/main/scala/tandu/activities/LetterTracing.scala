@@ -283,6 +283,20 @@ object LetterTracing extends Activity:
   private val RowTop  = 14.0
   private val RowBase = 68.0
 
+  /** One printed worksheet of `RowsPerSheet` rows, as a bare body for composed
+    * documents like workbooks. Ordered variants walk the character set —
+    * `pageIdx` 0 starts the alphabet, 1 continues it, wrapping around so any
+    * requested count yields a sheet. A shuffled variant instead deals a fresh
+    * random hand of characters per page. */
+  def printSheetBody(v: Variant, lang: Lang, pageIdx: Int): HtmlElement =
+    val chars = v.chars(lang)
+    val rows =
+      if v.shuffled then scala.util.Random.shuffle(chars).take(RowsPerSheet)
+      else
+        val groups = chars.grouped(RowsPerSheet).toVector
+        groups(pageIdx % groups.size)
+    div(cls := "lt-print-sheet", rows.map(printRow))
+
   private def renderPrint(): HtmlElement =
     val slot = Printable.printSlot[Variant]()
     div(

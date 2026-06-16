@@ -10,6 +10,7 @@ object Storage:
   private val KeyFavouritesOnly = "tandu.favouritesOnly"
   private val KeyHidden         = "tandu.hidden"
   private val KeyClockFormat    = "tandu.clockFormat"
+  private val KeyWorkbookBooks  = "tandu.workbook.books"
 
   def getString(key: String): Option[String] =
     Try(Option(dom.window.localStorage.getItem(key))).toOption.flatten
@@ -47,3 +48,8 @@ object Storage:
 
   def loadClockFormat(): Option[String]    = getString(KeyClockFormat)
   def saveClockFormat(value: String): Unit = setString(KeyClockFormat, value)
+
+  // The saved workbooks, as one JSON blob; the codec lives with the model
+  // (workbook.Workbook.Codec), storage just moves an opaque string.
+  def loadWorkbookBooks(): Option[String]   = getString(KeyWorkbookBooks)
+  def saveWorkbookBooks(json: String): Unit = setString(KeyWorkbookBooks, json)

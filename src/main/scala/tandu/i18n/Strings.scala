@@ -46,7 +46,8 @@ final case class Strings(
     drawAndGuess: Strings.DrawAndGuess,
     dotToDot: Strings.DotToDot,
     letterTracing: Strings.LetterTracing,
-    seekAndFind: Strings.SeekAndFind
+    seekAndFind: Strings.SeekAndFind,
+    workbook: Strings.Workbook
 )
 
 object Strings:
@@ -752,6 +753,45 @@ object Strings:
       hard: String
   )
 
+  final case class Workbook(
+      name: String,
+      bannerTitle: String,
+      bannerSubtitle: String,
+      noBooksYet: String,
+      createBook: String,
+      unnamedBook: String,
+      deleteBook: String,
+      /** Delete confirmation; `{}` is replaced by the book's name. */
+      deleteConfirmBody: String,
+      replaceWithPreset: String,
+      age45: String,
+      age67: String,
+      age8plus: String,
+      travel: String,
+      mathBoost: String,
+      emptyPreset: String,
+      coverPage: String,
+      namePlaceholder: String,
+      emojiLabel: String,
+      printBook: String,
+      /** Shown on the print button while the book's pages are generating. */
+      printingBook: String,
+      addPages: String,
+      empty: String,
+      previewLabel: String,
+      fewer: String,
+      more: String,
+      paperName: String,
+      paperBlank: String,
+      paperLined: String,
+      paperSquared: String,
+      /** The home-screen Paper tool's blurb. */
+      paperDescription: String,
+      reorder: String,
+      share: String,
+      shareCopied: String
+  )
+
   val en: Strings = Strings(
     drawAndGuess = DrawAndGuess(
       name = "Draw & Guess",
@@ -1290,8 +1330,8 @@ object Strings:
       undo = "Undo",
       pencil = "Pencil",
       assist = "Helper",
-      emoji4 = SudokuVariant("Emoji 4×4", "Four pictures — perfect for little solvers."),
-      emoji6 = SudokuVariant("Emoji 6×6", "Six pictures — one step up."),
+      emoji4 = SudokuVariant("Pictures 4×4", "Four pictures — perfect for little solvers."),
+      emoji6 = SudokuVariant("Pictures 6×6", "Six pictures — one step up."),
       easy = SudokuVariant("Easy", "More clues — a friendly start."),
       medium = SudokuVariant("Medium", "Fewer clues — a real challenge."),
       hard = SudokuVariant("Hard", "Sparse clues — for sharp solvers.")
@@ -1471,6 +1511,41 @@ object Strings:
       tipsTitle = "Clue ideas",
       tip1 = "By colour, shape, size or what it's made of.",
       tip2 = "Or by first letter: \"…something beginning with B\"."
+    ),
+    workbook = Workbook(
+      name = "Workbook",
+      bannerTitle = "Print a workbook",
+      bannerSubtitle = "A fresh activity book every time — pick, print, play.",
+      noBooksYet = "No books yet. Create one — a fresh activity book in a few taps.",
+      createBook = "Create a book",
+      unnamedBook = "Untitled",
+      deleteBook = "Delete this book",
+      deleteConfirmBody = "Delete “{}”? This can't be undone.",
+      replaceWithPreset = "Replace with a preset",
+      age45 = "Ages 4–5",
+      age67 = "Ages 6–7",
+      age8plus = "Ages 8+",
+      travel = "Travel pack",
+      mathBoost = "Math boost",
+      emptyPreset = "Empty",
+      coverPage = "Cover page",
+      namePlaceholder = "Book name",
+      emojiLabel = "Book picture",
+      printBook = "Print the book",
+      printingBook = "Preparing…",
+      addPages = "Add pages",
+      empty = "Pick a preset or add pages to fill the book.",
+      previewLabel = "Preview",
+      fewer = "Fewer",
+      more = "More",
+      paperName = "Paper",
+      paperBlank = "Blank",
+      paperLined = "Lined",
+      paperSquared = "Squared",
+      paperDescription = "Blank, lined and squared sheets to print.",
+      reorder = "Reorder",
+      share = "Share",
+      shareCopied = "Link copied!"
     )
   )
 
@@ -2012,8 +2087,8 @@ object Strings:
       undo = "Cofnij",
       pencil = "Notatka",
       assist = "Podpowiedzi",
-      emoji4 = SudokuVariant("Emoji 4×4", "Cztery obrazki — idealne dla maluchów."),
-      emoji6 = SudokuVariant("Emoji 6×6", "Sześć obrazków — o krok dalej."),
+      emoji4 = SudokuVariant("Obrazki 4×4", "Cztery obrazki — idealne dla maluchów."),
+      emoji6 = SudokuVariant("Obrazki 6×6", "Sześć obrazków — o krok dalej."),
       easy = SudokuVariant("Łatwe", "Więcej podpowiedzi — przyjazny start."),
       medium = SudokuVariant("Średnie", "Mniej podpowiedzi — prawdziwe wyzwanie."),
       hard = SudokuVariant("Trudne", "Mało podpowiedzi — dla wytrawnych.")
@@ -2193,6 +2268,41 @@ object Strings:
       tipsTitle = "Pomysły na wskazówki",
       tip1 = "Po kolorze, kształcie, wielkości albo z czego jest zrobione.",
       tip2 = "Albo po pierwszej literze: „…coś na literę B”."
+    ),
+    workbook = Workbook(
+      name = "Książeczka zadań",
+      bannerTitle = "Wydrukuj książeczkę zadań",
+      bannerSubtitle = "Za każdym razem nowy zestaw — wybierz, wydrukuj, gotowe.",
+      noBooksYet = "Nie ma jeszcze żadnej książeczki. Stwórz pierwszą — wystarczy kilka dotknięć.",
+      createBook = "Stwórz książeczkę",
+      unnamedBook = "Bez nazwy",
+      deleteBook = "Usuń książeczkę",
+      deleteConfirmBody = "Usunąć „{}”? Tego nie da się cofnąć.",
+      replaceWithPreset = "Zastąp zestawem",
+      age45 = "4–5 lat",
+      age67 = "6–7 lat",
+      age8plus = "8+ lat",
+      travel = "W podróż",
+      mathBoost = "Trening liczenia",
+      emptyPreset = "Pusta",
+      coverPage = "Okładka",
+      namePlaceholder = "Nazwa książeczki",
+      emojiLabel = "Obrazek książeczki",
+      printBook = "Drukuj książeczkę",
+      printingBook = "Przygotowuję…",
+      addPages = "Dodaj strony",
+      empty = "Wybierz zestaw albo dodaj strony.",
+      previewLabel = "Podgląd",
+      fewer = "Mniej",
+      more = "Więcej",
+      paperName = "Kartka",
+      paperBlank = "Czysta",
+      paperLined = "W linie",
+      paperSquared = "W kratkę",
+      paperDescription = "Czyste kartki, w linie i w kratkę — do druku.",
+      reorder = "Zmień kolejność",
+      share = "Udostępnij",
+      shareCopied = "Link skopiowany!"
     )
   )
 
@@ -2734,8 +2844,8 @@ object Strings:
       undo = "Deshacer",
       pencil = "Lápiz",
       assist = "Ayuda",
-      emoji4 = SudokuVariant("Emoji 4×4", "Cuatro dibujos — perfecto para peques."),
-      emoji6 = SudokuVariant("Emoji 6×6", "Seis dibujos — un paso más."),
+      emoji4 = SudokuVariant("Dibujos 4×4", "Cuatro dibujos — perfecto para peques."),
+      emoji6 = SudokuVariant("Dibujos 6×6", "Seis dibujos — un paso más."),
       easy = SudokuVariant("Fácil", "Más pistas — un buen comienzo."),
       medium = SudokuVariant("Medio", "Menos pistas — un reto real."),
       hard = SudokuVariant("Difícil", "Pocas pistas — para expertos.")
@@ -2915,6 +3025,41 @@ object Strings:
       tipsTitle = "Ideas de pistas",
       tip1 = "Por color, forma, tamaño o material.",
       tip2 = "O por la primera letra: «…algo que empieza por B»."
+    ),
+    workbook = Workbook(
+      name = "Cuadernillo",
+      bannerTitle = "Imprime un cuadernillo",
+      bannerSubtitle = "Un cuadernillo de actividades nuevo cada vez: elige, imprime y a jugar.",
+      noBooksYet = "Aún no hay cuadernillos. Crea uno: un cuadernillo nuevo en unos toques.",
+      createBook = "Crear un cuadernillo",
+      unnamedBook = "Sin nombre",
+      deleteBook = "Eliminar el cuadernillo",
+      deleteConfirmBody = "¿Eliminar «{}»? No se puede deshacer.",
+      replaceWithPreset = "Reemplazar con una plantilla",
+      age45 = "4–5 años",
+      age67 = "6–7 años",
+      age8plus = "8+ años",
+      travel = "Para el viaje",
+      mathBoost = "Refuerzo de mates",
+      emptyPreset = "Vacío",
+      coverPage = "Portada",
+      namePlaceholder = "Nombre del cuadernillo",
+      emojiLabel = "Dibujo del cuadernillo",
+      printBook = "Imprimir el cuadernillo",
+      printingBook = "Preparando…",
+      addPages = "Añadir páginas",
+      empty = "Elige una plantilla o añade páginas.",
+      previewLabel = "Vista previa",
+      fewer = "Menos",
+      more = "Más",
+      paperName = "Hoja",
+      paperBlank = "En blanco",
+      paperLined = "Rayada",
+      paperSquared = "Cuadriculada",
+      paperDescription = "Hojas en blanco, rayadas y cuadriculadas para imprimir.",
+      reorder = "Reordenar",
+      share = "Compartir",
+      shareCopied = "¡Enlace copiado!"
     )
   )
 
@@ -3456,8 +3601,8 @@ object Strings:
       undo = "Annuler",
       pencil = "Crayon",
       assist = "Aide",
-      emoji4 = SudokuVariant("Émoji 4×4", "Quatre images — parfait pour les petits."),
-      emoji6 = SudokuVariant("Émoji 6×6", "Six images — un cran au-dessus."),
+      emoji4 = SudokuVariant("Images 4×4", "Quatre images — parfait pour les petits."),
+      emoji6 = SudokuVariant("Images 6×6", "Six images — un cran au-dessus."),
       easy = SudokuVariant("Facile", "Plus d'indices — un démarrage doux."),
       medium = SudokuVariant("Moyen", "Moins d'indices — un vrai défi."),
       hard = SudokuVariant("Difficile", "Peu d'indices — pour les experts.")
@@ -3637,6 +3782,41 @@ object Strings:
       tipsTitle = "Idées d'indices",
       tip1 = "Par couleur, forme, taille ou matière.",
       tip2 = "Ou par première lettre : « …quelque chose qui commence par B »."
+    ),
+    workbook = Workbook(
+      name = "Cahier d'activités",
+      bannerTitle = "Imprimer un cahier d'activités",
+      bannerSubtitle = "Un cahier tout neuf à chaque fois : choisissez, imprimez, jouez.",
+      noBooksYet = "Pas encore de cahier. Créez-en un : un cahier tout neuf en quelques gestes.",
+      createBook = "Créer un cahier",
+      unnamedBook = "Sans titre",
+      deleteBook = "Supprimer le cahier",
+      deleteConfirmBody = "Supprimer « {} » ? Cette action est définitive.",
+      replaceWithPreset = "Remplacer par un modèle",
+      age45 = "4–5 ans",
+      age67 = "6–7 ans",
+      age8plus = "8 ans et +",
+      travel = "Spécial voyage",
+      mathBoost = "Coup de pouce en maths",
+      emptyPreset = "Vide",
+      coverPage = "Couverture",
+      namePlaceholder = "Nom du cahier",
+      emojiLabel = "Image du cahier",
+      printBook = "Imprimer le cahier",
+      printingBook = "Préparation…",
+      addPages = "Ajouter des pages",
+      empty = "Choisissez un modèle ou ajoutez des pages.",
+      previewLabel = "Aperçu",
+      fewer = "Moins",
+      more = "Plus",
+      paperName = "Feuille",
+      paperBlank = "Vierge",
+      paperLined = "Lignée",
+      paperSquared = "Quadrillée",
+      paperDescription = "Feuilles vierges, lignées et quadrillées à imprimer.",
+      reorder = "Réorganiser",
+      share = "Partager",
+      shareCopied = "Lien copié !"
     )
   )
 
@@ -4178,8 +4358,8 @@ object Strings:
       undo = "Rückgängig",
       pencil = "Notiz",
       assist = "Hilfe",
-      emoji4 = SudokuVariant("Emoji 4×4", "Vier Bilder — perfekt für kleine Knobler."),
-      emoji6 = SudokuVariant("Emoji 6×6", "Sechs Bilder — eine Stufe höher."),
+      emoji4 = SudokuVariant("Bilder 4×4", "Vier Bilder — perfekt für kleine Knobler."),
+      emoji6 = SudokuVariant("Bilder 6×6", "Sechs Bilder — eine Stufe höher."),
       easy = SudokuVariant("Leicht", "Mehr Hinweise — sanfter Einstieg."),
       medium = SudokuVariant("Mittel", "Weniger Hinweise — echte Herausforderung."),
       hard = SudokuVariant("Schwer", "Wenige Hinweise — für Profis.")
@@ -4359,6 +4539,41 @@ object Strings:
       tipsTitle = "Hinweis-Ideen",
       tip1 = "Nach Farbe, Form, Größe oder Material.",
       tip2 = "Oder nach dem ersten Buchstaben: „…etwas mit B“."
+    ),
+    workbook = Workbook(
+      name = "Rätselheft",
+      bannerTitle = "Rätselheft drucken",
+      bannerSubtitle = "Jedes Mal ein frisches Heft voller Aufgaben – auswählen, drucken, losspielen.",
+      noBooksYet = "Noch keine Hefte. Erstelle eins – ein frisches Rätselheft in wenigen Fingertipps.",
+      createBook = "Heft erstellen",
+      unnamedBook = "Ohne Namen",
+      deleteBook = "Heft löschen",
+      deleteConfirmBody = "„{}“ löschen? Das kann nicht rückgängig gemacht werden.",
+      replaceWithPreset = "Durch eine Vorlage ersetzen",
+      age45 = "4–5 Jahre",
+      age67 = "6–7 Jahre",
+      age8plus = "ab 8 Jahren",
+      travel = "Für unterwegs",
+      mathBoost = "Mathe-Training",
+      emptyPreset = "Leer",
+      coverPage = "Titelseite",
+      namePlaceholder = "Name des Hefts",
+      emojiLabel = "Heft-Bild",
+      printBook = "Heft drucken",
+      printingBook = "Wird vorbereitet…",
+      addPages = "Seiten hinzufügen",
+      empty = "Wähle eine Vorlage oder füge Seiten hinzu.",
+      previewLabel = "Vorschau",
+      fewer = "Weniger",
+      more = "Mehr",
+      paperName = "Papier",
+      paperBlank = "Blanko",
+      paperLined = "Liniert",
+      paperSquared = "Kariert",
+      paperDescription = "Blanko, linierte und karierte Blätter zum Drucken.",
+      reorder = "Neu anordnen",
+      share = "Teilen",
+      shareCopied = "Link kopiert!"
     )
   )
 

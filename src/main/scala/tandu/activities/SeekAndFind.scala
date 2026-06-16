@@ -432,6 +432,20 @@ object SeekAndFind extends Activity:
       c.toDataURL("image/png")
     })
 
+  /** Level ids exposed for composed documents (workbooks). */
+  def printLevelIds: List[String] = seekLevels.map(_.levelId)
+
+  /** One printed find-and-circle page, as a bare body for composed documents
+    * like workbooks. Unknown level ids fall back to easy. */
+  def printSeekBody(levelId: String, rng: Random = new Random()): HtmlElement =
+    val l = seekLevels.find(_.levelId == levelId).getOrElse(seekLevels.head)
+    seekSheet(generate(l.print.getOrElse(l.app), PrintW, PrintH, rng))
+
+  /** One printed count-and-write page, as a bare body for composed documents
+    * like workbooks. */
+  def printCountBody(rng: Random = new Random()): HtmlElement =
+    countSheet(generate(countSheetSpec, PrintW, PrintH, rng))
+
   private def renderOffline(): HtmlElement =
     val sheet: Var[Option[HtmlElement]] = Var(None)
     val rng = new Random()

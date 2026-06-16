@@ -199,7 +199,7 @@ object GuideRobot extends Activity:
   )
 
   val variants: List[Variant] = List(
-    Variant("easy",   5, 0, false, false, 4, 6, 10, _.guideRobot.easy.name,   _.guideRobot.easy.description),
+    Variant("easy",   5, 0, false, false, 4, 4, 10, _.guideRobot.easy.name,   _.guideRobot.easy.description),
     Variant("medium", 6, 6, false, true,  5, 4, 16, _.guideRobot.medium.name, _.guideRobot.medium.description),
     Variant("hard",   6, 5, true,  true,  4, 4, 18, _.guideRobot.hard.name,   _.guideRobot.hard.description)
   )
@@ -535,6 +535,14 @@ object GuideRobot extends Activity:
       )
 
   // ---------- print ----------
+
+  /** One printed page's worth of puzzles (the variant's usual per-page batch),
+    * as a bare body for composed documents like workbooks. */
+  def printSheetBody(v: Variant, rng: Random = new Random()): HtmlElement =
+    div(
+      cls := "robot-print-sheet",
+      List.fill(v.perPage)(generate(v, rng)).map(p => printablePuzzle(v, p))
+    )
 
   private def renderOffline(): HtmlElement =
     // PrintSlot mounts a single variant's sheet, fires the print dialog, then

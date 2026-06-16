@@ -3459,7 +3459,8 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   stroke-linejoin: round;
 }
 .jigsaw-piece.is-placed .jigsaw-piece-edge { stroke: rgba(0, 0, 0, 0.05); }
-.jigsaw-file-input {
+.jigsaw-file-input,
+.wbk-import-input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -3780,6 +3781,29 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .wbk-share-book { color: var(--color-muted); }
 .wbk-delete-book { color: var(--color-muted); }
 .wbk-delete-book:hover { color: var(--color-hit); border-color: var(--color-hit); }
+
+/* Clipboard fallback: the link revealed for manual copy when the copy failed. */
+.wbk-share-manual { margin-top: var(--space-3); }
+.wbk-share-url { width: 100%; flex: none; font-size: 13px; }
+
+/* Standing banner when local storage refuses a save — can't be missed, but
+   stays out of the print sheet. */
+.wbk-save-warning {
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-hit);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-hit) 12%, var(--color-surface));
+  color: var(--color-text);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Library backup: quiet export/import row under the create button. */
+.wbk-library-actions { margin-top: var(--space-4); align-items: center; }
+.wbk-library-actions .row { justify-content: center; flex-wrap: wrap; }
+.wbk-import, .wbk-export { color: var(--color-muted); }
+/* .wbk-import-input is visually hidden — see the shared rule with .jigsaw-file-input. */
+.wbk-import-error { color: var(--color-hit); }
 
 /* Printed paper pages — plain, lined (10mm) and squared (5mm). SVG strokes
    because browsers skip CSS backgrounds when printing. */

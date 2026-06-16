@@ -11,7 +11,7 @@ enum Page:
   case Home
   case Activity(id: String, path: List[String] = Nil)
   case Tool(id: String)
-  case Workbook(book: Option[Int] = None)
+  case Workbook(book: Option[String] = None)
   /** A shared workbook recipe arriving as a link; `payload` is the encoded
     * recipe, imported on visit (see WorkbookPage). */
   case WorkbookShared(payload: String)
@@ -39,11 +39,11 @@ object Routing:
   private val routeWorkbookList: Route[Page.Workbook, Unit] =
     Route.staticPartial(Page.Workbook(None), root / "workbook" / endOfSegments)
 
-  private val routeWorkbookEditor: Route[Page.Workbook, Int] =
-    Route[Page.Workbook, Int](
-      encode = _.book.getOrElse(0),
-      decode = i => Page.Workbook(Some(i)),
-      pattern = root / "workbook" / segment[Int] / endOfSegments
+  private val routeWorkbookEditor: Route[Page.Workbook, String] =
+    Route[Page.Workbook, String](
+      encode = _.book.getOrElse(""),
+      decode = id => Page.Workbook(Some(id)),
+      pattern = root / "workbook" / segment[String] / endOfSegments
     )
 
   private val routeWorkbookShared: Route[Page.WorkbookShared, String] =
@@ -73,7 +73,7 @@ object Routing:
     if s == "h" then Page.Home
     else if s == "w" then Page.Workbook(None)
     else if s.startsWith("ws:") then Page.WorkbookShared(s.drop(3))
-    else if s.startsWith("w:") then Page.Workbook(s.drop(2).toIntOption)
+    else if s.startsWith("w:") then Page.Workbook(Option.when(s.drop(2).nonEmpty)(s.drop(2)))
     else if s.startsWith("a:") then
       val parts = s.drop(2).split("/").toList
       parts match

@@ -789,7 +789,16 @@ object Strings:
       paperDescription: String,
       reorder: String,
       share: String,
-      shareCopied: String
+      shareCopied: String,
+      /** Shown when the clipboard is unreachable and the link is revealed for
+        * manual copying instead. */
+      shareManual: String,
+      /** Standing banner when a save to local storage is refused. */
+      saveFailed: String,
+      exportBooks: String,
+      importBooks: String,
+      /** Flashed when an imported file isn't a readable workbook export. */
+      importFailed: String
   )
 
   val en: Strings = Strings(
@@ -1545,7 +1554,12 @@ object Strings:
       paperDescription = "Blank, lined and squared sheets to print.",
       reorder = "Reorder",
       share = "Share",
-      shareCopied = "Link copied!"
+      shareCopied = "Link copied!",
+      shareManual = "Couldn't copy automatically — copy this link:",
+      saveFailed = "Couldn't save — your browser storage may be full or blocked. Recent changes might not be kept.",
+      exportBooks = "Export all",
+      importBooks = "Import",
+      importFailed = "That file isn't a workbook export."
     )
   )
 
@@ -2302,7 +2316,12 @@ object Strings:
       paperDescription = "Czyste kartki, w linie i w kratkę — do druku.",
       reorder = "Zmień kolejność",
       share = "Udostępnij",
-      shareCopied = "Link skopiowany!"
+      shareCopied = "Link skopiowany!",
+      shareManual = "Nie udało się skopiować automatycznie — skopiuj ten link ręcznie:",
+      saveFailed = "Nie udało się zapisać — pamięć przeglądarki może być pełna lub zablokowana. Ostatnie zmiany mogą nie zostać zachowane.",
+      exportBooks = "Eksportuj wszystkie",
+      importBooks = "Wczytaj z pliku",
+      importFailed = "To nie jest plik z książeczkami."
     )
   )
 
@@ -3059,7 +3078,12 @@ object Strings:
       paperDescription = "Hojas en blanco, rayadas y cuadriculadas para imprimir.",
       reorder = "Reordenar",
       share = "Compartir",
-      shareCopied = "¡Enlace copiado!"
+      shareCopied = "¡Enlace copiado!",
+      shareManual = "No se pudo copiar automáticamente; copia este enlace:",
+      saveFailed = "No se pudo guardar: el almacenamiento del navegador puede estar lleno o bloqueado. Quizá no se conserven los cambios recientes.",
+      exportBooks = "Exportar todo",
+      importBooks = "Importar",
+      importFailed = "Ese archivo no es una exportación de cuadernillos."
     )
   )
 
@@ -3816,7 +3840,12 @@ object Strings:
       paperDescription = "Feuilles vierges, lignées et quadrillées à imprimer.",
       reorder = "Réorganiser",
       share = "Partager",
-      shareCopied = "Lien copié !"
+      shareCopied = "Lien copié !",
+      shareManual = "Copie automatique impossible — copiez ce lien :",
+      saveFailed = "Échec de l'enregistrement — le stockage du navigateur est peut-être plein ou bloqué. Les modifications récentes risquent d'être perdues.",
+      exportBooks = "Tout exporter",
+      importBooks = "Importer",
+      importFailed = "Ce fichier n'est pas un export de cahiers."
     )
   )
 
@@ -4573,7 +4602,12 @@ object Strings:
       paperDescription = "Blanko, linierte und karierte Blätter zum Drucken.",
       reorder = "Neu anordnen",
       share = "Teilen",
-      shareCopied = "Link kopiert!"
+      shareCopied = "Link kopiert!",
+      shareManual = "Automatisches Kopieren nicht möglich — kopiere diesen Link:",
+      saveFailed = "Speichern fehlgeschlagen — der Browser-Speicher ist evtl. voll oder blockiert. Die letzten Änderungen gehen möglicherweise verloren.",
+      exportBooks = "Alle exportieren",
+      importBooks = "Importieren",
+      importFailed = "Diese Datei ist kein Heft-Export."
     )
   )
 

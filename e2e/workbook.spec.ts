@@ -27,13 +27,13 @@ async function pickPreset(page, name: string) {
 async function createBook(page) {
   await page.goto("/workbook")
   await page.locator(".btn--hero").click()
-  await expect(page).toHaveURL(/\/workbook\/0$/)
+  await expect(page).toHaveURL(/\/workbook\/[0-9a-f]+$/)
   await pickPreset(page, "4–5")
 }
 
 test("home banner leads to the books list, empty at first", async ({ page }) => {
   await page.goto("/")
-  const banner = page.locator(".workbook-banner")
+  const banner = page.locator(".workbook-hero")
   await expect(banner).toBeVisible()
   await banner.click()
   await expect(page).toHaveURL(/\/workbook$/)
@@ -44,7 +44,7 @@ test("home banner leads to the books list, empty at first", async ({ page }) => 
 test("a new book starts empty, leading with the preset choice", async ({ page }) => {
   await page.goto("/workbook")
   await page.locator(".btn--hero").click()
-  await expect(page).toHaveURL(/\/workbook\/0$/)
+  await expect(page).toHaveURL(/\/workbook\/[0-9a-f]+$/)
   // No placeholder name is persisted; the empty name field gets focus.
   await expect(page.locator(".wbk-name-input")).toHaveValue("")
   await expect(page.locator(".wbk-name-input")).toBeFocused()
@@ -84,7 +84,7 @@ test("the Empty preset clears the book", async ({ page }) => {
 test("deleting a blank book skips the confirmation", async ({ page }) => {
   await page.goto("/workbook")
   await page.locator(".btn--hero").click()
-  await expect(page).toHaveURL(/\/workbook\/0$/)
+  await expect(page).toHaveURL(/\/workbook\/[0-9a-f]+$/)
   // Untouched book: no name, no pages — delete goes straight through.
   await page.locator(".wbk-delete-book").click()
   await expect(page).toHaveURL(/\/workbook$/)
@@ -182,7 +182,7 @@ test("sharing copies a link that imports the book elsewhere", async ({ page }) =
   // A "different device": wipe storage, then open the link.
   await page.evaluate(() => localStorage.clear())
   await page.goto(url)
-  await expect(page).toHaveURL(/\/workbook\/0$/)
+  await expect(page).toHaveURL(/\/workbook\/[0-9a-f]+$/)
   await expect(page.locator(".wbk-name-input")).toHaveValue("Hanna")
 
   // Opening the same link again must not duplicate the book.
@@ -224,12 +224,62 @@ test("deleting from the editor asks for confirmation first", async ({ page }) =>
   await expect(modal).toBeVisible()
   // Cancel keeps the book and stays in the editor.
   await modal.locator(".btn--ghost").click()
-  await expect(page).toHaveURL(/\/workbook\/0$/)
+  await expect(page).toHaveURL(/\/workbook\/[0-9a-f]+$/)
   // Confirm deletes and returns to the (now empty) list.
   await page.locator(".wbk-delete-book").click()
   await modal.locator(".wbk-confirm-delete").click()
   await expect(page).toHaveURL(/\/workbook$/)
   await expect(page.locator(".wbk-empty")).toBeVisible()
+})
+
+test("a book's URL is a stable id, not its list position", async ({ page }) => {
+  // Two books; capture the second's editor URL.
+  await page.goto("/workbook")
+  await page.locator(".btn--hero").click()
+  await page.locator(".wbk-name-input").fill("First")
+  await page.locator(".header .btn--icon").first().click()
+  await page.locator(".btn--hero").click()
+  await page.locator(".wbk-name-input").fill("Second")
+  const secondUrl = page.url()
+  await page.locator(".header .btn--icon").first().click()
+
+  // Delete the FIRST book — the second's slot shifts from index 1 to 0.
+  await page
+    .locator(".wbk-book-card", { hasText: "First" })
+    .locator(".wbk-book-card__delete")
+    .click()
+  await page.locator(".modal-backdrop.is-open .wbk-confirm-delete").click()
+
+  // The captured URL still opens the SECOND book, not whatever moved into
+  // its old index (which is how positional ids would mis-resolve).
+  await page.goto(secondUrl)
+  await expect(page.locator(".wbk-name-input")).toHaveValue("Second")
+})
+
+test("export saves the whole library and import merges it back", async ({ page }) => {
+  await createBook(page)
+  await page.locator(".wbk-name-input").fill("Hanna")
+  await page.locator(".header .btn--icon").first().click()
+  await expect(page.locator(".wbk-book-card", { hasText: "Hanna" })).toBeVisible()
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.locator(".wbk-export").click(),
+  ])
+  const file = await download.path()
+
+  // A "cleared cache": wipe storage, the library is empty again.
+  await page.evaluate(() => localStorage.clear())
+  await page.goto("/workbook")
+  await expect(page.locator(".wbk-empty")).toBeVisible()
+
+  // Import the file — the book comes back.
+  await page.locator(".wbk-import-input").setInputFiles(file)
+  await expect(page.locator(".wbk-book-card", { hasText: "Hanna" })).toBeVisible()
+
+  // Re-importing the same file is a no-op — merge by id, not duplicate.
+  await page.locator(".wbk-import-input").setInputFiles(file)
+  await expect(page.locator(".wbk-book-card")).toHaveCount(1)
 })
 
 test("books autosave onto the list; back returns to it; reload and delete work", async ({ page }) => {
@@ -250,7 +300,7 @@ test("books autosave onto the list; back returns to it; reload and delete work",
 
   // Reopen, then delete from the list → empty state returns.
   await page.locator(".wbk-book-card__main").click()
-  await expect(page).toHaveURL(/\/workbook\/0$/)
+  await expect(page).toHaveURL(/\/workbook\/[0-9a-f]+$/)
   await page.locator(".header .btn--icon").first().click()
   await page.locator(".wbk-book-card__delete").click()
   await page.locator(".modal-backdrop.is-open .wbk-confirm-delete").click()

@@ -9,8 +9,10 @@ import tandu.ui.Components.s
 import tandu.workbook.Workbook
 import tandu.workbook.Workbook.{Codec, Ctx, Recipe, Row, Source}
 
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
-import scala.util.Random
+import scala.util.{Random, Try}
 
 /** The workbook feature: a books list (the landing screen) and a one-screen
   * editor per book. Page selection is two-step — a row is added by *kind*
@@ -33,6 +35,12 @@ object WorkbookPage:
     * loses nothing. */
   private def isBlank(r: Recipe): Boolean = r.rows.isEmpty && r.name.trim.isEmpty
 
+  /** Flip a flag on, then back off after `ms` — the transient "Copied!" /
+    * import-failed flash. */
+  private def flash(v: Var[Boolean], ms: Int): Unit =
+    v.set(true)
+    val _ = js.timers.setTimeout(ms)(v.set(false))
+
   def render(): HtmlElement =
     val books: Var[Vector[Recipe]] =
       Var(Storage.loadWorkbookBooks().map(Codec.booksFromJson).getOrElse(Vector.empty))
@@ -41,13 +49,25 @@ object WorkbookPage:
     // stays mounted across the switch so `books` survives navigation.
     val view: Signal[Page] = Routing.router.currentPageSignal.distinct
 
+    // localStorage can refuse a write (quota, private mode, blocked storage).
+    // Autosave is invisible, so a silent failure means the parent edits, walks
+    // away, and loses the book — surface it instead with a standing banner.
+    val saveOk: Var[Boolean] = Var(true)
+
     div(
       cls := "app stack-lg",
-      books.signal --> (bs => Storage.saveWorkbookBooks(Codec.booksToJson(bs))),
+      books.signal --> (bs => saveOk.set(Storage.saveWorkbookBooks(Codec.booksToJson(bs)))),
+      // .distinct: a save runs (and succeeds) on every edit, so without it the
+      // banner's child rebuilds on each keystroke instead of only when the
+      // save state flips.
+      child <-- saveOk.signal.distinct.map {
+        case true  => emptyNode
+        case false => div(cls := "wbk-save-warning no-print", child.text <-- s(_.workbook.saveFailed))
+      },
       child <-- view.map {
-        case Page.Workbook(Some(idx)) => editorView(books, idx)
-        case Page.WorkbookShared(p)   => importView(books, p)
-        case _                        => listView(books)
+        case Page.Workbook(Some(id)) => editorView(books, id)
+        case Page.WorkbookShared(p)  => importView(books, p)
+        case _                       => listView(books)
       }
     )
 
@@ -62,13 +82,11 @@ object WorkbookPage:
           Codec.recipeFromShare(payload) match
             case None => Routing.replace(Page.Workbook(None))
             case Some(r) =>
-              val existing = books.now().indexOf(r)
-              val idx =
-                if existing >= 0 then existing
-                else
-                  books.update(_ :+ r)
-                  books.now().size - 1
-              Routing.replace(Page.Workbook(Some(idx)))
+              // The shared recipe carries the sender's id, so re-opening the
+              // same link finds the already-imported book by id instead of
+              // duplicating it — even after the recipient renamed it.
+              if !books.now().exists(_.id == r.id) then books.update(_ :+ r)
+              Routing.replace(Page.Workbook(Some(r.id)))
         }
       }
     )
@@ -81,11 +99,15 @@ object WorkbookPage:
     // starting point IS the first step. The list falls back to a muted
     // "untitled" for the name.
     def createBook(): Unit =
-      books.update(_ :+ Workbook.freshRecipe())
-      Routing.go(Page.Workbook(Some(books.now().size - 1)))
+      val fresh = Workbook.freshRecipe()
+      books.update(_ :+ fresh)
+      Routing.go(Page.Workbook(Some(fresh.id)))
 
-    // The book whose ✕ was tapped, awaiting confirmation.
-    val pendingDelete: Var[Option[Int]] = Var(None)
+    // The book whose ✕ was tapped, awaiting confirmation — by id, so a list
+    // that shifts under the open modal can't retarget the delete.
+    val pendingDelete: Var[Option[String]] = Var(None)
+    // A failed import (unreadable / not a workbook file) flashes a line.
+    val importError: Var[Boolean] = Var(false)
 
     div(
       cls := "stack-lg",
@@ -100,21 +122,93 @@ object WorkbookPage:
               emptyArt(),
               p(cls := "muted center wbk-empty", child.text <-- s(_.workbook.noBooksYet))
             )
-          else bs.zipWithIndex.map((b, i) => bookCard(b, i, books, pendingDelete)).toList
+          else bs.map(b => bookCard(b, books, pendingDelete)).toList
         },
-        Components.primaryBig(s(_.workbook.createBook), createBook())
+        Components.primaryBig(s(_.workbook.createBook), createBook()),
+        libraryActions(books, importError)
       ),
       confirmDeleteModal(
         isOpen = pendingDelete.signal.map(_.isDefined),
         bookName = pendingDelete.signal.combineWith(books.signal)
-          .map((p, bs) => p.flatMap(bs.lift).map(_.name).getOrElse("")),
+          .map((p, bs) => p.flatMap(id => bs.find(_.id == id)).map(_.name).getOrElse("")),
         onCancel = () => pendingDelete.set(None),
         onConfirm = () => {
-          pendingDelete.now().foreach(i => books.update(_.patch(i, Nil, 1)))
+          pendingDelete.now().foreach(id => books.update(_.filterNot(_.id == id)))
           pendingDelete.set(None)
         }
       )
     )
+
+  /** Whole-library backup: export every book as one JSON file and import it
+    * back (merging by id, so re-importing your own export is a no-op). The
+    * per-book share link covers "send one book"; this covers "don't lose them
+    * all to a cleared cache". */
+  private def libraryActions(books: Var[Vector[Recipe]], importError: Var[Boolean]): HtmlElement =
+    div(
+      cls := "stack wbk-library-actions no-print",
+      div(
+        cls := "row",
+        // Hidden file input, surfaced as the label button (the Jigsaw pattern).
+        label(
+          cls := "btn btn--ghost wbk-import",
+          child.text <-- s(_.workbook.importBooks),
+          input(
+            cls := "wbk-import-input",
+            tpe := "file",
+            accept := "application/json,.json",
+            onChange --> { ev =>
+              val inp = ev.target.asInstanceOf[dom.HTMLInputElement]
+              val files = inp.files
+              if files != null && files.length > 0 then importBooksFromFile(files(0), books, importError)
+              inp.value = "" // let the same file be re-picked
+            }
+          )
+        ),
+        child <-- books.signal.map(_.isEmpty).distinct.map { isEmpty =>
+          if isEmpty then emptyNode
+          else
+            button(
+              cls := "btn btn--ghost wbk-export",
+              child.text <-- s(_.workbook.exportBooks),
+              onClick --> (_ => downloadJson("tandu-workbooks.json", Codec.booksToJson(books.now())))
+            )
+        }
+      ),
+      child <-- importError.signal.map {
+        case false => emptyNode
+        case true  => p(cls := "muted center wbk-import-error", child.text <-- s(_.workbook.importFailed))
+      }
+    )
+
+  private def importBooksFromFile(
+      file: dom.File,
+      books: Var[Vector[Recipe]],
+      importError: Var[Boolean]
+  ): Unit =
+    val reader = new dom.FileReader()
+    reader.onload = (_: dom.Event) =>
+      val imported = Codec.booksFromJson(reader.result.asInstanceOf[String])
+      if imported.isEmpty then flash(importError, 4000)
+      else
+        importError.set(false)
+        // Merge, not replace: keep what's here, add only ids not already held.
+        books.update { existing =>
+          val have = existing.map(_.id).toSet
+          existing ++ imported.filterNot(b => have.contains(b.id))
+        }
+    reader.readAsText(file)
+
+  /** Trigger a client-side download of a text blob — no backend involved. */
+  private def downloadJson(filename: String, json: String): Unit =
+    val blob = new dom.Blob(js.Array[dom.BlobPart](json), new dom.BlobPropertyBag { `type` = "application/json" })
+    val url = dom.URL.createObjectURL(blob)
+    val a = dom.document.createElement("a").asInstanceOf[dom.HTMLAnchorElement]
+    a.href = url
+    a.setAttribute("download", filename)
+    val _ = dom.document.body.appendChild(a)
+    a.click()
+    val _ = dom.document.body.removeChild(a)
+    dom.URL.revokeObjectURL(url)
 
   /** A miniature fan of "pages" — the empty list's set-piece, selling the
     * book (not print-queue) mental model before any book exists. */
@@ -135,9 +229,8 @@ object WorkbookPage:
 
   private def bookCard(
       b: Recipe,
-      idx: Int,
       books: Var[Vector[Recipe]],
-      pendingDelete: Var[Option[Int]]
+      pendingDelete: Var[Option[String]]
   ): HtmlElement =
     // What's inside, at a glance: one glyph per kind, in page order.
     val strip = b.rows
@@ -167,7 +260,7 @@ object WorkbookPage:
           )
         ),
         span(cls := "wbk-book-card__chev", "›"),
-        onClick --> (_ => Routing.go(Page.Workbook(Some(idx))))
+        onClick --> (_ => Routing.go(Page.Workbook(Some(b.id))))
       ),
       button(
         cls := "wbk-book-card__delete",
@@ -175,8 +268,8 @@ object WorkbookPage:
         "✕",
         // A blank book loses nothing — no confirmation theatre.
         onClick --> { _ =>
-          if isBlank(b) then books.update(_.patch(idx, Nil, 1))
-          else pendingDelete.set(Some(idx))
+          if isBlank(b) then books.update(_.filterNot(_.id == b.id))
+          else pendingDelete.set(Some(b.id))
         }
       )
     )
@@ -222,10 +315,36 @@ object WorkbookPage:
 
   // ---------- editor ----------
 
-  private def editorView(books: Var[Vector[Recipe]], idx: Int): HtmlElement =
-    books.now().lift(idx) match
+  /** Copy text to the clipboard, resolving to whether it landed. The async
+    * Clipboard API needs a secure context and a granted permission; where it's
+    * absent or rejects (plain http, some in-app webviews) fall back to the
+    * legacy execCommand path before giving up. */
+  private def copyToClipboard(text: String): Future[Boolean] =
+    val clip = dom.window.navigator.clipboard
+    if js.isUndefined(clip) || clip == null then Future.successful(legacyCopy(text))
+    else
+      import scala.scalajs.js.Thenable.Implicits.thenable2future
+      clip.writeText(text).map(_ => true).recover { case _ => legacyCopy(text) }
+
+  /** The pre-Clipboard-API copy: a throwaway off-screen textarea + execCommand.
+    * Works in insecure contexts and old webviews where the async API doesn't. */
+  private def legacyCopy(text: String): Boolean =
+    val ta = dom.document.createElement("textarea").asInstanceOf[dom.HTMLTextAreaElement]
+    ta.value = text
+    ta.style.position = "fixed"
+    ta.style.top = "0"
+    ta.style.opacity = "0"
+    val _ = dom.document.body.appendChild(ta)
+    ta.focus()
+    ta.select()
+    val ok = Try(dom.document.asInstanceOf[js.Dynamic].execCommand("copy").asInstanceOf[Boolean]).getOrElse(false)
+    val _ = dom.document.body.removeChild(ta)
+    ok
+
+  private def editorView(books: Var[Vector[Recipe]], id: String): HtmlElement =
+    books.now().find(_.id == id) match
       case None =>
-        // Stale URL (deleted book, bad index) — bounce to the list.
+        // Stale URL (deleted book, an id that isn't here) — bounce to the list.
         div(onMountCallback(_ => Routing.replace(Page.Workbook(None))))
       case Some(initial) =>
         val recipe: Var[Recipe] = Var(initial)
@@ -256,24 +375,36 @@ object WorkbookPage:
 
         val confirmDelete: Var[Boolean] = Var(false)
         val shareCopied: Var[Boolean] = Var(false)
+        // The share link to copy by hand when the clipboard is unreachable.
+        val shareManualUrl: Var[Option[String]] = Var(None)
         val presetsOpen: Var[Boolean] = Var(false)
 
         def deleteBook(): Unit =
-          books.update(_.patch(idx, Nil, 1))
+          books.update(_.filterNot(_.id == id))
           Routing.go(Page.Workbook(None))
 
         def shareBook(): Unit =
           val payload = Codec.recipeToShare(recipe.now())
           val url = Routing.router.absoluteUrlForPage(Page.WorkbookShared(payload))
-          val _ = dom.window.navigator.clipboard.writeText(url)
-          shareCopied.set(true)
-          val _ = js.timers.setTimeout(2000)(shareCopied.set(false))
+          copyToClipboard(url).foreach { copied =>
+            if copied then
+              shareManualUrl.set(None)
+              flash(shareCopied, 2000)
+            else
+              // Nothing reached the clipboard (locked-down webview, denied
+              // permission) — reveal the link instead of claiming "Copied!".
+              shareManualUrl.set(Some(url))
+          }
 
         div(
           cls := "stack-lg",
-          // Autosave: the book on the list IS the recipe being edited. The
-          // size guard covers the tick between deleting and navigating away.
-          recipe.signal --> (r => books.update(bs => if idx < bs.size then bs.updated(idx, r) else bs)),
+          // Autosave: the book on the list IS the recipe being edited. Resolve
+          // by id every time, so a list reordered/trimmed elsewhere can't make
+          // this write land on the wrong slot (or on a since-deleted book).
+          recipe.signal --> (r => books.update { bs =>
+            val i = bs.indexWhere(_.id == id)
+            if i >= 0 then bs.updated(i, r) else bs
+          }),
           // The page's subject is the book itself, so its name is the title.
           Components.header(
             recipe.signal.combineWith(AppState.strings).map { (r, str) =>
@@ -316,7 +447,24 @@ object WorkbookPage:
                     if isBlank(recipe.now()) then deleteBook() else confirmDelete.set(true)
                   }
                 )
-              )
+              ),
+              // Clipboard fallback: when the copy couldn't happen, show the link
+              // in a read-only field, pre-selected, so it can be copied by hand.
+              child <-- shareManualUrl.signal.map {
+                case None => emptyNode
+                case Some(url) =>
+                  div(
+                    cls := "stack wbk-share-manual",
+                    p(cls := "muted", child.text <-- s(_.workbook.shareManual)),
+                    input(
+                      cls := "wbk-input wbk-share-url",
+                      readOnly := true,
+                      value := url,
+                      onMountCallback(c => c.thisNode.ref.select()),
+                      onClick --> (e => e.currentTarget.asInstanceOf[dom.HTMLInputElement].select())
+                    )
+                  )
+              }
             ),
             printDock(recipe, preparing.signal, () => printBook())
           ),

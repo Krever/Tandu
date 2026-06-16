@@ -19,13 +19,21 @@ object Workbook:
   final case class Row(sourceId: String, count: Int)
 
   /** `name` and `coverEmoji` are the book's identity — they label it on the
-    * books list and, when the cover page is on, land on the cover too. */
+    * books list and, when the cover page is on, land on the cover too. `id`
+    * is the stable handle: the list is positional, but URLs, autosave and
+    * share-dedup must survive a book's slot shifting (a deletion elsewhere,
+    * an import), so they key off the id rather than the index. */
   final case class Recipe(
+      id: String,
       rows: Vector[Row],
       cover: Boolean,
       name: String,
       coverEmoji: String
   )
+
+  /** A fresh book id. 64 random bits, lowercase hex — unique enough for a
+    * device-local list, and URL-safe with no escaping. */
+  def freshId(): String = java.lang.Long.toHexString(Random.nextLong())
 
   /** Identity pictures offered alongside the name; one is drawn at random for
     * a fresh book. Kept modest in size on the printed cover — raster emoji
@@ -34,7 +42,7 @@ object Workbook:
     Vector("🦊", "🐰", "🦄", "🚀", "🐬", "🦖", "⭐", "🌈", "🐱", "⚽")
 
   def freshRecipe(rows: Vector[Row] = Vector.empty, name: String = ""): Recipe =
-    Recipe(rows, cover = true, name = name, coverEmoji = coverEmojis(Random.nextInt(coverEmojis.size)))
+    Recipe(freshId(), rows, cover = true, name = name, coverEmoji = coverEmojis(Random.nextInt(coverEmojis.size)))
 
   // ---------- page sources ----------
 
@@ -274,13 +282,17 @@ object Workbook:
       js.Array(rows.map(r => js.Dynamic.literal(s = r.sourceId, c = r.count))*)
 
     private def recipeToJs(r: Recipe): js.Dynamic =
-      js.Dynamic.literal(cover = r.cover, name = r.name, emoji = r.coverEmoji, rows = rowsToJs(r.rows))
+      js.Dynamic.literal(id = r.id, cover = r.cover, name = r.name, emoji = r.coverEmoji, rows = rowsToJs(r.rows))
 
     private def recipeFromJs(d: js.Dynamic): Recipe =
       val rows = d.rows.asInstanceOf[js.Array[js.Dynamic]].toVector
         .map(row => Row(row.s.asInstanceOf[String], row.c.asInstanceOf[Int]))
         .filter(row => byId(row.sourceId).isDefined && row.count > 0)
+      // Books stored before ids existed (or hand-edited) get one on read, so a
+      // pre-id library keeps working — it's saved back with ids on next edit.
+      val id = d.id.asInstanceOf[js.UndefOr[String]].toOption.filter(_.nonEmpty).getOrElse(freshId())
       Recipe(
+        id,
         rows,
         cover = d.cover.asInstanceOf[Boolean],
         name = d.name.asInstanceOf[String],

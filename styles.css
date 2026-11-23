@@ -986,6 +986,47 @@ select { font-family: inherit; font-size: inherit; }
 .ttt-board  { max-width: 360px; width: 100%; margin-left: auto; margin-right: auto; }
 .ttt-board.board--dense { max-width: 480px; }
 
+/* Four in a row — discs drop into the lowest free cell. Each disc animates in
+   from above the board (clipped by .board's overflow), falling --c4-fall rows. */
+.c4-board { max-width: 440px; width: 100%; margin-left: auto; margin-right: auto; }
+.c4-board.is-locked .c4-cell { cursor: default; }
+.c4-disc {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.25);
+  animation: c4-drop calc(120ms + var(--c4-fall, 1) * 55ms) cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+.c4-disc--p1 { background: var(--color-p1); }
+.c4-disc--p2 { background: var(--color-p2); }
+.cell--win .c4-disc { box-shadow: 0 0 0 3px #facc15, inset 0 -3px 0 rgba(0, 0, 0, 0.22); }
+@keyframes c4-drop {
+  from { transform: translateY(calc(var(--c4-fall, 1) * -127%)); }
+  to   { transform: translateY(0); }
+}
+@media (hover: hover) {
+  .c4-cell--preview::after {
+    content: "";
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    opacity: 0.25;
+    background: var(--player-color);
+  }
+}
+.c4-badge-disc {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background: var(--player-color);
+  border: 2px solid white; /* the badge background is the player's colour too */
+  vertical-align: middle;
+}
+@media (prefers-reduced-motion: reduce) {
+  .c4-disc { animation: none; }
+}
+
 .mem-board { max-width: 480px; width: 100%; margin-left: auto; margin-right: auto; }
 .mem-card { background: var(--color-primary); font-size: clamp(28px, 9vw, 56px); transition: background 120ms ease, opacity 120ms ease; }
 .mem-card.mem-card--up { background: var(--color-surface); }

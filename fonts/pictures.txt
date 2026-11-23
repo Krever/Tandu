@@ -1,5 +1,5 @@
-# pictures-color.woff2 sha256 aa23d2b7fe9364706c41063d494b4bedf45c24a19fd243cb711a147cf505ee6c
-# pictures-mono.woff2 sha256 c76d1be9ff481723d808515efcf4b5ba0bcd6da53b759f8e23d5a6cfbd3e38ed
+# pictures-color.woff2 sha256 58163acbfd80d3fa0644ac165c02d87f9703a93e50fcb595af2c10b1a1b55ac0
+# pictures-mono.woff2 sha256 b4aae171a2b62950d460982e696328eb5ba930c3eae47f7ff68c5b74bef0d35b
 ↔
 ⏰
 ⏱
@@ -179,6 +179,7 @@
 🔦
 🔨
 🔭
+🔴
 🕐
 🕶️
 🕷️

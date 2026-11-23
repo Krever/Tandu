@@ -1180,15 +1180,15 @@ object Strings:
       ),
       seekAndFind = SeekAndFindOff(
         printTitle = "Seek & Find — find and circle",
-        countPrintTitle = "Seek & Find — count and write",
-        sheetHint = "Print a sheet and circle every picture from the list — or count them and write the numbers.",
+        countPrintTitle = "Seek & Find — count and circle",
+        sheetHint = "Print a sheet and circle every picture from the list — or count them and circle the right numbers.",
         findLabel = "Find and circle:",
-        countLabel = "Count each picture and write the number in its box:",
+        countLabel = "Count each picture and circle the right number:",
         countSheetName = "Counting",
         rules = Rules("How to play", List(
           "Look at the list at the top of the sheet.",
           "Find every matching picture in the big scene and circle it.",
-          "On the counting sheet, count each kind of picture and write the number in its box."
+          "On the counting sheet, count each kind of picture and circle the right number next to it."
         ))
       )
     ),
@@ -1942,15 +1942,15 @@ object Strings:
       ),
       seekAndFind = SeekAndFindOff(
         printTitle = "Wyszukiwanka — znajdź i zakreśl",
-        countPrintTitle = "Wyszukiwanka — policz i zapisz",
-        sheetHint = "Wydrukuj kartkę i zakreśl wszystkie obrazki z listy — albo policz je i wpisz liczby.",
+        countPrintTitle = "Wyszukiwanka — policz i zakreśl",
+        sheetHint = "Wydrukuj kartkę i zakreśl wszystkie obrazki z listy — albo policz je i zakreśl właściwe liczby.",
         findLabel = "Znajdź i zakreśl:",
-        countLabel = "Policz obrazki każdego rodzaju i wpisz liczbę w okienko:",
+        countLabel = "Policz obrazki każdego rodzaju i zakreśl właściwą liczbę:",
         countSheetName = "Liczenie",
         rules = Rules("Jak grać", List(
           "Spójrz na listę u góry kartki.",
           "Odszukaj w scenie każdy pasujący obrazek i zakreśl go.",
-          "Na kartce z liczeniem policz obrazki każdego rodzaju i wpisz liczbę w okienko."
+          "Na kartce z liczeniem policz obrazki każdego rodzaju i zakreśl właściwą liczbę obok."
         ))
       )
     ),
@@ -2704,15 +2704,15 @@ object Strings:
       ),
       seekAndFind = SeekAndFindOff(
         printTitle = "Busca y encuentra — encuentra y rodea",
-        countPrintTitle = "Busca y encuentra — cuenta y escribe",
-        sheetHint = "Imprime una hoja y rodea todos los dibujos de la lista — o cuéntalos y escribe los números.",
+        countPrintTitle = "Busca y encuentra — cuenta y rodea",
+        sheetHint = "Imprime una hoja y rodea todos los dibujos de la lista — o cuéntalos y rodea los números correctos.",
         findLabel = "Busca y rodea:",
-        countLabel = "Cuenta cada dibujo y escribe el número en su casilla:",
+        countLabel = "Cuenta cada dibujo y rodea el número correcto:",
         countSheetName = "Contar",
         rules = Rules("Cómo jugar", List(
           "Mira la lista en la parte de arriba de la hoja.",
           "Encuentra cada dibujo de la lista en la escena y rodéalo.",
-          "En la hoja de contar, cuenta cada tipo de dibujo y escribe el número en su casilla."
+          "En la hoja de contar, cuenta cada tipo de dibujo y rodea el número correcto a su lado."
         ))
       )
     ),
@@ -3466,15 +3466,15 @@ object Strings:
       ),
       seekAndFind = SeekAndFindOff(
         printTitle = "Cherche et trouve — trouve et entoure",
-        countPrintTitle = "Cherche et trouve — compte et écris",
-        sheetHint = "Imprimez la feuille et entourez toutes les images de la liste — ou comptez-les et écrivez les nombres.",
+        countPrintTitle = "Cherche et trouve — compte et entoure",
+        sheetHint = "Imprimez la feuille et entourez toutes les images de la liste — ou comptez-les et entourez les bons nombres.",
         findLabel = "Cherche et entoure :",
-        countLabel = "Compte chaque image et écris le nombre dans sa case :",
+        countLabel = "Compte chaque image et entoure le bon nombre :",
         countSheetName = "Comptage",
         rules = Rules("Comment jouer", List(
           "Regarde la liste en haut de la feuille.",
           "Trouve chaque image de la liste dans la scène et entoure-la.",
-          "Sur la feuille de comptage, compte chaque sorte d'image et écris le nombre dans sa case."
+          "Sur la feuille de comptage, compte chaque sorte d'image et entoure le bon nombre à côté."
         ))
       )
     ),
@@ -4228,15 +4228,15 @@ object Strings:
       ),
       seekAndFind = SeekAndFindOff(
         printTitle = "Wimmelbild — finde und kreise ein",
-        countPrintTitle = "Wimmelbild — zähle und schreibe",
-        sheetHint = "Druckt ein Blatt aus und kreist alle Bilder aus der Liste ein — oder zählt sie und schreibt die Zahlen auf.",
+        countPrintTitle = "Wimmelbild — zähle und kreise ein",
+        sheetHint = "Druckt ein Blatt aus und kreist alle Bilder aus der Liste ein — oder zählt sie und kreist die richtigen Zahlen ein.",
         findLabel = "Finde und kreise ein:",
-        countLabel = "Zähle jedes Bild und schreibe die Zahl in das Kästchen:",
+        countLabel = "Zähle jedes Bild und kreise die richtige Zahl ein:",
         countSheetName = "Zählen",
         rules = Rules("So wird gespielt", List(
           "Schau dir die Liste oben auf dem Blatt an.",
           "Finde jedes Bild aus der Liste in der Szene und kreise es ein.",
-          "Auf dem Zählblatt zählst du jede Bildsorte und schreibst die Zahl ins Kästchen."
+          "Auf dem Zählblatt zählst du jede Bildsorte und kreist die richtige Zahl daneben ein."
         ))
       )
     ),

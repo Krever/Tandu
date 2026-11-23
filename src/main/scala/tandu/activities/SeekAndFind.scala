@@ -13,7 +13,7 @@ import scala.util.Random
 
 /** Seek & find: a busy themed emoji scene hiding a handful of target
   * pictures. Two in-app games (find-them-all and how-many counting) plus
-  * printable find-and-circle / count-and-write sheets.
+  * printable find-and-circle / count-and-circle sheets.
   *
   * Scenes are themed (ocean, forest, farm, ...) rather than drawn from one
   * big pool: a cat among other animals is a real search, a cat among cars
@@ -137,7 +137,7 @@ object SeekAndFind extends Activity:
     Level("hard", app = Spec(55, 1, 7, 12, 0.85, 1.3, 0.22, 15, distinctKinds = true), nameKey = _.seekAndFind.hard)
   )
 
-  /** The count-and-write sheet: every kind on the field is counted, so no
+  /** The count-and-circle sheet: every kind on the field is counted, so no
     * distractors at all (total = 0 → targets only). */
   private val countSheetSpec = Spec(total = 0, targetTypes = 4, countMin = 4, countMax = 9, sizeFactor = 0.70, jitterBoost = 1.0, sizeJitter = 0.10, maxTilt = 0, distinctKinds = true)
 
@@ -441,7 +441,7 @@ object SeekAndFind extends Activity:
     val l = seekLevels.find(_.levelId == levelId).getOrElse(seekLevels.head)
     seekSheet(generate(l.print.getOrElse(l.app), PrintW, PrintH, rng))
 
-  /** One printed count-and-write page, as a bare body for composed documents
+  /** One printed count-and-circle page, as a bare body for composed documents
     * like workbooks. */
   def printCountBody(rng: Random = new Random()): HtmlElement =
     countSheet(generate(countSheetSpec, PrintW, PrintH, rng))
@@ -503,6 +503,10 @@ object SeekAndFind extends Activity:
       printField(p)
     )
 
+  /** The numbers printed next to each kind on the counting sheet. The range
+    * must include every count that `countSheetSpec` can deal. */
+  private val CountChoices: Range = 1 to 10
+
   private def countSheet(p: Puzzle): HtmlElement =
     div(
       cls := "snf-print",
@@ -517,7 +521,10 @@ object SeekAndFind extends Activity:
           div(
             cls := "snf-count-cell",
             img(cls := "snf-print-emoji", src := emojiUrl(t.emoji), alt := t.emoji),
-            span(cls := "snf-count-box")
+            // The child circles the answer. Pre-readers do not know how to
+            // write digits, and the ordered line lets them count along it
+            // to find a number that they do not recognize.
+            CountChoices.map(n => span(cls := "snf-count-num", n.toString))
           )
         )
       )

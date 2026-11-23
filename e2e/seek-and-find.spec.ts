@@ -79,17 +79,28 @@ test("print mode: seek and counting sheets fill with a scene", async ({ page }) 
   expect(await page.locator(".snf-print-field text").count()).toBe(0)
   expect(await page.locator(".snf-print-field image").count()).toBe(48)
 
-  // Counting sheet: one write-in box per kind, and nothing on the field
+  // Counting sheet: one number line (1 to 10) per kind, and nothing on the field
   // that isn't one of the counted kinds. The raster cache hands identical
   // data URLs to the legend <img>s and the field <image>s, so the sets match.
   await buttons.nth(3).click()
-  await expect(page.locator(".snf-count-box")).toHaveCount(4)
+  const cells = page.locator(".snf-count-cell")
+  await expect(cells).toHaveCount(4)
+  for (const cell of await cells.all()) {
+    expect(await cell.locator(".snf-count-num").allTextContents())
+      .toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+  }
   const kinds = new Set(
     await page.locator(".snf-count-cell img").evaluateAll(es => es.map(e => e.getAttribute("src"))))
   const onField = await page.locator(".snf-print-field image").evaluateAll(
     es => es.map(e => e.getAttribute("href")))
   expect(onField.length).toBeGreaterThanOrEqual(16) // 4 kinds × at least 4 each
   for (const href of onField) expect(kinds.has(href)).toBe(true)
+  // Each true count must be one of the printed numbers.
+  for (const kind of kinds) {
+    const n = onField.filter(h => h === kind).length
+    expect(n).toBeGreaterThanOrEqual(1)
+    expect(n).toBeLessThanOrEqual(10)
+  }
 
   await page.emulateMedia({ media: "print" })
   await page.setViewportSize({ width: 794, height: 1123 }) // A4 @ 96dpi

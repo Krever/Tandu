@@ -87,7 +87,7 @@ object Workbook:
         ctx => DotToDot.printSheetBody(ctx.rng))
     )),
     // The counting sheet rides along as a fourth "variant" — it's the same
-    // board, scored by writing counts instead of circling.
+    // board, scored by circling each count on a number line instead of circling pictures.
     Group("seek-and-find", "👀", "vermilion", _.seekAndFind.name,
       SeekAndFind.printLevelIds.map { lvl =>
         Source(s"seek-and-find-$lvl", levelName(lvl), _.offline.seekAndFind.printTitle,

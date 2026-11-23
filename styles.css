@@ -3587,7 +3587,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .snf-answer.is-wrong { animation: snf-wobble 0.35s ease-in-out 1; }
 
 /* Print sheets — one big field per A4 page under a legend strip; the
-   counting sheet adds write-in boxes below the field. */
+   counting sheet adds one number line per kind below the field. */
 .snf-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
 .snf-print-legend {
   display: flex;
@@ -3606,18 +3606,21 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   border-radius: 2mm;
 }
 .snf-count-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
   justify-content: center;
-  gap: 10mm;
-  margin-top: 6mm;
+  gap: 3mm 8mm;
+  margin-top: 4mm;
 }
-.snf-count-cell { display: flex; align-items: center; gap: 3mm; font-size: 20pt; }
-.snf-count-box {
-  width: 13mm;
-  height: 13mm;
-  border: 1.5px solid black;
-  border-radius: 2mm;
+.snf-count-cell { display: flex; align-items: center; gap: 1mm; }
+.snf-count-cell .snf-print-emoji { margin-right: 2mm; }
+/* Each number has a fixed-width slot, so there is room to circle it. */
+.snf-count-num {
+  width: 7mm;
+  text-align: center;
+  font-size: 15pt;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .snf-print-emoji { width: 9mm; height: 9mm; vertical-align: middle; }
 

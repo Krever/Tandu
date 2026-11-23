@@ -76,6 +76,7 @@ test("print mode: size is limited by mazes per page", async ({ page }) => {
   const rows = page.locator(".sb-form__row")
   await expect(rows.nth(0).getByTestId("maze-per-page-1")).toBeVisible()
   await expect(rows.nth(1).getByTestId("maze-size")).toBeVisible()
+  await expect(rows.nth(2).getByTestId("maze-style-winding")).toBeVisible()
 
   await page.getByTestId("maze-preset-hard").click() // 1 per page
   const plus = stepperPlus(page, "maze-size")
@@ -85,6 +86,24 @@ test("print mode: size is limited by mazes per page", async ({ page }) => {
   await page.getByTestId("maze-per-page-4").click()
   await expect(page.getByTestId("maze-size")).toContainText("16")
   await expect(plus).toBeDisabled()
+})
+
+test("print mode: the style changes the maze and is kept in the URL", async ({ page }) => {
+  await page.goto("/activity/maze/print")
+  const first = page.getByTestId("maze-preview").locator(".maze-print-board").first()
+  await expect(page.getByTestId("maze-style-winding")).toHaveClass(/is-active/) // Easy
+  const before = await walls(first)
+
+  await page.getByTestId("maze-style-branchy").click()
+  await expect(page).toHaveURL(/\/print\/s10\.branchy\.few\.pp4$/)
+  await expect(page.getByTestId("maze-preset-easy")).not.toHaveClass(/is-active/)
+  expect(await walls(first)).not.toBe(before)
+
+  // The presets get harder in style too.
+  await page.getByTestId("maze-preset-medium").click()
+  await expect(page.getByTestId("maze-style-balanced")).toHaveClass(/is-active/)
+  await page.getByTestId("maze-preset-hard").click()
+  await expect(page.getByTestId("maze-style-branchy")).toHaveClass(/is-active/)
 })
 
 test("print mode: walls have the same line width at every maze size", async ({ page }) => {
@@ -108,7 +127,7 @@ test("print mode: the recipe is kept in the URL", async ({ page }) => {
   await page.goto("/activity/maze/print")
   await page.getByTestId("maze-preset-medium").click()
   await page.getByTestId("maze-loops-many").click()
-  await expect(page).toHaveURL(/\/print\/s16\.many\.pp4$/)
+  await expect(page).toHaveURL(/\/print\/s16\.balanced\.many\.pp4$/)
 
   // Opening the link restores the form.
   await page.goto(page.url())

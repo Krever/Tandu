@@ -64,15 +64,24 @@ object Maze extends Activity:
 
   // ---------- generator ----------
 
-  /** Recursive-backtracker (randomised DFS): carve a spanning tree of the grid
-    * so there is exactly one path between any two cells — long winding
-    * corridors that feel good to trace. Done iteratively with an explicit stack
-    * so a 24×24 board can't blow the call stack.
+  /** How the maze is carved. Each style makes a spanning tree of the grid:
+    * there is exactly one path between any two cells (before loops are
+    * added). The styles differ in the feel of the paths:
+    *   - Winding: recursive backtracker (randomised DFS). Long corridors and
+    *     few dead ends; the path is long but easy to follow.
+    *   - Balanced: Wilson's algorithm (loop-erased random walks). A uniform
+    *     random spanning tree, the "puzzle book" look.
+    *   - Branchy: Prim's algorithm with a random frontier. Many short dead
+    *     ends, which give many decisions: the hardest style at one size. */
+  enum Style:
+    case Winding, Balanced, Branchy
+
+  /** Carve a maze of `rows` × `cols` cells in the given style.
     *
     * `braid` (0..1) optionally knocks an extra wall out of that fraction of
     * dead-ends, turning some into gentle loops. We use it on the easy tier so
     * the youngest solvers meet fewer frustrating dead-ends. */
-  def generate(rows: Int, cols: Int, braid: Double, rng: Random = new Random()): Grid =
+  def generate(rows: Int, cols: Int, braid: Double, rng: Random = new Random(), style: Style = Style.Winding): Grid =
     val openRight = Array.fill(rows * cols)(false)
     val openDown  = Array.fill(rows * cols)(false)
     val visited   = Array.fill(rows * cols)(false)
@@ -84,18 +93,69 @@ object Maze extends Activity:
       if r1 == r2 then openRight(idx(r1, math.min(c1, c2))) = true
       else openDown(idx(math.min(r1, r2), c1)) = true
 
-    val stack = mutable.Stack[(Int, Int)]()
-    visited(idx(0, 0)) = true
-    stack.push((0, 0))
-    while stack.nonEmpty do
-      val (r, c) = stack.top
-      val unvisited = neighbors(r, c, rows, cols).filterNot((nr, nc) => visited(idx(nr, nc)))
-      if unvisited.isEmpty then { val _ = stack.pop() }
-      else
-        val (nr, nc) = unvisited(rng.nextInt(unvisited.size))
-        carve(r, c, nr, nc)
-        visited(idx(nr, nc)) = true
-        stack.push((nr, nc))
+    // Done iteratively with an explicit stack, so a big board cannot blow
+    // the call stack.
+    def winding(): Unit =
+      val stack = mutable.Stack[(Int, Int)]()
+      visited(idx(0, 0)) = true
+      stack.push((0, 0))
+      while stack.nonEmpty do
+        val (r, c) = stack.top
+        val unvisited = neighbors(r, c, rows, cols).filterNot((nr, nc) => visited(idx(nr, nc)))
+        if unvisited.isEmpty then { val _ = stack.pop() }
+        else
+          val (nr, nc) = unvisited(rng.nextInt(unvisited.size))
+          carve(r, c, nr, nc)
+          visited(idx(nr, nc)) = true
+          stack.push((nr, nc))
+
+    // From each cell that is not in the maze, walk at random until the walk
+    // touches the maze. When the walk crosses itself, the loop is erased:
+    // each cell keeps only its last exit. Then carve the walk into the maze.
+    def balanced(): Unit =
+      val exit = new Array[Int](rows * cols)
+      visited(idx(0, 0)) = true
+      for start <- rng.shuffle((0 until rows * cols).toVector) if !visited(start) do
+        var cur = start
+        while !visited(cur) do
+          val (r, c) = (cur / cols, cur % cols)
+          val ns = neighbors(r, c, rows, cols)
+          val (nr, nc) = ns(rng.nextInt(ns.size))
+          exit(cur) = idx(nr, nc)
+          cur = exit(cur)
+        cur = start
+        while !visited(cur) do
+          visited(cur) = true
+          val next = exit(cur)
+          carve(cur / cols, cur % cols, next / cols, next % cols)
+          cur = next
+
+    // Grow the maze from one cell: take a random cell next to the maze and
+    // connect it to a random maze neighbour.
+    def branchy(): Unit =
+      val frontier = mutable.ArrayBuffer.empty[Int]
+      val inFrontier = Array.fill(rows * cols)(false)
+      def add(r: Int, c: Int): Unit =
+        visited(idx(r, c)) = true
+        for (nr, nc) <- neighbors(r, c, rows, cols) if !visited(idx(nr, nc)) && !inFrontier(idx(nr, nc)) do
+          inFrontier(idx(nr, nc)) = true
+          frontier += idx(nr, nc)
+      add(0, 0)
+      while frontier.nonEmpty do
+        val i = rng.nextInt(frontier.size)
+        val cell = frontier(i)
+        frontier(i) = frontier.last
+        frontier.dropRightInPlace(1)
+        val (r, c) = (cell / cols, cell % cols)
+        val inMaze = neighbors(r, c, rows, cols).filter((nr, nc) => visited(idx(nr, nc)))
+        val (mr, mc) = inMaze(rng.nextInt(inMaze.size))
+        carve(r, c, mr, mc)
+        add(r, c)
+
+    style match
+      case Style.Winding  => winding()
+      case Style.Balanced => balanced()
+      case Style.Branchy  => branchy()
 
     if braid > 0 then
       // Same upper-left normalisation as `carve`/`connected`, read straight off
@@ -212,7 +272,7 @@ object Maze extends Activity:
     * value and nothing else.
     *   - `size`: cells on the short side of each maze, from
     *     [[SheetConfig.MinSize]] to `perPage.maxSize`. */
-  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage)
+  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage, style: Style)
 
   object SheetConfig:
     val MinSize = 5
@@ -226,18 +286,18 @@ object Maze extends Activity:
       else (c.size, (c.size * w / h).toInt)
 
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
-    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(10, Loops.Few, PerPage.Four)),
-    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(16, Loops.Off, PerPage.Four)),
-    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One))
+    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(10, Loops.Few, PerPage.Four, Style.Winding)),
+    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(16, Loops.Off, PerPage.Four, Style.Balanced)),
+    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One, Style.Branchy))
   )
 
   /** The settings token of a preset, for workbook rows. */
   def presetToken(presetId: String): String =
     encodeConfig(sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config)
 
-  /** The recipe as one URL path segment, for example `s10.few.pp4`. */
+  /** The recipe as one URL path segment, for example `s10.winding.few.pp4`. */
   def encodeConfig(c: SheetConfig): String =
-    s"s${c.size}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}"
+    s"s${c.size}.${c.style.toString.toLowerCase}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}"
 
   private val SizeToken = "s(\\d+)".r
   private val PerPageToken = "pp(\\d+)".r
@@ -248,7 +308,9 @@ object Maze extends Activity:
     * or old link always gives a valid recipe. */
   def decodeConfig(token: String): SheetConfig =
     val raw = token.split('.').foldLeft(sheetPresets.head.config) { (c, t) =>
-      SheetBuilder.named(Loops.values, t).map(v => c.copy(loops = v)).getOrElse(t match
+      SheetBuilder.named(Loops.values, t).map(v => c.copy(loops = v))
+        .orElse(SheetBuilder.named(Style.values, t).map(v => c.copy(style = v)))
+        .getOrElse(t match
         // toIntOption: a digit run too long for an Int must not throw.
         case SizeToken(n)    => n.toIntOption.fold(c)(v => c.copy(size = v))
         case PerPageToken(n) => PerPage.values.find(p => n.toIntOption.contains(p.n)).fold(c)(v => c.copy(perPage = v))
@@ -473,7 +535,7 @@ object Maze extends Activity:
   def sheetGrids(c: SheetConfig, n: Int, seed: Long): Vector[Vector[Grid]] =
     val rng = new Random(seed)
     val (rows, cols) = c.dims
-    Vector.fill(n)(Vector.fill(c.perPage.n)(generate(rows, cols, c.loops.braid, rng)))
+    Vector.fill(n)(Vector.fill(c.perPage.n)(generate(rows, cols, c.loops.braid, rng, c.style)))
 
   /** One printed page of mazes, without the printable frame. Each maze gets
     * the largest square cells that fit in its slot. */
@@ -531,6 +593,11 @@ object Maze extends Activity:
         p => config.update(k => k.copy(perPage = p, size = math.min(k.size, p.maxSize))))),
       formRow(form(_.size), SheetBuilder.fieldStepper(config, "maze-size", _.size, _ => MinSize, _.perPage.maxSize,
         (k, v) => k.copy(size = v))),
+      formRow(form(_.style), pills("maze-style", c.map(_.style), List(
+        (Style.Winding, "winding", s(form(_.styleWinding))),
+        (Style.Balanced, "balanced", s(form(_.styleBalanced))),
+        (Style.Branchy, "branchy", s(form(_.styleBranchy)))
+      ), st => config.update(_.copy(style = st)))),
       formRow(form(_.loops), pills("maze-loops", c.map(_.loops), List(
         (Loops.Off, "off", s(form(_.loopsOff))),
         (Loops.Few, "few", s(form(_.loopsFew))),

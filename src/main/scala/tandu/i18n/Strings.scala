@@ -269,7 +269,11 @@ object Strings:
       loopsOff: String,
       loopsFew: String,
       loopsMany: String,
-      perPage: String
+      perPage: String,
+      style: String,
+      styleWinding: String,
+      styleBalanced: String,
+      styleBranchy: String
   )
 
   final case class DotToDotOff(
@@ -1218,7 +1222,11 @@ object Strings:
           loopsOff = "None",
           loopsFew = "A few",
           loopsMany = "Many",
-          perPage = "Mazes per page"
+          perPage = "Mazes per page",
+          style = "Style",
+          styleWinding = "Winding",
+          styleBalanced = "Balanced",
+          styleBranchy = "Branchy"
         ),
         rules = Rules("How to play", List(
           "Start at the mouse 🐭 and find a path to the cheese 🧀.",
@@ -2034,7 +2042,11 @@ object Strings:
           loopsOff = "Brak",
           loopsFew = "Kilka",
           loopsMany = "Dużo",
-          perPage = "Labiryntów na stronie"
+          perPage = "Labiryntów na stronie",
+          style = "Styl",
+          styleWinding = "Kręty",
+          styleBalanced = "Zrównoważony",
+          styleBranchy = "Rozgałęziony"
         ),
         rules = Rules("Jak grać", List(
           "Zacznij przy myszce 🐭 i znajdź drogę do sera 🧀.",
@@ -2850,7 +2862,11 @@ object Strings:
           loopsOff = "Ninguno",
           loopsFew = "Algunos",
           loopsMany = "Muchos",
-          perPage = "Laberintos por página"
+          perPage = "Laberintos por página",
+          style = "Estilo",
+          styleWinding = "Sinuoso",
+          styleBalanced = "Equilibrado",
+          styleBranchy = "Ramificado"
         ),
         rules = Rules("Cómo jugar", List(
           "Empieza en el ratón 🐭 y encuentra el camino hasta el queso 🧀.",
@@ -3666,7 +3682,11 @@ object Strings:
           loopsOff = "Aucune",
           loopsFew = "Quelques-unes",
           loopsMany = "Beaucoup",
-          perPage = "Labyrinthes par page"
+          perPage = "Labyrinthes par page",
+          style = "Style",
+          styleWinding = "Sinueux",
+          styleBalanced = "Équilibré",
+          styleBranchy = "Ramifié"
         ),
         rules = Rules("Comment jouer", List(
           "Pars de la souris 🐭 et trouve le chemin jusqu'au fromage 🧀.",
@@ -4482,7 +4502,11 @@ object Strings:
           loopsOff = "Keine",
           loopsFew = "Einige",
           loopsMany = "Viele",
-          perPage = "Labyrinthe pro Seite"
+          perPage = "Labyrinthe pro Seite",
+          style = "Stil",
+          styleWinding = "Verschlungen",
+          styleBalanced = "Ausgewogen",
+          styleBranchy = "Verzweigt"
         ),
         rules = Rules("So wird gespielt", List(
           "Starte bei der Maus 🐭 und finde den Weg zum Käse 🧀.",

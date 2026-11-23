@@ -449,5 +449,5 @@ test("a book preset replacing the rows refreshes an open Maze form", async ({ pa
   await row.getByTestId("maze-per-page-1").click()
   const stored = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("tandu.workbook.books")!)[0].rows.find(r => r.s === "maze").p)
-  expect(stored).toMatch(/^s\d+\.few\.pp1$/)
+  expect(stored).toMatch(/^s\d+\.winding\.few\.pp1$/)
 })

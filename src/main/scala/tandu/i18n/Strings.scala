@@ -15,6 +15,7 @@ final case class Strings(
     paint: Strings.Paint,
     offline: Strings.Offline,
     ticTacToe: Strings.TicTacToe,
+    fourInARow: Strings.FourInARow,
     battleships: Strings.Battleships,
     wordAssociation: Strings.WordAssociation,
     categoriesGame: Strings.Categories,
@@ -221,6 +222,10 @@ object Strings:
       gomokuTip: String
   )
 
+  final case class FourInARowOff(
+      rules: Rules
+  )
+
   final case class SolitaireOff(
       rules: Rules,
       setupExample: String
@@ -316,6 +321,7 @@ object Strings:
       hangman: HangmanOff,
       chess: ChessOff,
       ticTacToe: TicTacToeOff,
+      fourInARow: FourInARowOff,
       solitaire: SolitaireOff,
       categories: CategoriesOff,
       checkers: CheckersOff,
@@ -338,6 +344,20 @@ object Strings:
       changeVariant: String,
       classic: TttVariant,
       gomoku: TttVariant
+  )
+
+  final case class FourInARow(
+      name: String,
+      description: String,
+      turn: String,
+      wins: String,
+      chooseOpponent: String,
+      changeOpponent: String,
+      friend: TttVariant,
+      computer: TttVariant,
+      you: String,
+      thinking: String,
+      computerWins: String
   )
 
   final case class BattleshipsP2P(
@@ -1124,6 +1144,14 @@ object Strings:
         gomokuTipTitle = "Mastered it?",
         gomokuTip = "Try gomoku next: a bigger grid, get five in a row. Same idea, much more interesting."
       ),
+      fourInARow = FourInARowOff(
+        rules = Rules("How to play", List(
+          "Draw a grid 7 squares wide and 6 tall.",
+          "Take turns choosing a column. Your mark (X or O) goes in the lowest empty square of that column — as if it fell to the bottom.",
+          "First to get four in a row — horizontal, vertical, or diagonal — wins.",
+          "If the grid fills up with no four in a row, it's a draw."
+        ))
+      ),
       solitaire = SolitaireOff(
         rules = Rules("Klondike — how to play", List(
           "Deal seven tableau columns: 1, 2, 3, 4, 5, 6, 7 cards. Top card of each column face-up.",
@@ -1252,6 +1280,19 @@ object Strings:
       changeVariant = "Change game",
       classic = TttVariant("Classic", "3×3 board, get 3 in a row. Quick and simple."),
       gomoku = TttVariant("Gomoku", "10×10 board, get 5 in a row. Harder strategy.")
+    ),
+    fourInARow = FourInARow(
+      name = "Four in a Row",
+      description = "Drop discs and line up four before your opponent does.",
+      turn = "Turn",
+      wins = "wins!",
+      chooseOpponent = "Who are you playing?",
+      changeOpponent = "Change opponent",
+      friend = TttVariant("Two players", "Take turns on one device."),
+      computer = TttVariant("Vs computer", "Play solo against the computer."),
+      you = "You",
+      thinking = "Computer is thinking…",
+      computerWins = "Computer wins!"
     ),
     battleships = Battleships(
       name = "Battleships",
@@ -1910,6 +1951,14 @@ object Strings:
         gomokuTipTitle = "Umiecie już?",
         gomokuTip = "Spróbujcie gomoku: większa plansza, pięć w rzędzie. Ten sam pomysł, znacznie ciekawszy."
       ),
+      fourInARow = FourInARowOff(
+        rules = Rules("Jak grać", List(
+          "Narysujcie siatkę 7 kratek szeroką i 6 kratek wysoką.",
+          "Na zmianę wybierajcie kolumnę. Znak (X lub O) trafia na najniższe wolne pole w tej kolumnie — jakby spadł na dół.",
+          "Pierwszy, który ułoży cztery w rzędzie — w poziomie, pionie lub po skosie — wygrywa.",
+          "Jeśli siatka się zapełni bez czwórki, jest remis."
+        ))
+      ),
       solitaire = SolitaireOff(
         rules = Rules("Klondike — jak grać", List(
           "Rozłóżcie siedem kolumn: 1, 2, 3, 4, 5, 6, 7 kart. Górna karta każdej kolumny odkryta.",
@@ -2038,6 +2087,19 @@ object Strings:
       changeVariant = "Zmień grę",
       classic = TttVariant("Klasyk", "Plansza 3×3, 3 w rzędzie wygrywa. Szybkie i proste."),
       gomoku = TttVariant("Gomoku", "Plansza 10×10, 5 w rzędzie. Trudniejsza strategia.")
+    ),
+    fourInARow = FourInARow(
+      name = "Cztery w rzędzie",
+      description = "Wrzucaj krążki i ułóż cztery w linii przed przeciwnikiem.",
+      turn = "Tura",
+      wins = "wygrywa!",
+      chooseOpponent = "Z kim grasz?",
+      changeOpponent = "Zmień przeciwnika",
+      friend = TttVariant("Dwóch graczy", "Grajcie na zmianę na jednym urządzeniu."),
+      computer = TttVariant("Z komputerem", "Zagraj sam przeciwko komputerowi."),
+      you = "Ty",
+      thinking = "Komputer myśli…",
+      computerWins = "Komputer wygrywa!"
     ),
     battleships = Battleships(
       name = "Statki",
@@ -2696,6 +2758,14 @@ object Strings:
         gomokuTipTitle = "¿Lo dominas?",
         gomokuTip = "Prueba gomoku: cuadrícula mayor, cinco en raya. La misma idea, mucho más interesante."
       ),
+      fourInARow = FourInARowOff(
+        rules = Rules("Cómo se juega", List(
+          "Dibujad una cuadrícula de 7 casillas de ancho y 6 de alto.",
+          "Por turnos elegid una columna. Vuestra marca (X u O) va en la casilla libre más baja de esa columna, como si cayera al fondo.",
+          "El primero que haga cuatro en raya — horizontal, vertical o diagonal — gana.",
+          "Si se llena la cuadrícula sin cuatro en raya, es empate."
+        ))
+      ),
       solitaire = SolitaireOff(
         rules = Rules("Klondike — cómo se juega", List(
           "Reparte siete columnas: 1, 2, 3, 4, 5, 6, 7 cartas. La carta superior boca arriba.",
@@ -2824,6 +2894,19 @@ object Strings:
       changeVariant = "Cambiar juego",
       classic = TttVariant("Clásico", "Tablero 3×3, 3 en línea. Rápido y sencillo."),
       gomoku = TttVariant("Gomoku", "Tablero 10×10, 5 en línea. Estrategia más difícil.")
+    ),
+    fourInARow = FourInARow(
+      name = "Cuatro en raya",
+      description = "Deja caer fichas y alinea cuatro antes que tu rival.",
+      turn = "Turno",
+      wins = "¡gana!",
+      chooseOpponent = "¿Contra quién juegas?",
+      changeOpponent = "Cambiar rival",
+      friend = TttVariant("Dos jugadores", "Turnaos en un mismo dispositivo."),
+      computer = TttVariant("Contra el ordenador", "Juega solo contra el ordenador."),
+      you = "Tú",
+      thinking = "El ordenador está pensando…",
+      computerWins = "¡Gana el ordenador!"
     ),
     battleships = Battleships(
       name = "Hundir la flota",
@@ -3482,6 +3565,14 @@ object Strings:
         gomokuTipTitle = "Vous maîtrisez ?",
         gomokuTip = "Essayez gomoku : grille plus grande, cinq en ligne. Même idée, beaucoup plus intéressant."
       ),
+      fourInARow = FourInARowOff(
+        rules = Rules("Comment jouer", List(
+          "Dessinez une grille de 7 cases de large et 6 de haut.",
+          "À tour de rôle, choisissez une colonne. Votre symbole (X ou O) va dans la case libre la plus basse de cette colonne, comme s'il tombait.",
+          "Le premier à aligner quatre symboles — ligne, colonne ou diagonale — gagne.",
+          "Si la grille est pleine sans alignement de quatre, c'est un match nul."
+        ))
+      ),
       solitaire = SolitaireOff(
         rules = Rules("Klondike — comment jouer", List(
           "Distribuez sept colonnes : 1, 2, 3, 4, 5, 6, 7 cartes. La carte du haut face visible.",
@@ -3610,6 +3701,19 @@ object Strings:
       changeVariant = "Changer de jeu",
       classic = TttVariant("Classique", "Plateau 3×3, 3 en ligne. Rapide et simple."),
       gomoku = TttVariant("Gomoku", "Plateau 10×10, 5 en ligne. Stratégie plus difficile.")
+    ),
+    fourInARow = FourInARow(
+      name = "Quatre en ligne",
+      description = "Lâche tes jetons et aligne-en quatre avant ton adversaire.",
+      turn = "Tour",
+      wins = "gagne !",
+      chooseOpponent = "Contre qui joues-tu ?",
+      changeOpponent = "Changer d'adversaire",
+      friend = TttVariant("Deux joueurs", "Jouez chacun votre tour sur le même appareil."),
+      computer = TttVariant("Contre l'ordinateur", "Joue seul contre l'ordinateur."),
+      you = "Toi",
+      thinking = "L'ordinateur réfléchit…",
+      computerWins = "L'ordinateur gagne !"
     ),
     battleships = Battleships(
       name = "Bataille navale",
@@ -4268,6 +4372,14 @@ object Strings:
         gomokuTipTitle = "Schon zu einfach?",
         gomokuTip = "Probiert Gomoku: größeres Gitter, fünf in einer Reihe. Gleiche Idee, viel spannender."
       ),
+      fourInARow = FourInARowOff(
+        rules = Rules("So spielt man", List(
+          "Zeichnet ein Gitter, 7 Kästchen breit und 6 hoch.",
+          "Reihum eine Spalte wählen. Euer Zeichen (X oder O) kommt in das unterste freie Feld dieser Spalte – als würde es nach unten fallen.",
+          "Wer zuerst vier in einer Reihe hat – waagerecht, senkrecht oder diagonal – gewinnt.",
+          "Ist das Gitter voll ohne Viererreihe, ist es unentschieden."
+        ))
+      ),
       solitaire = SolitaireOff(
         rules = Rules("Klondike — so spielt man", List(
           "Sieben Tableau-Spalten austeilen: 1, 2, 3, 4, 5, 6, 7 Karten. Oberste Karte offen.",
@@ -4396,6 +4508,19 @@ object Strings:
       changeVariant = "Spiel wechseln",
       classic = TttVariant("Klassisch", "3×3 Brett, 3 in einer Reihe. Schnell und einfach."),
       gomoku = TttVariant("Gomoku", "10×10 Brett, 5 in einer Reihe. Anspruchsvollere Strategie.")
+    ),
+    fourInARow = FourInARow(
+      name = "Vier in einer Reihe",
+      description = "Wirf Steine ein und bilde vor deinem Gegner eine Viererreihe.",
+      turn = "Zug",
+      wins = "gewinnt!",
+      chooseOpponent = "Gegen wen spielst du?",
+      changeOpponent = "Gegner wechseln",
+      friend = TttVariant("Zwei Spieler", "Abwechselnd auf einem Gerät spielen."),
+      computer = TttVariant("Gegen den Computer", "Spiel allein gegen den Computer."),
+      you = "Du",
+      thinking = "Der Computer denkt nach…",
+      computerWins = "Der Computer gewinnt!"
     ),
     battleships = Battleships(
       name = "Schiffe versenken",

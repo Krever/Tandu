@@ -79,6 +79,9 @@ object Battleships extends Activity:
       if g.enemyViews(shooter).knownCells.contains(target) then ()
       else
         val res = Domain.resolveShot(g.fleets(defender), g.incoming(defender), target)
+        // The result screen is the hand-off screen. Hide the own board
+        // now, so that the next player starts with their ships hidden.
+        showMyBoard.set(false)
         game.set(g.copy(
           incoming   = g.incoming.updated(defender, g.incoming(defender) + target),
           enemyViews = g.enemyViews.updated(shooter, g.enemyViews(shooter).apply(res)),
@@ -92,11 +95,10 @@ object Battleships extends Activity:
           if g.fleets(shooter.other).allSunk(g.incoming(shooter.other)) then
             game.update(_.copy(phase = Phase.GameOver(shooter)))
           else
-            // No hand-off screen between shots — own board is hidden by
-            // default and the turn header is colored by player, so passing
-            // the phone is enough. Reset the toggle so the next player
-            // starts with their own ships hidden.
-            showMyBoard.set(false)
+            // No separate hand-off screen between shots. The result
+            // screen does not show the own board (see `fire`), and the
+            // turn header is colored by player, so passing the phone
+            // is enough.
             game.update(_.copy(phase = Phase.AwaitingShot(shooter.other)))
         case _ => ()
 
@@ -118,7 +120,7 @@ object Battleships extends Activity:
       },
       child <-- phaseSig.map {
         case Phase.AwaitingShot(p)       => playerPage(p, turnView(p, game, fire, showMyBoard))
-        case Phase.ShotResolved(p, t, r) => playerPage(p, resolvedView(p, t, r, game, endTurn, showMyBoard))
+        case Phase.ShotResolved(p, t, r) => playerPage(p, resolvedView(p, t, r, game, endTurn))
         case Phase.GameOver(w)           => playerPage(w, gameOverView(w, restart))
       }
     )
@@ -180,8 +182,7 @@ object Battleships extends Activity:
       target: Cell,
       result: ShotResult,
       game: Var[GameState],
-      endTurn: () => Unit,
-      showMyBoard: Var[Boolean]
+      endTurn: () => Unit
   ): HtmlElement =
     val (bannerKind, msgFn): (String, Strings => String) = result match
       case ShotResult.Hit  => ("hit",  (str: Strings) => str.battleships.hit)
@@ -201,8 +202,9 @@ object Battleships extends Activity:
           onClick --> (_ => endTurn())
         )
       ),
-      enemyWaters(shooter, game.signal, onTap = Some(_ => endTurn()), highlight = Some(target)),
-      myWaters(shooter, game.signal, showMyBoard)
+      // No own board here: the device can go to the other player while
+      // this screen shows, and they must not see the shooter's ships.
+      enemyWaters(shooter, game.signal, onTap = Some(_ => endTurn()), highlight = Some(target))
     )
 
   private def gameOverView(winner: Player, restart: () => Unit): HtmlElement =

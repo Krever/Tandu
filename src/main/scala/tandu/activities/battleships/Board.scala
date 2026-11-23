@@ -100,10 +100,12 @@ object Board:
   ): HtmlElement =
     sectionTag(
       cls := s"stack $extraCls",
+      dataAttr("testid") := "my-board",
       div(
         cls := "center",
         button(
           cls := "btn btn--ghost",
+          dataAttr("testid") := "toggle-my-board",
           child.text <-- showMyBoard.signal.combineWith(AppState.strings).map { (shown, str) =>
             if shown then str.battleships.hideMyBoard else str.battleships.showMyBoard
           },

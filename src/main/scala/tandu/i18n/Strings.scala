@@ -329,7 +329,6 @@ object Strings:
       friend: TttVariant,
       computer: TttVariant,
       you: String,
-      computerName: String,
       thinking: String,
       computerWins: String
   )
@@ -1241,7 +1240,6 @@ object Strings:
       friend = TttVariant("Two players", "Take turns on one device."),
       computer = TttVariant("Vs computer", "Play solo against the computer."),
       you = "You",
-      computerName = "Computer",
       thinking = "Computer is thinking…",
       computerWins = "Computer wins!"
     ),
@@ -2025,7 +2023,6 @@ object Strings:
       friend = TttVariant("Dwóch graczy", "Grajcie na zmianę na jednym urządzeniu."),
       computer = TttVariant("Z komputerem", "Zagraj sam przeciwko komputerowi."),
       you = "Ty",
-      computerName = "Komputer",
       thinking = "Komputer myśli…",
       computerWins = "Komputer wygrywa!"
     ),
@@ -2809,7 +2806,6 @@ object Strings:
       friend = TttVariant("Dos jugadores", "Turnaos en un mismo dispositivo."),
       computer = TttVariant("Contra el ordenador", "Juega solo contra el ordenador."),
       you = "Tú",
-      computerName = "Ordenador",
       thinking = "El ordenador está pensando…",
       computerWins = "¡Gana el ordenador!"
     ),
@@ -3593,7 +3589,6 @@ object Strings:
       friend = TttVariant("Deux joueurs", "Jouez chacun votre tour sur le même appareil."),
       computer = TttVariant("Contre l'ordinateur", "Joue seul contre l'ordinateur."),
       you = "Toi",
-      computerName = "Ordinateur",
       thinking = "L'ordinateur réfléchit…",
       computerWins = "L'ordinateur gagne !"
     ),
@@ -4377,7 +4372,6 @@ object Strings:
       friend = TttVariant("Zwei Spieler", "Abwechselnd auf einem Gerät spielen."),
       computer = TttVariant("Gegen den Computer", "Spiel allein gegen den Computer."),
       you = "Du",
-      computerName = "Computer",
       thinking = "Der Computer denkt nach…",
       computerWins = "Der Computer gewinnt!"
     ),

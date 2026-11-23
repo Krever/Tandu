@@ -32,6 +32,9 @@ object FourInARow extends Activity:
 
   def idx(col: Int, row: Int): Int = row * Cols + col
 
+  private def inBounds(col: Int, row: Int): Boolean =
+    col >= 0 && col < Cols && row >= 0 && row < Rows
+
   /** The row a disc dropped into `col` lands on, if the column has room. */
   def landingRow(board: Board, col: Int): Option[Int] =
     (Rows - 1 to 0 by -1).find(r => board(idx(col, r)).isEmpty)
@@ -52,7 +55,7 @@ object FourInARow extends Activity:
       def run(dx: Int, dy: Int): List[Int] =
         Iterator
           .iterate((c0 + dx, r0 + dy))((c, r) => (c + dx, r + dy))
-          .takeWhile((c, r) => c >= 0 && c < Cols && r >= 0 && r < Rows && board(idx(c, r)).contains(p))
+          .takeWhile((c, r) => inBounds(c, r) && board(idx(c, r)).contains(p))
           .map((c, r) => idx(c, r))
           .toList
       Dirs.iterator
@@ -69,33 +72,30 @@ object FourInARow extends Activity:
     * beatable for kids. */
   def computerMove(board: Board, me: Player, rnd: Random = Random): Int =
     val legal = legalCols(board)
-    def winsFor(p: Player)(c: Int): Boolean =
-      drop(board, c, p).exists((b, at) => winThrough(b, at).isDefined)
+    def winsFor(b: Board, p: Player)(c: Int): Boolean =
+      drop(b, c, p).exists((b2, at) => winThrough(b2, at).isDefined)
 
-    legal.find(winsFor(me)).getOrElse {
-      legal.find(winsFor(me.other)).filter(_ => rnd.nextDouble() < 0.85).getOrElse {
+    legal
+      .find(winsFor(board, me))
+      .orElse(legal.find(winsFor(board, me.other)).filter(_ => rnd.nextDouble() < 0.85))
+      .getOrElse {
         // A move is unsafe if it lets the opponent win by dropping on top.
-        val safe = legal.filterNot { c =>
-          drop(board, c, me).exists { (b, _) =>
-            drop(b, c, me.other).exists((b2, at2) => winThrough(b2, at2).isDefined)
-          }
-        }
+        val safe = legal.filterNot(c => drop(board, c, me).exists((b, _) => winsFor(b, me.other)(c)))
         val pool = if safe.nonEmpty then safe else legal
         pool.maxBy(c => score(board, c, me) + rnd.nextDouble() * 2)
       }
-    }
 
   /** Heuristic value of dropping into `col`: centre preference plus how many
     * open four-windows through the landing cell already hold our discs. */
   private def score(board: Board, col: Int, me: Player): Double =
     landingRow(board, col).fold(Double.MinValue) { row =>
-      val centre = 3 - math.abs(col - Cols / 2)
+      val centre = Cols / 2 - math.abs(col - Cols / 2)
       val windows =
         for
           (dx, dy) <- Dirs
           offset   <- 0 until WinLen
           cells = (0 until WinLen).map(i => (col + dx * (i - offset), row + dy * (i - offset)))
-          if cells.forall((c, r) => c >= 0 && c < Cols && r >= 0 && r < Rows)
+          if cells.forall(inBounds)
           discs = cells.map((c, r) => board(idx(c, r)))
           if !discs.exists(_.contains(me.other))
         yield discs.count(_.contains(me)) match
@@ -108,8 +108,9 @@ object FourInARow extends Activity:
 
   // ---- UI ------------------------------------------------------------------
 
-  enum Opponent:
-    case Friend, Computer
+  enum Opponent(val id: String, val text: Strings => Strings.TttVariant):
+    case Friend   extends Opponent("friend", _.fourInARow.friend)
+    case Computer extends Opponent("computer", _.fourInARow.computer)
 
   def render(): HtmlElement =
     ModeChooser.render(id, List(
@@ -131,20 +132,13 @@ object FourInARow extends Activity:
       activityId = id,
       prefix = List("in-app"),
       heading = _.fourInARow.chooseOpponent,
-      modes = List(
+      modes = Opponent.values.toList.map(o =>
         Mode(
-          id = "friend",
-          label = _.fourInARow.friend.name,
-          description = Some(_.fourInARow.friend.description),
+          id = o.id,
+          label = o.text(_).name,
+          description = Some(o.text(_).description),
           testIdPrefix = "opponent",
-          render = () => gameView(Opponent.Friend)
-        ),
-        Mode(
-          id = "computer",
-          label = _.fourInARow.computer.name,
-          description = Some(_.fourInARow.computer.description),
-          testIdPrefix = "opponent",
-          render = () => gameView(Opponent.Computer)
+          render = () => gameView(o)
         )
       )
     )
@@ -155,8 +149,8 @@ object FourInARow extends Activity:
       winner: Option[Player],
       winLine: Set[Int]
   ):
-    def isDraw: Boolean = winner.isEmpty && legalCols(board).isEmpty
-    def finished: Boolean = winner.isDefined || isDraw
+    lazy val isDraw: Boolean   = winner.isEmpty && legalCols(board).isEmpty
+    lazy val finished: Boolean = winner.isDefined || isDraw
     def activePlayer: Option[Player] = winner.orElse(Option.when(!isDraw)(turn))
 
   private object State:
@@ -169,10 +163,14 @@ object FourInARow extends Activity:
     val computer   = Player.P2
     val state      = Var(State.initial)
     val hoverCol   = Var(Option.empty[Int])
-    // Bumped on reset so a computer move scheduled for the old game is dropped.
-    var generation = 0
+    // The pending computer move; cancelled on reset and on unmount.
+    var pending: Option[js.timers.SetTimeoutHandle] = None
+    def cancelPending(): Unit =
+      pending.foreach(js.timers.clearTimeout)
+      pending = None
 
     def computerToMove(st: State): Boolean = vsComputer && !st.finished && st.turn == computer
+    def locked(st: State): Boolean         = st.finished || computerToMove(st)
 
     def place(col: Int): Unit =
       val cur = state.now()
@@ -182,24 +180,23 @@ object FourInARow extends Activity:
           val next = State(board, cur.turn.other, line.map(_ => cur.turn), line.getOrElse(Set.empty))
           state.set(next)
           if computerToMove(next) then
-            val gen = generation
-            val _ = js.timers.setTimeout(ComputerDelayMs) {
+            pending = Some(js.timers.setTimeout(ComputerDelayMs) {
+              pending = None
               val now = state.now()
-              if gen == generation && computerToMove(now) then place(computerMove(now.board, computer))
-            }
+              if computerToMove(now) then place(computerMove(now.board, computer))
+            })
         }
 
     def tap(col: Int): Unit =
       if !computerToMove(state.now()) then place(col)
 
     def reset(): Unit =
-      generation += 1
+      cancelPending()
       state.set(State.initial)
 
+    // Labels never name the computer: its win and its turn have their own texts.
     def nameOf(p: Player, str: Strings): String =
-      if !vsComputer then p.labelKey(str)
-      else if p == computer then str.fourInARow.computerName
-      else str.fourInARow.you
+      if vsComputer then str.fourInARow.you else p.labelKey(str)
 
     val labelSignal: Signal[String] =
       state.signal.combineWith(AppState.strings).map { (st, str) =>
@@ -213,18 +210,20 @@ object FourInARow extends Activity:
       }
     val active   = state.signal.map(_.activePlayer)
     val finished = state.signal.map(_.finished)
+    val isLocked = state.signal.map(locked).distinct
 
     // The landing cell of the hovered column, shown as a faint preview disc.
+    // It shows only while the game runs, so its colour is the active player's
+    // (--player-color, from the page wrapper).
     val preview: Signal[Option[Int]] =
-      state.signal.combineWith(hoverCol.signal).map { (st, hc) =>
-        if st.finished || computerToMove(st) then None
+      state.signal.combineWith(hoverCol.signal.distinct).map { (st, hc) =>
+        if locked(st) then None
         else hc.flatMap(c => landingRow(st.board, c).map(r => idx(c, r)))
-      }
-
-    def discClass(p: Player): String = s"c4-disc c4-disc--p${p.num}"
+      }.distinct
 
     div(
       cls := "player-page stack-lg",
+      onUnmountCallback(_ => cancelPending()),
       cls("player-page--p1") <-- active.map(_.contains(Player.P1)),
       cls("player-page--p2") <-- active.map(_.contains(Player.P2)),
       div(
@@ -233,12 +232,12 @@ object FourInARow extends Activity:
           cls := "player-badge",
           dataAttr("testid") := "c4-status",
           span(child.text <-- labelSignal),
-          child.maybe <-- active.map(_.map(p => span(cls := s"c4-badge-disc c4-badge-disc--p${p.num}")))
+          child.maybe <-- active.map(_.map(_ => span(cls := "c4-badge-disc")))
         )
       ),
       div(
         cls := "board c4-board",
-        cls("is-locked") <-- state.signal.map(st => st.finished || computerToMove(st)),
+        cls("is-locked") <-- isLocked,
         styleAttr := s"grid-template-columns: repeat($Cols, 1fr);",
         onMouseLeave --> (_ => hoverCol.set(None)),
         (0 until Rows).flatMap { r =>
@@ -249,12 +248,11 @@ object FourInARow extends Activity:
               cls := "cell cell--btn c4-cell",
               dataAttr("col") := c.toString,
               cls("cell--win") <-- state.signal.map(_.winLine.contains(i)).distinct,
-              cls("c4-cell--preview-p1") <-- preview.combineWith(state.signal).map((pv, st) => pv.contains(i) && st.turn == Player.P1),
-              cls("c4-cell--preview-p2") <-- preview.combineWith(state.signal).map((pv, st) => pv.contains(i) && st.turn == Player.P2),
+              cls("c4-cell--preview") <-- preview.map(_.contains(i)).distinct,
               // A fresh element per placed disc, so the drop animation plays once
               // on arrival; --c4-fall is how many rows it falls through.
               child.maybe <-- mark.map(_.map(p =>
-                span(cls := discClass(p), styleAttr := s"--c4-fall: ${r + 1};")
+                span(cls := s"c4-disc c4-disc--p${p.num}", styleAttr := s"--c4-fall: ${r + 1};")
               )),
               onMouseEnter --> (_ => hoverCol.set(Some(c))),
               onClick --> (_ => tap(c))

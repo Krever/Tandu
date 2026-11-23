@@ -306,3 +306,81 @@ test("books autosave onto the list; back returns to it; reload and delete work",
   await page.locator(".modal-backdrop.is-open .wbk-confirm-delete").click()
   await expect(page.locator(".wbk-empty")).toBeVisible()
 })
+
+test("a Seek & Find row has its own settings form; they save, share and print", async ({ page }) => {
+  await createBook(page) // 4–5 preset: an Easy and a Counting Seek & Find row
+  const seekRows = page.locator(".wbk-row", { has: page.getByTestId("wbk-row-summary") })
+  await expect(seekRows).toHaveCount(2)
+  await expect(seekRows.nth(0).getByTestId("wbk-row-summary")).toHaveText("Easy")
+  await expect(seekRows.nth(1).getByTestId("wbk-row-summary")).toHaveText("Counting")
+  await expect(seekRows.locator(".wbk-variant-select")).toHaveCount(0)
+
+  // The summary unfolds the form; a change makes the row "Custom" and the
+  // preview follows.
+  const first = seekRows.nth(0)
+  await first.getByTestId("wbk-row-summary").click()
+  await first.getByTestId("snf-task-count").click()
+  await first.getByTestId("snf-answer-write").click()
+  await expect(first.getByTestId("wbk-row-summary")).toHaveText("Custom")
+  await expect(first.getByTestId("snf-preview").locator(".snf-count-box")).toHaveCount(2)
+
+  // The slider keeps working across several changes: the form is not rebuilt.
+  const extras = first.getByTestId("snf-extras")
+  await extras.fill("10")
+  await extras.fill("20")
+  await expect(extras).toHaveValue("20")
+  await expect(first.getByTestId("snf-answer-write")).toHaveClass(/is-active/)
+
+  // A preset in the row form brings the name back.
+  await first.getByTestId("snf-preset-hard").click()
+  await expect(first.getByTestId("wbk-row-summary")).toHaveText("Hard")
+  await first.getByTestId("snf-task-count").click()
+  await first.getByTestId("snf-answer-write").click()
+
+  // Saved: a reload keeps the settings.
+  await page.reload()
+  await expect(seekRows.nth(0).getByTestId("wbk-row-summary")).toHaveText("Custom")
+
+  // Printed: two pages for the row, both write-in counting sheets with the
+  // themes in a round (Hard uses all themes, so two pages differ).
+  await seekRows.nth(0).locator(".wbk-stepper__btn").nth(1).click()
+  await page.locator(".wbk-print-btn").click()
+  await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
+  const writeSheets = page.locator(".print-only .snf-print", { has: page.locator(".snf-count-box") })
+  await expect(writeSheets).toHaveCount(2)
+  const themes = await writeSheets.evaluateAll(es => es.map(e => e.getAttribute("data-theme")))
+  expect(themes[0]).not.toBe(themes[1])
+  await expect(page.locator(".print-only .printable__title", { hasText: "count and write" })).toHaveCount(2)
+})
+
+test("books saved with the old Seek & Find variants keep their sheets", async ({ page }) => {
+  await page.goto("/workbook")
+  await page.evaluate(() => localStorage.setItem("tandu.workbook.books", JSON.stringify([{
+    id: "0123abcd", cover: false, name: "Old", emoji: "🦊",
+    rows: [{ s: "seek-and-find-medium", c: 1 }, { s: "seek-and-find-count", c: 2 }, { s: "maze-easy", c: 1 }],
+  }])))
+  await page.goto("/workbook/0123abcd")
+  const summaries = page.getByTestId("wbk-row-summary")
+  await expect(summaries).toHaveText(["Medium", "Counting"])
+  await expect(page.locator(".wbk-row:not(.wbk-row--cover)")).toHaveCount(3) // + the maze
+})
+
+test("a book preset replacing the rows refreshes an open Seek & Find form", async ({ page }) => {
+  await createBook(page)
+  const row = page.locator(".wbk-row", { has: page.getByTestId("wbk-row-summary") }).first()
+  await row.getByTestId("wbk-row-summary").click()
+  await row.getByTestId("snf-task-count").click()
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Custom")
+
+  // Same preset again, with the form still open: the form shows Easy.
+  await pickPreset(page, "4–5")
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Easy")
+  await expect(row.getByTestId("snf-task-find")).toHaveClass(/is-active/)
+
+  // The next tap changes only what was tapped, not the old task.
+  await row.getByTestId("snf-layout-wild").click()
+  const stored = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("tandu.workbook.books")!)[0].rows.find(r => r.s === "seek-and-find").p)
+  expect(stored).toMatch(/^find\./)
+  expect(stored).toContain(".wild.")
+})

@@ -15,8 +15,11 @@ import scala.util.{Random, Try}
   */
 object Workbook:
 
-  /** One row of the composition list: print `count` pages of `sourceId`. */
-  final case class Row(sourceId: String, count: Int)
+  /** One row of the composition list: print `count` pages of `sourceId`.
+    * `params` holds the row's own settings for a source that has
+    * [[Settings]] (an opaque token that only the source reads). None means
+    * the source's default. */
+  final case class Row(sourceId: String, count: Int, params: Option[String] = None)
 
   /** `name` and `coverEmoji` are the book's identity — they label it on the
     * books list and, when the cover page is on, land on the cover too. `id`
@@ -51,14 +54,37 @@ object Workbook:
     * 1, page 2, … of their material. */
   final case class Ctx(lang: Lang, rng: Random, pageIndex: Int)
 
+  /** Settings that a parent can change per row, edited with the source's
+    * own form. The token is opaque to the workbook: it is saved, shared and
+    * handed back to the source unchanged.
+    *   - `summary`: the short label on the row line (for example "Easy").
+    *   - `title`: the print-sheet title, which can depend on the settings.
+    *   - `pages`: all page bodies of a row at once, so the source can plan
+    *     across them (Seek & Find: themes in rounds).
+    *   - `editor`: the form with a live preview; `token` is a two-way view
+    *     of the row's settings. */
+  final case class Settings(
+      default: String,
+      summary: String => Strings => String,
+      title: String => Strings => String,
+      pages: (String, Int, Random) => Seq[HtmlElement],
+      editor: Var[String] => HtmlElement
+  )
+
   /** One concrete page variant within a kind: the variant-chip label, the
     * print-sheet title, and a generator producing one A4 page body. */
   final case class Source(
       id: String,
       variantLabel: Strings => String,
       printTitle: Strings => String,
-      render: Ctx => HtmlElement
-  )
+      render: Ctx => HtmlElement,
+      settings: Option[Settings] = None
+  ):
+    /** The token a row uses: its own, or the default. */
+    def paramsOf(row: Row): String = settings.fold("")(st => row.params.getOrElse(st.default))
+
+    /** The print-sheet title for a row. */
+    def titleOf(row: Row): Strings => String = settings.fold(printTitle)(_.title(paramsOf(row)))
 
   /** One kind of page — the unit a parent picks. A row stores a concrete
     * variant (Source) but is presented as its kind, with the variant
@@ -86,14 +112,19 @@ object Workbook:
       Source("dot-to-dot", _.dotToDot.name, _.offline.dotToDot.printTitle,
         ctx => DotToDot.printSheetBody(ctx.rng))
     )),
-    // The counting sheet rides along as a fourth "variant" — it's the same
-    // board, scored by circling each count on a number line instead of circling pictures.
-    Group("seek-and-find", "👀", "vermilion", _.seekAndFind.name,
-      SeekAndFind.printLevelIds.map { lvl =>
-        Source(s"seek-and-find-$lvl", levelName(lvl), _.offline.seekAndFind.printTitle,
-          ctx => SeekAndFind.printSeekBody(lvl, ctx.rng))
-      } :+ Source("seek-and-find-count", _.offline.seekAndFind.countSheetName,
-        _.offline.seekAndFind.countPrintTitle, ctx => SeekAndFind.printCountBody(ctx.rng))),
+    // One source with its own form (the print page's form): find or count,
+    // themes, crowd, layout. Rows keep their settings in `params`.
+    Group("seek-and-find", "👀", "vermilion", _.seekAndFind.name, List(
+      Source("seek-and-find", _.seekAndFind.name, _.offline.seekAndFind.printTitle,
+        ctx => SeekAndFind.workbookPages(SeekAndFind.presetToken("easy"), 1, ctx.rng).head,
+        settings = Some(Settings(
+          default = SeekAndFind.presetToken("easy"),
+          summary = SeekAndFind.tokenSummary,
+          title = SeekAndFind.tokenTitle,
+          pages = SeekAndFind.workbookPages,
+          editor = SeekAndFind.settingsEditor
+        )))
+    )),
     Group("sudoku", "#", "plum", _.sudoku.name,
       Sudoku.variants.map { v =>
         Source(s"sudoku-${v.id}", v.nameKey, _.offline.sudoku.printTitle,
@@ -143,11 +174,6 @@ object Workbook:
       Source("paper-squared", _.workbook.paperSquared, _.workbook.paperName, _ => paperSheetBody("squared"))
     ))
   )
-
-  private def levelName(lvl: String): Strings => String = lvl match
-    case "easy"   => _.seekAndFind.easy
-    case "medium" => _.seekAndFind.medium
-    case _        => _.seekAndFind.hard
 
   /** Resolve a stored source id to its kind and variant. */
   def byId(id: String): Option[(Group, Source)] =
@@ -215,13 +241,16 @@ object Workbook:
     * mechanism. Rows only — cover settings belong to the parent's recipe. */
   final case class Preset(id: String, name: Strings => String, rows: Vector[Row])
 
+  /** A one-page Seek & Find row with the given settings token. */
+  private def seekRow(token: String): Row = Row("seek-and-find", 1, Some(token))
+
   val presets: List[Preset] = List(
     // Pre-readers: pictures, pens and counting; no word puzzles yet.
     Preset("age-4-5", _.workbook.age45, Vector(
       Row("letter-tracing-upper", 1),
       Row("dot-to-dot", 1),
-      Row("seek-and-find-easy", 1),
-      Row("seek-and-find-count", 1),
+      seekRow(SeekAndFind.presetToken("easy")),
+      seekRow(SeekAndFind.countSheetToken),
       Row("sudoku-emoji4", 1),
       Row("math-easy", 1),
       Row("maze-easy", 1)
@@ -230,7 +259,7 @@ object Workbook:
     Preset("age-6-7", _.workbook.age67, Vector(
       Row("dot-to-dot", 1),
       Row("letter-tracing-lower", 1),
-      Row("seek-and-find-medium", 1),
+      seekRow(SeekAndFind.presetToken("medium")),
       Row("sudoku-emoji6", 1),
       Row("word-builder-easy", 1),
       Row("word-search-easy", 1),
@@ -247,7 +276,7 @@ object Workbook:
       Row("word-search-hard", 1),
       Row("math-hard", 1),
       Row("word-builder-medium", 1),
-      Row("seek-and-find-hard", 1),
+      seekRow(SeekAndFind.presetToken("hard")),
       Row("guide-robot-medium", 1)
     )),
     // The whole book is understood as shared — game grids belong here.
@@ -256,7 +285,7 @@ object Workbook:
       Row("maze-easy", 1),
       Row("sudoku-emoji6", 1),
       Row("dot-to-dot", 1),
-      Row("seek-and-find-medium", 1),
+      seekRow(SeekAndFind.presetToken("medium")),
       Row("word-search-easy", 1),
       Row("math-medium", 1)
     )),
@@ -264,7 +293,7 @@ object Workbook:
       Row("math-easy", 1),
       Row("math-medium", 1),
       Row("math-hard", 1),
-      Row("seek-and-find-count", 1),
+      seekRow(SeekAndFind.countSheetToken),
       Row("sudoku-emoji6", 1),
       Row("sudoku-easy", 1)
     )),
@@ -279,14 +308,28 @@ object Workbook:
     * survives catalog changes. */
   object Codec:
     private def rowsToJs(rows: Vector[Row]): js.Array[js.Dynamic] =
-      js.Array(rows.map(r => js.Dynamic.literal(s = r.sourceId, c = r.count))*)
+      js.Array(rows.map { r =>
+        val d = js.Dynamic.literal(s = r.sourceId, c = r.count)
+        r.params.foreach(p => d.updateDynamic("p")(p))
+        d
+      }*)
+
+    /** Old Seek & Find source ids, mapped to the settings token of the same
+      * sheet. Books saved before Seek & Find got its form keep their pages. */
+    private val legacySeekRows: Map[String, String] =
+      List("easy", "medium", "hard").map(p => s"seek-and-find-$p" -> SeekAndFind.presetToken(p)).toMap +
+        ("seek-and-find-count" -> SeekAndFind.countSheetToken)
+
+    private def migrate(row: Row): Row =
+      legacySeekRows.get(row.sourceId).fold(row)(token => row.copy(sourceId = "seek-and-find", params = Some(token)))
 
     private def recipeToJs(r: Recipe): js.Dynamic =
       js.Dynamic.literal(id = r.id, cover = r.cover, name = r.name, emoji = r.coverEmoji, rows = rowsToJs(r.rows))
 
     private def recipeFromJs(d: js.Dynamic): Recipe =
       val rows = d.rows.asInstanceOf[js.Array[js.Dynamic]].toVector
-        .map(row => Row(row.s.asInstanceOf[String], row.c.asInstanceOf[Int]))
+        .map(row => Row(row.s.asInstanceOf[String], row.c.asInstanceOf[Int], row.p.asInstanceOf[js.UndefOr[String]].toOption))
+        .map(migrate)
         .filter(row => byId(row.sourceId).isDefined && row.count > 0)
       // Books stored before ids existed (or hand-edited) get one on read, so a
       // pre-id library keeps working — it's saved back with ids on next edit.

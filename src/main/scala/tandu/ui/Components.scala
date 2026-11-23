@@ -182,6 +182,51 @@ object Components:
         )
     )
 
+  /** A − n + stepper. The host decides the limits through `canDec` and
+    * `canInc` (the workbook row's − at one removes the row, so it stays on). */
+  def stepper(
+      value: Signal[Int],
+      canDec: Signal[Boolean],
+      canInc: Signal[Boolean],
+      onDec: () => Unit,
+      onInc: () => Unit,
+      testId: String = ""
+  ): HtmlElement =
+    div(
+      cls := "wbk-stepper",
+      when(testId.nonEmpty)(dataAttr("testid") := testId),
+      button(
+        typ := "button",
+        cls := "wbk-stepper__btn",
+        aria.label <-- s(_.workbook.fewer),
+        "−",
+        disabled <-- canDec.map(!_),
+        onClick --> (_ => onDec())
+      ),
+      span(cls := "wbk-stepper__count", aria.live := "polite", child.text <-- value.map(_.toString)),
+      button(
+        typ := "button",
+        cls := "wbk-stepper__btn",
+        aria.label <-- s(_.workbook.more),
+        "+",
+        disabled <-- canInc.map(!_),
+        onClick --> (_ => onInc())
+      )
+    )
+
+  /** An on/off switch. */
+  def switch(on: Signal[Boolean], label: Signal[String], flip: () => Unit, testId: String = ""): HtmlElement =
+    button(
+      typ := "button",
+      cls := "wbk-toggle",
+      when(testId.nonEmpty)(dataAttr("testid") := testId),
+      cls("is-on") <-- on,
+      aria.pressed <-- on.map(_.toString),
+      aria.label <-- label,
+      span(cls := "wbk-toggle__knob"),
+      onClick --> (_ => flip())
+    )
+
   def card(content: Modifier[HtmlElement]*): HtmlElement =
     div(cls := "card stack", content)
 

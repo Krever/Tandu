@@ -3588,7 +3588,6 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 
 /* Print sheets — one big field per A4 page under a legend strip; the
    counting sheet adds one number line per kind below the field. */
-.snf-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
 .snf-print-legend {
   display: flex;
   flex-wrap: wrap;
@@ -3623,6 +3622,70 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   font-variant-numeric: tabular-nums;
 }
 .snf-print-emoji { width: 9mm; height: 9mm; vertical-align: middle; }
+/* Write-in variant of the counting sheet: one empty box per kind. */
+.snf-count-row--write { display: flex; flex-wrap: wrap; gap: 10mm; }
+.snf-count-row--write .snf-count-cell { gap: 3mm; }
+.snf-count-box {
+  width: 13mm;
+  height: 13mm;
+  border: 1.5px solid black;
+  border-radius: 2mm;
+}
+
+/* Sheet builder (print mode): presets, form and a live preview. On narrow
+   screens the preview is above the form; on wide screens it is at the
+   right and stays in view while the form scrolls. */
+.snf-presets { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+.snf-builder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: center;
+}
+.snf-builder__preview { flex: 0 0 auto; align-items: center; }
+.snf-builder__actions { justify-content: center; }
+.snf-pager { justify-content: center; gap: var(--space-2); }
+.snf-pager.is-hidden { display: none; }
+.snf-pager__btn { min-width: 40px; min-height: 36px; padding: 0 var(--space-2); font-size: 20px; line-height: 1; }
+.snf-pager__label { min-width: 5ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.snf-preview {
+  width: 240px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: white;
+  overflow: hidden;
+}
+/* The page renders at the A4 body width and is zoomed down. */
+.snf-preview__page { width: 190mm; zoom: 0.33; }
+.snf-preview .printable { border: none; margin: 0; }
+.snf-form { flex: 1 1 300px; display: flex; flex-direction: column; gap: var(--space-3); }
+.snf-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.snf-form__label { font-size: 14px; font-weight: 600; color: var(--color-muted); }
+.snf-form__range { gap: var(--space-2); }
+.snf-form__range input[type="range"] { width: 140px; }
+.snf-form__value { min-width: 3ch; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.snf-form .pill-btn { padding: var(--space-1) var(--space-2); min-height: 36px; }
+/* Multi-select chips (base look shared with .wbk-preset-chip): separate
+   buttons, so several can be on at once. */
+.snf-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+.snf-chip-btn { min-height: 36px; min-width: 40px; padding: 0 var(--space-2); color: var(--color-text); font-weight: 600; }
+@media (min-width: 620px) {
+  .snf-builder__preview { order: 2; position: sticky; top: var(--space-3); }
+}
+/* The builder inside a workbook row: no sticky preview (the row is short). */
+.snf-builder--embedded .snf-builder__preview { position: static; }
+.snf-builder__form { flex: 1 1 300px; }
+.snf-builder__form .snf-form { flex: none; }
+.wbk-settings { margin-top: var(--space-2); }
+/* Settings summary on a workbook row (tapping it unfolds the form). It
+   shares the variant select's pill look, without the chevron. */
 
 /* ---- Workbook — generated, personalized, disposable activity book ---- */
 
@@ -3684,7 +3747,8 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 /* Builder: the preset panel, folded behind an explicit start/replace toggle. */
 .wbk-presets-toggle { color: var(--color-muted); }
 .wbk-presets__row { flex-wrap: wrap; gap: var(--space-2); }
-.wbk-preset-chip {
+/* .snf-chip-btn (Seek & Find theme chips) shares this look. */
+.wbk-preset-chip, .snf-chip-btn {
   border: 1.5px solid var(--color-border-strong);
   border-radius: 999px;
   padding: var(--space-2) var(--space-3);
@@ -3692,7 +3756,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   cursor: pointer;
   font-size: 14px;
 }
-.wbk-preset-chip.is-active {
+.wbk-preset-chip.is-active, .snf-chip-btn.is-active {
   background: var(--color-border-strong);
   color: var(--color-surface);
 }
@@ -3978,15 +4042,18 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
    with the preview open. Wraps below the name on narrow screens. */
 .wbk-row__stack > * + * { margin-top: var(--space-2); }
 .wbk-row__line { flex-wrap: wrap; }
-.wbk-variant-select {
-  appearance: none;
+.wbk-variant-select, .wbk-row__summary {
   border: 1.5px solid var(--color-border-strong);
   border-radius: 999px;
-  padding: 4px 30px 4px 12px;
+  padding: 4px 12px;
   background: var(--color-surface);
   font-size: 14px;
   color: inherit;
   cursor: pointer;
+}
+.wbk-variant-select {
+  appearance: none;
+  padding-right: 30px;
   /* A small chevron so the closed select reads as a dropdown. */
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%231a1410' stroke-width='1.8' stroke-linecap='round'/></svg>");
   background-repeat: no-repeat;

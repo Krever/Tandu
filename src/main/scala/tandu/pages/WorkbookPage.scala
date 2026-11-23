@@ -489,9 +489,10 @@ object WorkbookPage:
       when(r.cover)(coverPage(r)),
       r.rows.flatMap { row =>
         Workbook.byId(row.sourceId).toList.flatMap { (_, src) =>
-          (0 until row.count).map(i =>
-            Printable.render(title = src.printTitle, body = src.render(Ctx(lang, rng, i)))
-          )
+          val bodies = src.settings match
+            case Some(st) => st.pages(src.paramsOf(row), row.count, rng)
+            case None     => (0 until row.count).map(i => src.render(Ctx(lang, rng, i)))
+          bodies.map(body => Printable.render(title = src.titleOf(row), body = body))
         }
       }
     )
@@ -666,13 +667,10 @@ object WorkbookPage:
         div(
           cls := "wbk-row__end",
           previewEye(isOpen, () => togglePreview()),
-          button(
-            cls := "wbk-toggle",
-            cls("is-on") <-- recipe.signal.map(_.cover),
-            aria.pressed <-- recipe.signal.map(_.cover.toString),
-            aria.label <-- s(_.workbook.coverPage),
-            span(cls := "wbk-toggle__knob"),
-            onClick --> (_ => recipe.update(r => r.copy(cover = !r.cover)))
+          Components.switch(
+            recipe.signal.map(_.cover),
+            s(_.workbook.coverPage),
+            () => recipe.update(r => r.copy(cover = !r.cover))
           )
         )
       ),
@@ -685,6 +683,11 @@ object WorkbookPage:
   private def rowItem(idx: Int, recipe: Var[Recipe], previewOpen: Var[Option[String]]): HtmlElement =
     val rowKey = s"row-$idx"
     val rowSig = recipe.signal.map(_.rows.lift(idx)).distinct
+    // The row's structure depends only on its source. Count and settings
+    // are signals inside it: a rebuild on each settings change would replace
+    // the open form (and a slider in the middle of a drag).
+    val sourceSig = rowSig.map(_.map(_.sourceId)).distinct
+    val countSig = rowSig.map(_.fold(0)(_.count)).distinct
     val isOpen = previewOpen.signal.map(_.contains(rowKey)).distinct
 
     def updateRow(f: Row => Option[Row]): Unit =
@@ -704,13 +707,15 @@ object WorkbookPage:
         Option.when(next > 0)(row.copy(count = math.min(MaxCount, next)))
       }
 
+    def togglePreview(): Unit =
+      previewOpen.update(c => if c.contains(rowKey) then None else Some(rowKey))
 
     div(
       cls := "card wbk-row",
-      child <-- rowSig.map {
+      child <-- sourceSig.map {
         case None => emptyNode // length change re-renders the list right after
-        case Some(row) =>
-          Workbook.byId(row.sourceId) match
+        case Some(sourceId) =>
+          Workbook.byId(sourceId) match
             case None => emptyNode
             case Some((group, src)) =>
               div(
@@ -723,50 +728,58 @@ object WorkbookPage:
                     aria.expanded <-- isOpen,
                     span(cls := s"wbk-row__glyph activity-card--${group.tint}", group.glyph),
                     span(cls := "wbk-row__name", child.text <-- s(group.name)),
-                    onClick --> (_ => previewOpen.update(c => if c.contains(rowKey) then None else Some(rowKey)))
+                    onClick --> (_ => togglePreview())
                   ),
                   // The variant rides right next to the title; eye + stepper
-                  // keep to the row's end.
-                  when(group.sources.size > 1)(
-                    select(
-                      cls := "wbk-variant-select",
-                      aria.label <-- s(group.name),
-                      group.sources.map { v =>
-                        option(
-                          value := v.id,
-                          selected := v.id == row.sourceId,
-                          child.text <-- s(v.variantLabel)
+                  // keep to the row's end. A source with settings shows a
+                  // summary instead; its form is in the unfolded pane.
+                  src.settings match
+                    case Some(st) =>
+                      button(
+                        cls := "wbk-row__summary",
+                        dataAttr("testid") := "wbk-row-summary",
+                        child.text <-- rowSig.combineWith(AppState.strings).map { (row, str) =>
+                          st.summary(row.fold(st.default)(src.paramsOf))(str)
+                        },
+                        onClick --> (_ => togglePreview())
+                      )
+                    case None =>
+                      when(group.sources.size > 1)(
+                        select(
+                          cls := "wbk-variant-select",
+                          aria.label <-- s(group.name),
+                          group.sources.map { v =>
+                            option(
+                              value := v.id,
+                              selected := v.id == sourceId,
+                              child.text <-- s(v.variantLabel)
+                            )
+                          },
+                          onChange.mapToValue --> (id => updateRow(r => Some(r.copy(sourceId = id, params = None))))
                         )
-                      },
-                      onChange.mapToValue --> (id => updateRow(r => Some(r.copy(sourceId = id))))
-                    )
-                  ),
+                      )
+                  ,
                   div(
                     cls := "wbk-row__end",
-                    previewEye(isOpen, () => previewOpen.update(c => if c.contains(rowKey) then None else Some(rowKey))),
-                    div(
-                      cls := "wbk-stepper",
-                      button(
-                        cls := "wbk-stepper__btn",
-                        aria.label <-- s(_.workbook.fewer),
-                        "−",
-                        onClick --> (_ => bump(-1))
-                      ),
-                      span(cls := "wbk-stepper__count", aria.live := "polite", row.count.toString),
-                      button(
-                        cls := "wbk-stepper__btn",
-                        aria.label <-- s(_.workbook.more),
-                        "+",
-                        disabled := row.count >= MaxCount,
-                        onClick --> (_ => bump(1))
-                      )
-                    ),
+                    previewEye(isOpen, () => togglePreview()),
+                    // − at one removes the row, so it is never disabled.
+                    Components.stepper(countSig, Val(true), countSig.map(_ < MaxCount), () => bump(-1), () => bump(1)),
                     dragHandle(idx, recipe, previewOpen)
                   )
                 ),
                 child <-- isOpen.map {
                   case false => emptyNode
-                  case true  => previewPane(src)
+                  case true =>
+                    src.settings match
+                      case None => previewPane(src)
+                      case Some(st) =>
+                        // A two-way view of this row's settings: the form
+                        // writes into the row, and a change from outside (a
+                        // book preset) shows in the form at once.
+                        val token = recipe.zoomLazy(r => r.rows.lift(idx).fold(st.default)(src.paramsOf)) { (r, t) =>
+                          r.rows.lift(idx).fold(r)(row => r.copy(rows = r.rows.updated(idx, row.copy(params = Some(t)))))
+                        }
+                        div(cls := "wbk-settings", st.editor(token))
                 }
               )
       }

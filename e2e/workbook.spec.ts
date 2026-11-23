@@ -22,6 +22,12 @@ async function pickPreset(page, name: string) {
   await page.locator(".wbk-preset-chip", { hasText: name }).click()
 }
 
+/** The rows of one page kind, by the kind name on the row. */
+const kindRows = (page, name: string) =>
+  page.locator(".wbk-row", { has: page.locator(".wbk-row__name", { hasText: name }) })
+const seekAndFindRows = (page) => kindRows(page, "Seek & Find")
+const mazeRows = (page) => kindRows(page, "Maze")
+
 // Creates a book and gives it the first age band — the composition most
 // tests poke at.
 async function createBook(page) {
@@ -309,7 +315,7 @@ test("books autosave onto the list; back returns to it; reload and delete work",
 
 test("a Seek & Find row has its own settings form; they save, share and print", async ({ page }) => {
   await createBook(page) // 4–5 preset: an Easy and a Counting Seek & Find row
-  const seekRows = page.locator(".wbk-row", { has: page.getByTestId("wbk-row-summary") })
+  const seekRows = seekAndFindRows(page)
   await expect(seekRows).toHaveCount(2)
   await expect(seekRows.nth(0).getByTestId("wbk-row-summary")).toHaveText("Easy")
   await expect(seekRows.nth(1).getByTestId("wbk-row-summary")).toHaveText("Counting")
@@ -361,13 +367,14 @@ test("books saved with the old Seek & Find variants keep their sheets", async ({
   }])))
   await page.goto("/workbook/0123abcd")
   const summaries = page.getByTestId("wbk-row-summary")
-  await expect(summaries).toHaveText(["Medium", "Counting"])
-  await expect(page.locator(".wbk-row:not(.wbk-row--cover)")).toHaveCount(3) // + the maze
+  // The maze row has its own settings too (see the maze tests below).
+  await expect(summaries).toHaveText(["Medium", "Counting", "Easy"])
+  await expect(page.locator(".wbk-row:not(.wbk-row--cover)")).toHaveCount(3)
 })
 
 test("a book preset replacing the rows refreshes an open Seek & Find form", async ({ page }) => {
   await createBook(page)
-  const row = page.locator(".wbk-row", { has: page.getByTestId("wbk-row-summary") }).first()
+  const row = seekAndFindRows(page).first()
   await row.getByTestId("wbk-row-summary").click()
   await row.getByTestId("snf-task-count").click()
   await expect(row.getByTestId("wbk-row-summary")).toHaveText("Custom")
@@ -383,4 +390,64 @@ test("a book preset replacing the rows refreshes an open Seek & Find form", asyn
     JSON.parse(localStorage.getItem("tandu.workbook.books")!)[0].rows.find(r => r.s === "seek-and-find").p)
   expect(stored).toMatch(/^find\./)
   expect(stored).toContain(".wild.")
+})
+
+test("a Maze row has its own settings form; they save and print", async ({ page }) => {
+  await createBook(page) // 4–5 preset: one Easy maze row
+  const row = mazeRows(page)
+  await expect(row).toHaveCount(1)
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Easy")
+  await expect(row.locator(".wbk-variant-select")).toHaveCount(0)
+
+  // The summary unfolds the form; a change makes the row "Custom" and the
+  // preview follows.
+  await row.getByTestId("wbk-row-summary").click()
+  await row.getByTestId("maze-per-page-2").click()
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Custom")
+  await expect(row.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(2)
+
+  // Saved: a reload keeps the settings.
+  await page.reload()
+  await expect(mazeRows(page).getByTestId("wbk-row-summary")).toHaveText("Custom")
+
+  // Printed: two pages for the row, both with two mazes.
+  await mazeRows(page).locator(".wbk-stepper__btn").nth(1).click()
+  await page.locator(".wbk-print-btn").click()
+  await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
+  await expect(page.locator(".print-only .maze-print-sheet--pp2")).toHaveCount(2)
+})
+
+test("books saved with the old maze variants keep their sheets", async ({ page }) => {
+  await page.goto("/workbook")
+  await page.evaluate(() => localStorage.setItem("tandu.workbook.books", JSON.stringify([{
+    id: "0123abce", cover: false, name: "Old mazes", emoji: "🐭",
+    rows: [{ s: "maze-hard", c: 1 }, { s: "maze-medium", c: 1 }],
+  }])))
+  await page.goto("/workbook/0123abce")
+  await expect(page.getByTestId("wbk-row-summary")).toHaveText(["Hard", "Medium"])
+
+  await page.locator(".wbk-print-btn").click()
+  await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
+  const firstSheet = page.locator(".print-only .maze-print-sheet").first()
+  await expect(firstSheet.locator(".maze-print-board")).toHaveCount(1)
+  expect(await firstSheet.locator("svg").getAttribute("viewBox")).toBe("0 0 240 290")
+})
+
+test("a book preset replacing the rows refreshes an open Maze form", async ({ page }) => {
+  await createBook(page)
+  const row = mazeRows(page)
+  await row.getByTestId("wbk-row-summary").click()
+  await row.getByTestId("maze-loops-many").click()
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Custom")
+
+  // Same preset again, with the form still open: the form shows Easy.
+  await pickPreset(page, "4–5")
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Easy")
+  await expect(row.getByTestId("maze-loops-few")).toHaveClass(/is-active/)
+
+  // The next tap changes only what was tapped.
+  await row.getByTestId("maze-per-page-1").click()
+  const stored = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("tandu.workbook.books")!)[0].rows.find(r => r.s === "maze").p)
+  expect(stored).toMatch(/^s\d+\.few\.pp1$/)
 })

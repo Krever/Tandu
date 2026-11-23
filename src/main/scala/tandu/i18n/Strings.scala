@@ -128,7 +128,10 @@ object Strings:
       print: String,
       printMaps: String,
       printRules: String,
-      blackAndWhite: String
+      blackAndWhite: String,
+      startFrom: String,
+      pages: String,
+      custom: String
   )
 
   final case class Timer(
@@ -255,7 +258,18 @@ object Strings:
   final case class MazeOff(
       printTitle: String,
       sheetHint: String,
+      form: MazeForm,
       rules: Rules
+  )
+
+  /** Labels of the maze sheet builder form (print mode). */
+  final case class MazeForm(
+      size: String,
+      loops: String,
+      loopsOff: String,
+      loopsFew: String,
+      loopsMany: String,
+      perPage: String
   )
 
   final case class DotToDotOff(
@@ -291,7 +305,6 @@ object Strings:
 
   /** Labels of the sheet builder form (print mode). */
   final case class SeekAndFindForm(
-      preset: String,
       task: String,
       taskFind: String,
       taskCount: String,
@@ -309,8 +322,6 @@ object Strings:
       answer: String,
       answerCircle: String,
       answerWrite: String,
-      pages: String,
-      custom: String,
       countWriteTitle: String,
       countWriteLabel: String
   )
@@ -1045,7 +1056,10 @@ object Strings:
       print = "Print",
       printMaps = "Print maps",
       printRules = "Print rules",
-      blackAndWhite = "Black and white"
+      blackAndWhite = "Black and white",
+      startFrom = "Start from",
+      pages = "Pages",
+      custom = "Custom"
     ),
     timer = Timer(
       name = "Timer",
@@ -1198,6 +1212,14 @@ object Strings:
       maze = MazeOff(
         printTitle = "Mazes — help the mouse find the cheese",
         sheetHint = "Print the sheet and draw a path from the mouse to the cheese with a pencil. There's one way through each maze.",
+        form = MazeForm(
+          size = "Size",
+          loops = "Loops",
+          loopsOff = "None",
+          loopsFew = "A few",
+          loopsMany = "Many",
+          perPage = "Mazes per page"
+        ),
         rules = Rules("How to play", List(
           "Start at the mouse 🐭 and find a path to the cheese 🧀.",
           "You can't cross the walls — only follow the open corridors.",
@@ -1243,7 +1265,6 @@ object Strings:
         countLabel = "Count each picture and circle the right number:",
         countSheetName = "Counting",
         form = SeekAndFindForm(
-          preset = "Start from",
           task = "Task",
           taskFind = "Find and circle",
           taskCount = "Count",
@@ -1261,8 +1282,6 @@ object Strings:
           answer = "Answer",
           answerCircle = "Circle a number",
           answerWrite = "Write the number",
-          pages = "Pages",
-          custom = "Custom",
           countWriteTitle = "Seek & Find — count and write",
           countWriteLabel = "Count each picture and write the number in its box:"
         ),
@@ -1853,7 +1872,10 @@ object Strings:
       print = "Drukuj",
       printMaps = "Drukuj plansze",
       printRules = "Drukuj zasady",
-      blackAndWhite = "Czarno-białe"
+      blackAndWhite = "Czarno-białe",
+      startFrom = "Zacznij od",
+      pages = "Strony",
+      custom = "Własne"
     ),
     timer = Timer(
       name = "Stoper",
@@ -2006,6 +2028,14 @@ object Strings:
       maze = MazeOff(
         printTitle = "Labirynty — pomóż myszce znaleźć ser",
         sheetHint = "Wydrukuj kartkę i narysuj ołówkiem drogę od myszki do sera. Przez każdy labirynt prowadzi jedna ścieżka.",
+        form = MazeForm(
+          size = "Rozmiar",
+          loops = "Pętle",
+          loopsOff = "Brak",
+          loopsFew = "Kilka",
+          loopsMany = "Dużo",
+          perPage = "Labiryntów na stronie"
+        ),
         rules = Rules("Jak grać", List(
           "Zacznij przy myszce 🐭 i znajdź drogę do sera 🧀.",
           "Nie można przechodzić przez ściany — idź tylko otwartymi korytarzami.",
@@ -2051,7 +2081,6 @@ object Strings:
         countLabel = "Policz obrazki każdego rodzaju i zakreśl właściwą liczbę:",
         countSheetName = "Liczenie",
         form = SeekAndFindForm(
-          preset = "Zacznij od",
           task = "Zadanie",
           taskFind = "Znajdź i zakreśl",
           taskCount = "Policz",
@@ -2069,8 +2098,6 @@ object Strings:
           answer = "Odpowiedź",
           answerCircle = "Zakreśl liczbę",
           answerWrite = "Wpisz liczbę",
-          pages = "Strony",
-          custom = "Własne",
           countWriteTitle = "Wyszukiwanka — policz i zapisz",
           countWriteLabel = "Policz obrazki każdego rodzaju i wpisz liczbę w okienko:"
         ),
@@ -2661,7 +2688,10 @@ object Strings:
       print = "Imprimir",
       printMaps = "Imprimir tableros",
       printRules = "Imprimir reglas",
-      blackAndWhite = "Blanco y negro"
+      blackAndWhite = "Blanco y negro",
+      startFrom = "Empezar con",
+      pages = "Páginas",
+      custom = "Personalizado"
     ),
     timer = Timer(
       name = "Cronómetro",
@@ -2814,6 +2844,14 @@ object Strings:
       maze = MazeOff(
         printTitle = "Laberintos — ayuda al ratón a encontrar el queso",
         sheetHint = "Imprime la hoja y dibuja con lápiz un camino del ratón al queso. Hay un solo camino en cada laberinto.",
+        form = MazeForm(
+          size = "Tamaño",
+          loops = "Bucles",
+          loopsOff = "Ninguno",
+          loopsFew = "Algunos",
+          loopsMany = "Muchos",
+          perPage = "Laberintos por página"
+        ),
         rules = Rules("Cómo jugar", List(
           "Empieza en el ratón 🐭 y encuentra el camino hasta el queso 🧀.",
           "No puedes cruzar las paredes — sigue solo los pasillos abiertos.",
@@ -2859,7 +2897,6 @@ object Strings:
         countLabel = "Cuenta cada dibujo y rodea el número correcto:",
         countSheetName = "Contar",
         form = SeekAndFindForm(
-          preset = "Empezar con",
           task = "Tarea",
           taskFind = "Busca y rodea",
           taskCount = "Cuenta",
@@ -2877,8 +2914,6 @@ object Strings:
           answer = "Respuesta",
           answerCircle = "Rodea un número",
           answerWrite = "Escribe el número",
-          pages = "Páginas",
-          custom = "Personalizado",
           countWriteTitle = "Busca y encuentra — cuenta y escribe",
           countWriteLabel = "Cuenta cada dibujo y escribe el número en su casilla:"
         ),
@@ -3469,7 +3504,10 @@ object Strings:
       print = "Imprimer",
       printMaps = "Imprimer les plateaux",
       printRules = "Imprimer les règles",
-      blackAndWhite = "Noir et blanc"
+      blackAndWhite = "Noir et blanc",
+      startFrom = "Partir de",
+      pages = "Pages",
+      custom = "Personnalisé"
     ),
     timer = Timer(
       name = "Minuteur",
@@ -3622,6 +3660,14 @@ object Strings:
       maze = MazeOff(
         printTitle = "Labyrinthes — aide la souris à trouver le fromage",
         sheetHint = "Imprimez la feuille et tracez au crayon un chemin de la souris au fromage. Un seul passage par labyrinthe.",
+        form = MazeForm(
+          size = "Taille",
+          loops = "Boucles",
+          loopsOff = "Aucune",
+          loopsFew = "Quelques-unes",
+          loopsMany = "Beaucoup",
+          perPage = "Labyrinthes par page"
+        ),
         rules = Rules("Comment jouer", List(
           "Pars de la souris 🐭 et trouve le chemin jusqu'au fromage 🧀.",
           "On ne traverse pas les murs — suis seulement les couloirs ouverts.",
@@ -3667,7 +3713,6 @@ object Strings:
         countLabel = "Compte chaque image et entoure le bon nombre :",
         countSheetName = "Comptage",
         form = SeekAndFindForm(
-          preset = "Partir de",
           task = "Tâche",
           taskFind = "Cherche et entoure",
           taskCount = "Compte",
@@ -3685,8 +3730,6 @@ object Strings:
           answer = "Réponse",
           answerCircle = "Entoure un nombre",
           answerWrite = "Écris le nombre",
-          pages = "Pages",
-          custom = "Personnalisé",
           countWriteTitle = "Cherche et trouve — compte et écris",
           countWriteLabel = "Compte chaque image et écris le nombre dans sa case :"
         ),
@@ -4277,7 +4320,10 @@ object Strings:
       print = "Drucken",
       printMaps = "Felder drucken",
       printRules = "Regeln drucken",
-      blackAndWhite = "Schwarz-weiß"
+      blackAndWhite = "Schwarz-weiß",
+      startFrom = "Vorlage",
+      pages = "Seiten",
+      custom = "Eigene"
     ),
     timer = Timer(
       name = "Stoppuhr",
@@ -4430,6 +4476,14 @@ object Strings:
       maze = MazeOff(
         printTitle = "Labyrinthe — hilf der Maus zum Käse",
         sheetHint = "Druckt das Blatt aus und malt mit einem Stift einen Weg von der Maus zum Käse. Durch jedes Labyrinth führt ein Weg.",
+        form = MazeForm(
+          size = "Größe",
+          loops = "Schleifen",
+          loopsOff = "Keine",
+          loopsFew = "Einige",
+          loopsMany = "Viele",
+          perPage = "Labyrinthe pro Seite"
+        ),
         rules = Rules("So wird gespielt", List(
           "Starte bei der Maus 🐭 und finde den Weg zum Käse 🧀.",
           "Wände kann man nicht überqueren — folge nur den offenen Gängen.",
@@ -4475,7 +4529,6 @@ object Strings:
         countLabel = "Zähle jedes Bild und kreise die richtige Zahl ein:",
         countSheetName = "Zählen",
         form = SeekAndFindForm(
-          preset = "Vorlage",
           task = "Aufgabe",
           taskFind = "Finden und einkreisen",
           taskCount = "Zählen",
@@ -4493,8 +4546,6 @@ object Strings:
           answer = "Antwort",
           answerCircle = "Zahl einkreisen",
           answerWrite = "Zahl schreiben",
-          pages = "Seiten",
-          custom = "Eigene",
           countWriteTitle = "Wimmelbild — zähle und schreibe",
           countWriteLabel = "Zähle jedes Bild und schreibe die Zahl in das Kästchen:"
         ),

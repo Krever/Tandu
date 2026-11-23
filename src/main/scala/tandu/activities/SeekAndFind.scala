@@ -4,7 +4,8 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures, RulesCard, SheetBuilder}
+import tandu.ui.SheetBuilder.{clamp, named, MaxPages}
 import tandu.ui.Components.s
 
 import scala.collection.mutable
@@ -233,15 +234,12 @@ object SeekAndFind extends Activity:
     def withTheme(themeId: String): SheetConfig =
       c.copy(themes = normalizeThemes(if c.themes(themeId) then c.themes - themeId else c.themes + themeId))
 
-  /** A named starting point for the builder form. */
-  final case class SheetPreset(presetId: String, name: Strings => String, config: SheetConfig)
-
-  val sheetPresets: List[SheetPreset] = List(
-    SheetPreset("easy", _.seekAndFind.easy,
+  val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
+    SheetBuilder.Preset("easy", _.seekAndFind.easy,
       SheetConfig(Task.Find, Set.empty, kinds = 2, perKindMin = 5, perKindMax = 7, extras = 40, Layout.Tidy, lookAlikes = true, showCounts = true, Answer.Circle)),
-    SheetPreset("medium", _.seekAndFind.medium,
+    SheetBuilder.Preset("medium", _.seekAndFind.medium,
       SheetConfig(Task.Find, Set.empty, kinds = 2, perKindMin = 4, perKindMax = 6, extras = 70, Layout.Mixed, lookAlikes = true, showCounts = true, Answer.Circle)),
-    SheetPreset("hard", _.seekAndFind.hard,
+    SheetBuilder.Preset("hard", _.seekAndFind.hard,
       SheetConfig(Task.Find, Set.empty, kinds = 3, perKindMin = 4, perKindMax = 6, extras = 105, Layout.Wild, lookAlikes = true, showCounts = true, Answer.Circle))
   )
 
@@ -276,12 +274,7 @@ object SeekAndFind extends Activity:
       c.answer.toString.toLowerCase
     ).mkString(".")
 
-  private def clamp(v: Int, lo: Int, hi: Int): Int = math.max(lo, math.min(hi, v))
-
   private val NumRange = "n(\\d+)-(\\d+)".r
-
-  /** The enum case whose lower-case name is `t`. */
-  private def named[E](values: Array[E], t: String): Option[E] = values.find(_.toString.toLowerCase == t)
 
   def decodeConfig(token: String): SheetConfig =
     import SheetConfig.*
@@ -353,17 +346,6 @@ object SeekAndFind extends Activity:
     val rng = new Random(seed)
     val order = themeOrder(c.themeIds, math.max(n, MaxPages), rng)
     order.take(n).map(t => sheetPuzzle(c, rng, t))
-
-  val MaxPages = 10
-
-  /** The page count is a token in the same URL segment as the recipe
-    * (`.p3`), but it is not part of [[SheetConfig]]: a workbook row has its
-    * own page count. */
-  private def encodePages(n: Int): String = if n == 1 then "" else s".p$n"
-
-  private def decodePages(token: String): Int =
-    token.split('.').iterator.filter(_.startsWith("p")).flatMap(_.drop(1).toIntOption).nextOption()
-      .fold(1)(clamp(_, 1, MaxPages))
 
   /** A random theme, not `avoid` (the in-app games). */
   private def pickTheme(rng: Random, avoid: String = ""): Theme =
@@ -680,30 +662,19 @@ object SeekAndFind extends Activity:
     * "Custom" after a change in the form. */
   def tokenSummary(token: String): Strings => String =
     val c = decodeConfig(token)
-    sheetPresets.find(_.config == c).map(_.name)
+    SheetBuilder.presetName(sheetSpec, c)
       .orElse(Option.when(c == countSheetConfig)(_.offline.seekAndFind.countSheetName))
-      .getOrElse(_.offline.seekAndFind.form.custom)
+      .getOrElse(_.printable.custom)
 
   def tokenTitle(token: String): Strings => String = sheetTitle(decodeConfig(token))
 
   /** All `n` pages of a workbook row: the same generator as the print page,
     * so the themes come in rounds there too. */
   def workbookPages(token: String, n: Int, rng: Random): Seq[HtmlElement] =
-    val c = decodeConfig(token)
-    sheetPuzzles(c, n, rng.nextLong()).map(sheetBody(c, _))
+    SheetBuilder.workbookPages(sheetSpec, token, n, rng)
 
-  /** The workbook row editor: presets, the form and a live preview of one
-    * page. `token` is a two-way view of the row's settings, so a change
-    * from outside (a book preset) shows in the form at once. */
-  def settingsEditor(token: Var[String]): HtmlElement =
-    val config = token.zoomLazy(decodeConfig)((_, c) => encodeConfig(c))
-    val seed = Var(Random.nextLong())
-    val sheet = config.signal.distinct.combineWith(seed.signal).map((c, sd) => page(c, sheetPuzzles(c, 1, sd).head))
-    div(
-      cls := "snf-builder snf-builder--embedded",
-      previewBox(sheet, div(cls := "row snf-builder__actions", newSceneButton(seed))),
-      div(cls := "stack snf-builder__form", presetPills(config), sheetForm(config))
-    )
+  /** The workbook row editor (see [[SheetBuilder.embedded]]). */
+  def settingsEditor(token: Var[String]): HtmlElement = SheetBuilder.embedded(sheetSpec, token)
 
   /** The sheet title that agrees with the recipe. */
   def sheetTitle(c: SheetConfig): Strings => String = (c.task, c.answer) match
@@ -715,161 +686,48 @@ object SeekAndFind extends Activity:
     case Task.Find  => seekSheet(p, c.showCounts)
     case Task.Count => countSheet(p, c.answer)
 
-  private def page(c: SheetConfig, p: Puzzle): HtmlElement =
-    Printable.render(title = sheetTitle(c), body = sheetBody(c, p))
+  private lazy val sheetSpec: SheetBuilder.Spec[SheetConfig, Puzzle] = SheetBuilder.Spec(
+    testIdPrefix = "snf",
+    presets = sheetPresets,
+    encode = encodeConfig,
+    decode = decodeConfig,
+    title = sheetTitle,
+    pagesOf = sheetPuzzles,
+    body = sheetBody,
+    form = sheetForm,
+    newLabel = _.seekAndFind.newGame
+  )
 
-  /** The scaled-down live page, with action rows under it. */
-  private def previewBox(sheet: Signal[HtmlElement], below: HtmlElement*): HtmlElement =
-    div(
-      cls := "snf-builder__preview stack",
-      div(
-        cls := "snf-preview",
-        dataAttr("testid") := "snf-preview",
-        div(cls := "snf-preview__page", child <-- sheet)
-      ),
-      below
-    )
-
-  private def newSceneButton(seed: Var[Long]): HtmlElement =
-    Components.ghost(s(_.seekAndFind.newGame), seed.set(Random.nextLong()))
-
-  /** The sheet builder: presets, a form to change the recipe, and a live
-    * preview. The preview and the printed page come from the same recipe
-    * and the same seed, so the print is exactly what the preview shows. */
+  /** The sheet builder (see [[SheetBuilder.printPage]]). */
   private def renderOffline(): HtmlElement =
-    // The segment after "print" holds the recipe (see `encodeConfig`).
-    val urlToken = Routing.router.currentPageSignal.now() match
-      case Page.Activity(`id`, "print" :: token :: _) => Some(token)
-      case _ => None
-    val config = Var(urlToken.fold(sheetPresets.head.config)(decodeConfig))
-    val pages = Var(urlToken.fold(1)(decodePages))
-    val seed = Var(Random.nextLong())
-    // The page that the preview shows, 0-based. `setPages` keeps it in range.
-    val shown = Var(0)
-    // The print copies exist only while printing: building every page in
-    // hidden DOM on each change in the form is wasted work.
-    val printing = Var(false)
-    val sheets = config.signal.combineWith(pages.signal, seed.signal).map { (c, n, sd) =>
-      (c, sheetPuzzles(c, n, sd))
-    }
-    def setPages(n: Int): Unit =
-      pages.set(n)
-      shown.update(i => math.min(i, n - 1))
-    def pagerButton(testId: String, label: String, isDisabled: Signal[Boolean], go: Int => Int): HtmlElement =
-      Components.ghost(Val(label), shown.update(go), isDisabled).amend(
-        typ := "button",
-        cls := "snf-pager__btn",
-        dataAttr("testid") := testId
-      )
-
-    div(
-      cls := "stack-lg",
-      // Keep the URL in step with the form, so the page can be bookmarked
-      // or shared. Replace, not push: each tap must not add a history entry.
-      config.signal.combineWith(pages.signal).changes --> { (c, n) =>
-        Routing.replace(Page.Activity(id, List("print", encodeConfig(c) + encodePages(n))))
-      },
-      // Ctrl+P and the browser menu print too, not only the Print button.
-      windowEvents(_.onBeforePrint) --> (_ => printing.set(true)),
-      windowEvents(_.onAfterPrint) --> (_ => printing.set(false)),
-      div(
-        cls := "no-print",
-        RulesCard.render(List(RulesCard.fromRules(_.offline.seekAndFind.rules)))
-      ),
-      div(cls := "no-print", presetPills(config)),
-      div(
-        cls := "snf-builder no-print",
-        previewBox(
-          sheets.combineWith(shown.signal).map((c, ps, i) => page(c, ps(i))),
-          // Flip through the pages; hidden for a single page.
-          div(
-            cls := "row snf-pager",
-            cls("is-hidden") <-- pages.signal.map(_ == 1),
-            pagerButton("snf-page-prev", "‹", shown.signal.map(_ == 0), _ - 1),
-            span(
-              cls := "snf-pager__label",
-              dataAttr("testid") := "snf-page-label",
-              child.text <-- shown.signal.combineWith(pages.signal).map((i, n) => s"${i + 1} / $n")
-            ),
-            pagerButton("snf-page-next", "›", shown.signal.combineWith(pages.signal).map((i, n) => i >= n - 1), _ + 1)
-          ),
-          div(
-            cls := "row snf-builder__actions",
-            span(cls := "snf-form__label", child.text <-- s(_.offline.seekAndFind.form.pages)),
-            Components.stepper(
-              pages.signal,
-              pages.signal.map(_ > 1),
-              pages.signal.map(_ < MaxPages),
-              () => setPages(pages.now() - 1),
-              () => setPages(pages.now() + 1),
-              testId = "snf-pages"
-            )
-          ),
-          Pictures.bwToggle(),
-          div(
-            cls := "row snf-builder__actions",
-            newSceneButton(seed),
-            Components.primary(s(_.printable.print), {
-              // Mounted synchronously, so the pages are there before the
-              // print snapshot; beforeprint does the same for Ctrl+P.
-              printing.set(true)
-              Printable.print()
-            }).amend(dataAttr("testid") := "snf-print")
-          )
-        ),
-        sheetForm(config)
-      ),
-      div(
-        cls := "print-only",
-        children <-- printing.signal.combineWith(sheets).map { (on, c, ps) =>
-          if on then ps.map(p => page(c, p)) else Nil
-        }
-      )
-    )
+    SheetBuilder.printPage(sheetSpec, id, RulesCard.render(List(RulesCard.fromRules(_.offline.seekAndFind.rules))))
 
   // ---------- sheet builder form ----------
-
-  /** The presets row. A preset is active only while the recipe is equal to
-    * it; after a change in the form, no preset is active. */
-  def presetPills(config: Var[SheetConfig]): HtmlElement =
-    div(
-      cls := "snf-presets",
-      span(cls := "snf-form__label", child.text <-- s(_.offline.seekAndFind.form.preset)),
-      pills("snf-preset", config.signal, sheetPresets.map(pr => (pr.config, pr.presetId, s(pr.name))), config.set)
-    )
 
   /** The form. It reads and writes only `config`, so a different host (a
     * workbook row) can supply its own Var. */
   def sheetForm(config: Var[SheetConfig]): HtmlElement =
     import SheetConfig.*
+    import SheetBuilder.{chip, formRow, pills}
     val c = config.signal
     def form(f: Strings.SeekAndFindForm => String): Strings => String = str => f(str.offline.seekAndFind.form)
-    /** A stepper for one field; the limits may depend on other fields. */
     def fieldStepper(testId: String, get: SheetConfig => Int, lo: SheetConfig => Int, hi: SheetConfig => Int, set: (SheetConfig, Int) => SheetConfig): HtmlElement =
-      Components.stepper(
-        c.map(get),
-        c.map(k => get(k) > lo(k)),
-        c.map(k => get(k) < hi(k)),
-        () => config.update(k => set(k, get(k) - 1)),
-        () => config.update(k => set(k, get(k) + 1)),
-        testId
-      )
+      SheetBuilder.fieldStepper(config, testId, get, lo, hi, set)
     def flag(testId: String, label: Strings => String, get: SheetConfig => Boolean, flip: SheetConfig => SheetConfig): HtmlElement =
-      formRow(label, Components.switch(c.map(get), s(label), () => config.update(flip), testId))
+      SheetBuilder.flag(config, testId, label, get, flip)
     // While the slider is dragged, only its number follows; the recipe
     // changes on release. Each recipe change regenerates the preview and
     // writes the URL or the workbook, which is too much per input event.
     val dragging = Var(Option.empty[Int])
 
-    div(
-      cls := "snf-form",
+    SheetBuilder.form(
       formRow(form(_.task), pills("snf-task", c.map(_.task), List(
         (Task.Find, "find", s(form(_.taskFind))),
         (Task.Count, "count", s(form(_.taskCount)))
       ), t => config.update(_.copy(task = t)))),
       // Multi-select: pages go through the selected themes (see themeOrder).
       formRow(form(_.theme), div(
-        cls := "snf-chips",
+        cls := "sb-chips",
         chip("snf-theme-all", c.map(_.themes.isEmpty), s(form(_.themeAll)),
           () => config.update(_.copy(themes = Set.empty))),
         themes.map { t =>
@@ -879,13 +737,13 @@ object SeekAndFind extends Activity:
       )),
       formRow(form(_.kinds), fieldStepper("snf-kinds", _.kinds, _ => 1, _ => MaxKinds, (k, v) => k.copy(kinds = v))),
       formRow(form(_.perKind), div(
-        cls := "row snf-form__range",
+        cls := "row sb-form__range",
         fieldStepper("snf-per-min", _.perKindMin, _ => 1, _.perKindMax, (k, v) => k.copy(perKindMin = v)),
         span("–"),
         fieldStepper("snf-per-max", _.perKindMax, _.perKindMin, _ => MaxPerKind, (k, v) => k.copy(perKindMax = v))
       )),
       formRow(form(_.extras), div(
-        cls := "row snf-form__range",
+        cls := "row sb-form__range",
         input(
           typ := "range",
           dataAttr("testid") := "snf-extras",
@@ -899,7 +757,7 @@ object SeekAndFind extends Activity:
             config.update(_.copy(extras = v.toIntOption.getOrElse(0)))
           }
         ),
-        span(cls := "snf-form__value", child.text <-- c.combineWith(dragging.signal).map((k, d) => d.getOrElse(k.extras).toString))
+        span(cls := "sb-form__value", child.text <-- c.combineWith(dragging.signal).map((k, d) => d.getOrElse(k.extras).toString))
       )),
       formRow(form(_.layout), pills("snf-layout", c.map(_.layout), List(
         (Layout.Tidy, "tidy", s(form(_.tidy))),
@@ -917,44 +775,6 @@ object SeekAndFind extends Activity:
             (Answer.Write, "write", s(form(_.answerWrite)))
           ), a => config.update(_.copy(answer = a))))
       }
-    )
-
-  private def formRow(label: Strings => String, control: HtmlElement): HtmlElement =
-    div(
-      cls := "snf-form__row",
-      span(cls := "snf-form__label", child.text <-- s(label)),
-      control
-    )
-
-  private def pills[A](
-      testId: String,
-      current: Signal[A],
-      options: List[(A, String, Signal[String])],
-      pick: A => Unit
-  ): HtmlElement =
-    div(
-      cls := "pill-toggle",
-      options.map { (value, key, label) =>
-        button(
-          typ := "button",
-          cls := "pill-btn",
-          dataAttr("testid") := s"$testId-$key",
-          cls("is-active") <-- current.map(_ == value),
-          child.text <-- label,
-          onClick --> (_ => pick(value))
-        )
-      }
-    )
-
-  private def chip(testId: String, on: Signal[Boolean], label: Signal[String], tap: () => Unit): HtmlElement =
-    button(
-      typ := "button",
-      cls := "snf-chip-btn",
-      dataAttr("testid") := testId,
-      cls("is-active") <-- on,
-      aria.pressed <-- on.map(_.toString),
-      child.text <-- label,
-      onClick --> (_ => tap())
     )
 
   // ---------- sheet bodies ----------

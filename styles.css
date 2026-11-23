@@ -2266,22 +2266,22 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .maze-instruction { margin: 0 auto; max-width: 34ch; }
 .maze-controls { margin-top: var(--space-2); }
 
-.maze-print-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
+/* Maze print sheet. The board size in mm is set inline from the recipe
+   (see Maze.sheetBody); the grid only places the boards in their slots. */
 .maze-print-sheet {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 6mm;
-  justify-content: center;
+  justify-items: center;
   align-content: start;
 }
-.maze-print-sheet--single { grid-template-columns: 1fr; }
-.maze-print-board { display: flex; align-items: center; justify-content: center; }
+.maze-print-sheet--pp4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.maze-print-board { display: flex; align-items: center; justify-content: center; max-width: 100%; }
 .maze-print-svg { width: 100%; height: auto; overflow: visible; }
-.maze-print-board--easy   { width: 88mm;  height: 88mm;  }
-.maze-print-board--medium { width: 92mm;  height: 92mm;  }
-.maze-print-board--hard   { width: 180mm; height: 180mm; }
+/* The walls have the same width on paper at every maze size: the width is
+   in mm and does not scale with the viewBox. */
 .maze-print-svg .maze-border,
-.maze-print-svg .maze-wall { stroke: black; stroke-width: 0.6; }
+.maze-print-svg .maze-wall { stroke: black; stroke-width: 0.5mm; vector-effect: non-scaling-stroke; }
 
 /* Dot to Dot — tap numbered dots in order; the picture is the reward.
    Geometry lives in a 100-unit viewBox (see DotToDot.scala) so the same
@@ -3733,21 +3733,21 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 /* Sheet builder (print mode): presets, form and a live preview. On narrow
    screens the preview is above the form; on wide screens it is at the
    right and stays in view while the form scrolls. */
-.snf-presets { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
-.snf-builder {
+.sb-presets { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+.sb-builder {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
   align-items: flex-start;
   justify-content: center;
 }
-.snf-builder__preview { flex: 0 0 auto; align-items: center; }
-.snf-builder__actions { justify-content: center; }
-.snf-pager { justify-content: center; gap: var(--space-2); }
-.snf-pager.is-hidden { display: none; }
-.snf-pager__btn { min-width: 40px; min-height: 36px; padding: 0 var(--space-2); font-size: 20px; line-height: 1; }
-.snf-pager__label { min-width: 5ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
-.snf-preview {
+.sb-builder__preview { flex: 0 0 auto; align-items: center; }
+.sb-builder__actions { justify-content: center; }
+.sb-pager { justify-content: center; gap: var(--space-2); }
+.sb-pager.is-hidden { display: none; }
+.sb-pager__btn { min-width: 40px; min-height: 36px; padding: 0 var(--space-2); font-size: 20px; line-height: 1; }
+.sb-pager__label { min-width: 5ch; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sb-preview {
   width: 240px;
   border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
@@ -3755,32 +3755,32 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   overflow: hidden;
 }
 /* The page renders at the A4 body width and is zoomed down. */
-.snf-preview__page { width: 190mm; zoom: 0.33; }
-.snf-preview .printable { border: none; margin: 0; }
-.snf-form { flex: 1 1 300px; display: flex; flex-direction: column; gap: var(--space-3); }
-.snf-form__row {
+.sb-preview__page { width: 190mm; zoom: 0.33; }
+.sb-preview .printable { border: none; margin: 0; }
+.sb-form { flex: 1 1 300px; display: flex; flex-direction: column; gap: var(--space-3); }
+.sb-form__row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
 }
-.snf-form__label { font-size: 14px; font-weight: 600; color: var(--color-muted); }
-.snf-form__range { gap: var(--space-2); }
-.snf-form__range input[type="range"] { width: 140px; }
-.snf-form__value { min-width: 3ch; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-.snf-form .pill-btn { padding: var(--space-1) var(--space-2); min-height: 36px; }
+.sb-form__label { font-size: 14px; font-weight: 600; color: var(--color-muted); }
+.sb-form__range { gap: var(--space-2); }
+.sb-form__range input[type="range"] { width: 140px; }
+.sb-form__value { min-width: 3ch; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sb-form .pill-btn { padding: var(--space-1) var(--space-2); min-height: 36px; }
 /* Multi-select chips (base look shared with .wbk-preset-chip): separate
    buttons, so several can be on at once. */
-.snf-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
-.snf-chip-btn { min-height: 36px; min-width: 40px; padding: 0 var(--space-2); color: var(--color-text); font-weight: 600; }
+.sb-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+.sb-chip-btn { min-height: 36px; min-width: 40px; padding: 0 var(--space-2); color: var(--color-text); font-weight: 600; }
 @media (min-width: 620px) {
-  .snf-builder__preview { order: 2; position: sticky; top: var(--space-3); }
+  .sb-builder__preview { order: 2; position: sticky; top: var(--space-3); }
 }
 /* The builder inside a workbook row: no sticky preview (the row is short). */
-.snf-builder--embedded .snf-builder__preview { position: static; }
-.snf-builder__form { flex: 1 1 300px; }
-.snf-builder__form .snf-form { flex: none; }
+.sb-builder--embedded .sb-builder__preview { position: static; }
+.sb-builder__form { flex: 1 1 300px; }
+.sb-builder__form .sb-form { flex: none; }
 .wbk-settings { margin-top: var(--space-2); }
 /* Settings summary on a workbook row (tapping it unfolds the form). It
    shares the variant select's pill look, without the chevron. */
@@ -3845,8 +3845,8 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 /* Builder: the preset panel, folded behind an explicit start/replace toggle. */
 .wbk-presets-toggle { color: var(--color-muted); }
 .wbk-presets__row { flex-wrap: wrap; gap: var(--space-2); }
-/* .snf-chip-btn (Seek & Find theme chips) shares this look. */
-.wbk-preset-chip, .snf-chip-btn {
+/* .sb-chip-btn (sheet builder multi-select chips) shares this look. */
+.wbk-preset-chip, .sb-chip-btn {
   border: 1.5px solid var(--color-border-strong);
   border-radius: 999px;
   padding: var(--space-2) var(--space-3);
@@ -3854,7 +3854,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   cursor: pointer;
   font-size: 14px;
 }
-.wbk-preset-chip.is-active, .snf-chip-btn.is-active {
+.wbk-preset-chip.is-active, .sb-chip-btn.is-active {
   background: var(--color-border-strong);
   color: var(--color-surface);
 }

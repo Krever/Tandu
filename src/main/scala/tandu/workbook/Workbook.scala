@@ -130,11 +130,19 @@ object Workbook:
         Source(s"sudoku-${v.id}", v.nameKey, _.offline.sudoku.printTitle,
           _ => Sudoku.printSheetBody(v))
       }),
-    Group("maze", "🐭", "peach", _.maze.name,
-      Maze.variants.map { v =>
-        Source(s"maze-${v.id}", v.nameKey, _.offline.maze.printTitle,
-          ctx => Maze.printSheetBody(v, ctx.rng))
-      }),
+    // One source with its own form (the print page's form): size, loops,
+    // mazes per page. Rows keep their settings in `params`.
+    Group("maze", "🐭", "peach", _.maze.name, List(
+      Source("maze", _.maze.name, _.offline.maze.printTitle,
+        ctx => Maze.workbookPages(Maze.presetToken("easy"), 1, ctx.rng).head,
+        settings = Some(Settings(
+          default = Maze.presetToken("easy"),
+          summary = Maze.tokenSummary,
+          title = _ => _.offline.maze.printTitle,
+          pages = Maze.workbookPages,
+          editor = Maze.settingsEditor
+        )))
+    )),
     // The doc's "occasional variety page" — write-the-program robot sheets.
     Group("guide-robot", "🤖", "olive", _.guideRobot.name,
       GuideRobot.variants.map { v =>
@@ -244,6 +252,9 @@ object Workbook:
   /** A one-page Seek & Find row with the given settings token. */
   private def seekRow(token: String): Row = Row("seek-and-find", 1, Some(token))
 
+  /** A one-page Maze row with the settings of a preset. */
+  private def mazeRow(presetId: String): Row = Row("maze", 1, Some(Maze.presetToken(presetId)))
+
   val presets: List[Preset] = List(
     // Pre-readers: pictures, pens and counting; no word puzzles yet.
     Preset("age-4-5", _.workbook.age45, Vector(
@@ -253,7 +264,7 @@ object Workbook:
       seekRow(SeekAndFind.countSheetToken),
       Row("sudoku-emoji4", 1),
       Row("math-easy", 1),
-      Row("maze-easy", 1)
+      mazeRow("easy")
     )),
     // Early readers: word builder and word search join in.
     Preset("age-6-7", _.workbook.age67, Vector(
@@ -264,14 +275,14 @@ object Workbook:
       Row("word-builder-easy", 1),
       Row("word-search-easy", 1),
       Row("math-medium", 1),
-      Row("maze-medium", 1),
+      mazeRow("medium"),
       Row("guide-robot-easy", 1)
     )),
     // Confident readers: mid/hard everything.
     Preset("age-8", _.workbook.age8plus, Vector(
       Row("sudoku-medium", 1),
       Row("sudoku-hard", 1),
-      Row("maze-hard", 1),
+      mazeRow("hard"),
       Row("word-search-medium", 1),
       Row("word-search-hard", 1),
       Row("math-hard", 1),
@@ -282,7 +293,7 @@ object Workbook:
     // The whole book is understood as shared — game grids belong here.
     Preset("travel", _.workbook.travel, Vector(
       Row("tic-tac-toe-grids", 1),
-      Row("maze-easy", 1),
+      mazeRow("easy"),
       Row("sudoku-emoji6", 1),
       Row("dot-to-dot", 1),
       seekRow(SeekAndFind.presetToken("medium")),
@@ -314,14 +325,17 @@ object Workbook:
         d
       }*)
 
-    /** Old Seek & Find source ids, mapped to the settings token of the same
-      * sheet. Books saved before Seek & Find got its form keep their pages. */
-    private val legacySeekRows: Map[String, String] =
-      List("easy", "medium", "hard").map(p => s"seek-and-find-$p" -> SeekAndFind.presetToken(p)).toMap +
-        ("seek-and-find-count" -> SeekAndFind.countSheetToken)
+    /** Old source ids of Seek & Find and Maze, mapped to (new source id,
+      * settings token of the same sheet). Books saved before these kinds got
+      * their forms keep their pages. */
+    private val legacyRows: Map[String, (String, String)] =
+      val levels = List("easy", "medium", "hard")
+      levels.map(p => s"seek-and-find-$p" -> ("seek-and-find", SeekAndFind.presetToken(p))).toMap +
+        ("seek-and-find-count" -> ("seek-and-find", SeekAndFind.countSheetToken)) ++
+        levels.map(p => s"maze-$p" -> ("maze", Maze.presetToken(p)))
 
     private def migrate(row: Row): Row =
-      legacySeekRows.get(row.sourceId).fold(row)(token => row.copy(sourceId = "seek-and-find", params = Some(token)))
+      legacyRows.get(row.sourceId).fold(row)((id, token) => row.copy(sourceId = id, params = Some(token)))
 
     private def recipeToJs(r: Recipe): js.Dynamic =
       js.Dynamic.literal(id = r.id, cover = r.cover, name = r.name, emoji = r.coverEmoji, rows = rowsToJs(r.rows))

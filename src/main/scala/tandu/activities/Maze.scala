@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, RulesCard, SheetBuilder}
 import tandu.ui.Components.s
 import tandu.ui.DomExt.*
 
@@ -169,21 +169,93 @@ object Maze extends Activity:
 
   // ---------- variants ----------
 
+  /** The in-app levels. The printable sheets have their own recipe: see
+    * [[SheetConfig]]. */
   final case class Variant(
       id: String,
       rows: Int,
       cols: Int,
       braid: Double,
-      perPage: Int,
       nameKey: Strings => String,
       descKey: Strings => String
   )
 
   val variants: List[Variant] = List(
-    Variant("easy",   10, 10, 0.30, 4, _.maze.easy.name,   _.maze.easy.description),
-    Variant("medium", 16, 16, 0.0,  4, _.maze.medium.name, _.maze.medium.description),
-    Variant("hard",   24, 24, 0.0,  1, _.maze.hard.name,   _.maze.hard.description)
+    Variant("easy",   10, 10, 0.30, _.maze.easy.name,   _.maze.easy.description),
+    Variant("medium", 16, 16, 0.0,  _.maze.medium.name, _.maze.medium.description),
+    Variant("hard",   24, 24, 0.0,  _.maze.hard.name,   _.maze.hard.description)
   )
+
+  // ---------- printable sheet recipe ----------
+
+  /** How many dead ends of the maze are opened into loops (see `generate`).
+    * Loops give more than one way through, which is easier. */
+  enum Loops(val braid: Double):
+    case Off  extends Loops(0.0)
+    case Few  extends Loops(0.3)
+    case Many extends Loops(0.6)
+
+  /** How many mazes are on one page, and the space that each maze gets.
+    *   - `maxSize`: the largest size for this layout. Larger mazes would
+    *     have cells too small to draw a line through (less than 5.5 mm).
+    *   - `slotMm`: (width, height) of the space for one maze, in mm. The
+    *     A4 body is approximately 190 × 255 mm. The slots use only 230 mm
+    *     of the height, so that the sheet also fits on US Letter paper
+    *     (body approximately 190 × 243 mm). 2 per page are one above the
+    *     other; 4 per page are a 2 × 2 grid; the gap is 6 mm. */
+  enum PerPage(val n: Int, val maxSize: Int, val slotMm: (Double, Double)):
+    case One  extends PerPage(1, 30, (190.0, 230.0))
+    case Two  extends PerPage(2, 20, (190.0, 112.0))
+    case Four extends PerPage(4, 16, (92.0, 112.0))
+
+  /** The full recipe of one printable sheet. The builder form edits this
+    * value and nothing else.
+    *   - `size`: cells on the short side of each maze, from
+    *     [[SheetConfig.MinSize]] to `perPage.maxSize`. */
+  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage)
+
+  object SheetConfig:
+    val MinSize = 5
+
+  extension (c: SheetConfig)
+    /** (rows, cols). The short side has `size` cells. The long side follows
+      * the shape of the slot, so the maze fills its space on the page. */
+    def dims: (Int, Int) =
+      val (w, h) = c.perPage.slotMm
+      if w <= h then ((c.size * h / w).toInt, c.size)
+      else (c.size, (c.size * w / h).toInt)
+
+  val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
+    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(10, Loops.Few, PerPage.Four)),
+    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(16, Loops.Off, PerPage.Four)),
+    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One))
+  )
+
+  /** The settings token of a preset, for workbook rows. */
+  def presetToken(presetId: String): String =
+    encodeConfig(sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config)
+
+  /** The recipe as one URL path segment, for example `s10.few.pp4`. */
+  def encodeConfig(c: SheetConfig): String =
+    s"s${c.size}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}"
+
+  private val SizeToken = "s(\\d+)".r
+  private val PerPageToken = "pp(\\d+)".r
+
+  /** The recipe from a URL path segment. The order of tokens does not
+    * matter. A missing or bad token keeps the value of the first preset,
+    * and the size is clamped to the limits of the layout. Therefore an edited
+    * or old link always gives a valid recipe. */
+  def decodeConfig(token: String): SheetConfig =
+    val raw = token.split('.').foldLeft(sheetPresets.head.config) { (c, t) =>
+      SheetBuilder.named(Loops.values, t).map(v => c.copy(loops = v)).getOrElse(t match
+        // toIntOption: a digit run too long for an Int must not throw.
+        case SizeToken(n)    => n.toIntOption.fold(c)(v => c.copy(size = v))
+        case PerPageToken(n) => PerPage.values.find(p => n.toIntOption.contains(p.n)).fold(c)(v => c.copy(perPage = v))
+        case _               => c
+      )
+    }
+    raw.copy(size = SheetBuilder.clamp(raw.size, SheetConfig.MinSize, raw.perPage.maxSize))
 
   // ---------- UI ----------
 
@@ -206,7 +278,9 @@ object Maze extends Activity:
   // Easy is the implicit default when the URL has no variant segment after the
   // in-app mode — a friendly first board.
   private val DefaultVariant = variants(0)
-  private val variantSignal: Signal[Variant] =
+  // Lazy: the router needs the browser window, and the unit tests load this
+  // object without one.
+  private lazy val variantSignal: Signal[Variant] =
     Routing.router.currentPageSignal.map {
       case Page.Activity(`id`, _ :: vId :: _) =>
         variants.find(_.id == vId).getOrElse(DefaultVariant)
@@ -394,59 +468,83 @@ object Maze extends Activity:
 
   // ---------- print ----------
 
-  /** One printed page's worth of mazes (the variant's usual per-page batch),
-    * as a bare body for composed documents like workbooks. */
-  def printSheetBody(v: Variant, rng: Random = new Random()): HtmlElement =
+  /** `n` pages of `perPage` mazes each. One generator makes them in page
+    * order, so page k does not change when pages are added after it. */
+  def sheetGrids(c: SheetConfig, n: Int, seed: Long): Vector[Vector[Grid]] =
+    val rng = new Random(seed)
+    val (rows, cols) = c.dims
+    Vector.fill(n)(Vector.fill(c.perPage.n)(generate(rows, cols, c.loops.braid, rng)))
+
+  /** One printed page of mazes, without the printable frame. Each maze gets
+    * the largest square cells that fit in its slot. */
+  def sheetBody(c: SheetConfig, grids: Vector[Grid]): HtmlElement =
+    val (slotW, slotH) = c.perPage.slotMm
     div(
-      cls := "maze-print-sheet",
-      cls("maze-print-sheet--single") := v.perPage == 1,
-      List.fill(v.perPage)(printableMaze(v, generate(v.rows, v.cols, v.braid, rng)))
+      cls := s"maze-print-sheet maze-print-sheet--pp${c.perPage.n}",
+      grids.map { g =>
+        val cell = math.min(slotW / g.cols, slotH / g.rows)
+        printableMaze(g, g.cols * cell)
+      }
     )
 
+  // ---------- workbook ----------
+
+  /** All `n` pages of a workbook row, from the same generator as the print
+    * page. */
+  def workbookPages(token: String, n: Int, rng: Random): Seq[HtmlElement] =
+    SheetBuilder.workbookPages(sheetSpec, token, n, rng)
+
+  /** The workbook row editor (see [[SheetBuilder.embedded]]). */
+  def settingsEditor(token: Var[String]): HtmlElement = SheetBuilder.embedded(sheetSpec, token)
+
+  /** The row label: the preset name, or "Custom". */
+  def tokenSummary(token: String): Strings => String = SheetBuilder.summary(sheetSpec, token)
+
+  private lazy val sheetSpec: SheetBuilder.Spec[SheetConfig, Vector[Grid]] = SheetBuilder.Spec(
+    testIdPrefix = "maze",
+    presets = sheetPresets,
+    encode = encodeConfig,
+    decode = decodeConfig,
+    title = _ => _.offline.maze.printTitle,
+    pagesOf = sheetGrids,
+    body = sheetBody,
+    form = sheetForm,
+    newLabel = _.maze.newGame
+  )
+
+  /** The sheet builder (see [[SheetBuilder.printPage]]). */
   private def renderOffline(): HtmlElement =
-    // Each printed batch is a single variant, so the sheet's column count and
-    // tile size key off that variant alone.
-    val mazes: Var[List[(Variant, Grid)]] = Var(Nil)
+    SheetBuilder.printPage(sheetSpec, id, RulesCard.render(List(RulesCard.fromRules(_.offline.maze.rules))))
 
-    def printBatch(v: Variant): Unit =
-      mazes.set(List.fill(v.perPage)(v -> generate(v.rows, v.cols, v.braid)))
-      val _ = js.timers.setTimeout(50)(Printable.print())
-
-    div(
-      cls := "stack-lg",
-      div(
-        cls := "no-print",
-        RulesCard.render(List(RulesCard.fromRules(_.offline.maze.rules)))
-      ),
-      Pictures.bwToggle(),
-      div(
-        cls := "no-print stack-lg maze-print-actions",
-        variants.map { v =>
-          button(
-            cls := "btn btn--lg btn--block",
-            child.text <-- AppState.strings.map(str => s"${str.printable.print} — ${v.nameKey(str)}"),
-            onClick --> (_ => printBatch(v))
-          )
-        }
-      ),
-      div(
-        cls := "print-only",
-        Printable.render(
-          title = _.offline.maze.printTitle,
-          body = div(
-            cls := "maze-print-sheet",
-            // One big maze per page (hard) drops to a single column; the rest
-            // tile two-up. Column layout stays in CSS, not inline styles.
-            cls("maze-print-sheet--single") <-- mazes.signal.map(_.headOption.exists(_._1.perPage == 1)),
-            children <-- mazes.signal.map(_.map((v, g) => printableMaze(v, g)))
-          )
-        )
-      )
+  /** The form. It reads and writes only `config`, so a different host (a
+    * workbook row) can supply its own Var. */
+  def sheetForm(config: Var[SheetConfig]): HtmlElement =
+    import SheetConfig.*
+    import SheetBuilder.{formRow, pills}
+    val c = config.signal
+    def form(f: Strings.MazeForm => String): Strings => String = str => f(str.offline.maze.form)
+    SheetBuilder.form(
+      // First, because it sets the max size: a smaller slot has a smaller
+      // max size, and a change clamps the size.
+      formRow(form(_.perPage), pills("maze-per-page", c.map(_.perPage),
+        PerPage.values.toList.map(p => (p, p.n.toString, Val(p.n.toString))),
+        p => config.update(k => k.copy(perPage = p, size = math.min(k.size, p.maxSize))))),
+      formRow(form(_.size), SheetBuilder.fieldStepper(config, "maze-size", _.size, _ => MinSize, _.perPage.maxSize,
+        (k, v) => k.copy(size = v))),
+      formRow(form(_.loops), pills("maze-loops", c.map(_.loops), List(
+        (Loops.Off, "off", s(form(_.loopsOff))),
+        (Loops.Few, "few", s(form(_.loopsFew))),
+        (Loops.Many, "many", s(form(_.loopsMany)))
+      ), l => config.update(_.copy(loops = l))))
     )
 
-  private def printableMaze(v: Variant, g: Grid): HtmlElement =
+  /** The board is `widthMm` wide on paper. The CSS lets it become
+    * narrower when its column is narrower (the preview page on the screen
+    * has padding); the height follows from the aspect ratio. */
+  private def printableMaze(g: Grid, widthMm: Double): HtmlElement =
     div(
-      cls := s"maze-print-board maze-print-board--${v.id}",
+      cls := "maze-print-board",
+      styleAttr := f"width: $widthMm%.1fmm; aspect-ratio: ${g.cols} / ${g.rows};",
       svg.svg(
         svg.cls := "maze-print-svg",
         svg.viewBox := s"0 0 ${g.cols * CELL} ${g.rows * CELL}",

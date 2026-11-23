@@ -3,7 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable, RulesCard}
 import tandu.ui.Components.s
 
 import scala.scalajs.js
@@ -100,6 +100,7 @@ object Memory extends Activity:
         cls := "no-print",
         RulesCard.render(List(RulesCard.fromRules(_.offline.memory.rules)))
       ),
+      Pictures.bwToggle(),
       Printable.printButton(),
       div(cls := "print-only", printableSheet())
     )

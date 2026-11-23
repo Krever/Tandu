@@ -3,7 +3,7 @@ package tandu.pages
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing, Storage}
-import tandu.ui.{Components, Printable}
+import tandu.ui.{Components, Pictures, Printable}
 import tandu.ui.DomExt.*
 import tandu.ui.Components.s
 import tandu.workbook.Workbook
@@ -368,8 +368,7 @@ object WorkbookPage:
               // Same grace as PrintSlot, a touch longer for the bigger DOM: let
               // Laminar commit the pages before the print dialog snapshots them.
               val _ = js.timers.setTimeout(150) {
-                Printable.print()
-                preparing.set(false)
+                Printable.print(() => preparing.set(false))
               }
             }
 
@@ -957,6 +956,7 @@ object WorkbookPage:
   private def printDock(recipe: Var[Recipe], preparing: Signal[Boolean], onPrint: () => Unit): HtmlElement =
     div(
       cls := "wbk-print-dock",
+      Pictures.bwToggle(),
       button(
         cls := "btn btn--hero btn--block wbk-print-btn",
         cls("is-preparing") <-- preparing,

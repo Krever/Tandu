@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable, RulesCard}
 import tandu.ui.Components.s
 import tandu.ui.DomExt.*
 
@@ -555,6 +555,7 @@ object GuideRobot extends Activity:
         cls := "no-print",
         RulesCard.render(List(RulesCard.fromRules(_.offline.guideRobot.rules)))
       ),
+      Pictures.bwToggle(),
       div(
         cls := "no-print stack-lg robot-print-actions",
         variants.map { v =>

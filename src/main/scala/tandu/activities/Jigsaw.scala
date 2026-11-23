@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures}
 import tandu.ui.Components.s
 import tandu.ui.DomExt.*
 
@@ -200,20 +200,16 @@ object Jigsaw extends Activity:
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, Board, Board)
 
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
     val gridN = 4
     val cell = Board / gridN
     for gr <- 0 until gridN; gc <- 0 until gridN do
       val e = theme.emojis(rng.nextInt(theme.emojis.size))
       val size = cell * (0.5 + rng.nextDouble() * 0.35)
-      ctx.font = s"${size.toInt}px sans-serif"
       val jx = gc * cell + cell * 0.5 + (rng.nextDouble() - 0.5) * cell * 0.4
       val jy = gr * cell + cell * 0.5 + (rng.nextDouble() - 0.5) * cell * 0.4
-      ctx.fillText(e, jx, jy)
+      Pictures.draw(ctx, e, size.toInt, jx, jy)
 
-    ctx.font = s"${(Board * 0.32).toInt}px sans-serif"
-    ctx.fillText(theme.emojis(rng.nextInt(theme.emojis.size)), Board * 0.5, Board * 0.5)
+    Pictures.draw(ctx, theme.emojis(rng.nextInt(theme.emojis.size)), (Board * 0.32).toInt, Board * 0.5, Board * 0.5)
 
     canvas.toDataURL("image/png")
 
@@ -250,7 +246,10 @@ object Jigsaw extends Activity:
 
   // ---------- UI ----------
 
-  def render(): HtmlElement =
+  // The picture is drawn on a canvas, thus wait for the picture font.
+  def render(): HtmlElement = Pictures.whenDrawable(renderReady())
+
+  private def renderReady(): HtmlElement =
     // A single in-app mode (ModeChooser collapses it to the body) — matching the
     // other interactive activities, leaving room to add a print/rules mode later.
     ModeChooser.render(id, List(

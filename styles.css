@@ -1,3 +1,41 @@
+/* The picture fonts. `scripts/picture-fonts.mjs` builds them from the Noto
+   emoji fonts, cut down to the emoji that the app uses.
+   `tech(color-COLRv1)` makes a browser that cannot draw this colour format
+   ignore the font. That browser then shows the emoji of the device. Without
+   the guard, it would show empty glyphs. */
+@font-face {
+  font-family: "Tandu Pictures";
+  src: url("./fonts/pictures-color.woff2") format("woff2") tech(color-COLRv1);
+  font-display: swap;
+}
+@font-face {
+  font-family: "Tandu Pictures Mono";
+  src: url("./fonts/pictures-mono.woff2") format("woff2");
+  font-display: swap;
+}
+
+/* Black-and-white print (`Pictures.printBw` sets the class on the root).
+   A sheet that is shown on the screen, such as a workbook preview, uses the
+   mono pictures too, so the preview agrees with the printout. The print
+   rules below change the font for all other printed content. */
+:root.print-bw :is(.printable, .wbk-preview) { --font-pictures: var(--font-pictures-mono); }
+
+/* The content pictures of the activities. Add a class to this list when an
+   activity shows a picture as text (also on SVG <text>). Emoji that
+   are only decoration in the UI (tile icons, button labels) are not in the
+   list; they use the emoji font of the device. */
+.wb-picture, .wb-pic-choice, .wb-print-emoji, .wb-print-pic,
+.mem-card, .mem-print-card,
+.mp-group, .mp-choice-pic, .mp-print-group,
+.snf-emoji, .snf-chip__emoji,
+.sudoku-board--4, .sudoku-board--6, .sudoku-pad--emoji,
+.maze-marker,
+.robot-cell,
+.clock-daypart__emoji,
+.wbk-cover__emoji, .wbk-book-card__emoji, .wbk-emoji-current, .wbk-emoji-btn {
+  font-family: var(--font-pictures);
+}
+
 :root {
   --color-bg: #f4ead8;
   --color-bg-2: #ece0c5;
@@ -30,6 +68,10 @@
 
   --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
   --font-stack: "Outfit Variable", "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Pictures (emoji) come from our own vector font. The font has emoji glyphs
+     only, thus letters and digits in the same element use the text fonts. */
+  --font-pictures: "Tandu Pictures", var(--font-stack);
+  --font-pictures-mono: "Tandu Pictures Mono", var(--font-stack);
 
   --shadow-sm: 0 1px 2px rgba(26, 20, 16, 0.06);
   --shadow-md: 0 6px 18px rgba(26, 20, 16, 0.10);
@@ -366,6 +408,15 @@ select { font-family: inherit; font-size: inherit; }
 @media (hover: hover) {
   .checkbox-track__opt:not(.is-active):hover { color: var(--color-text); opacity: 0.9; }
 }
+/* A print setting adjacent to a print button: a text label and a switch. */
+.print-setting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+.print-setting__label { font-size: 14px; font-weight: 600; }
 
 .corner-menu { position: relative; }
 .corner-menu__backdrop {
@@ -2101,6 +2152,9 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 @page { margin: 10mm; }
 
 @media print {
+  /* Black-and-white print: line pictures use much less ink than a grey
+     version of the colour pictures. `Pictures.printBw` sets the class. */
+  :root.print-bw { --font-pictures: var(--font-pictures-mono); }
   html, body { margin: 0; padding: 0; }
   .no-print { display: none !important; }
   .print-only { display: block; }
@@ -2260,6 +2314,9 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 .dots-print-mark { fill: black; }
 .dots-print-start { fill: none; stroke: black; stroke-width: 0.35; }
 .dots-print-num { font-size: 3px; font-weight: 600; fill: black; }
+/* The dashed arrow from the last dot back to dot 1. */
+.dots-print-close__line { fill: none; stroke: #555; stroke-width: 0.3; stroke-dasharray: 0.9 0.7; }
+.dots-print-close__head { fill: #555; }
 
 /* Lab: generator eyeball page (/activity/dot-to-dot/lab), dev only. */
 .dots-lab {
@@ -4118,6 +4175,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   padding: var(--space-4) 0 var(--space-3);
   background: linear-gradient(to top, var(--color-bg) 72%, transparent);
 }
+.wbk-print-dock .print-setting { margin-bottom: var(--space-2); }
 
 /* Printed cover page */
 .wbk-cover {

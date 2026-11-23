@@ -126,7 +126,8 @@ object Strings:
   final case class Printable(
       print: String,
       printMaps: String,
-      printRules: String
+      printRules: String,
+      blackAndWhite: String
   )
 
   final case class Timer(
@@ -1023,7 +1024,8 @@ object Strings:
     printable = Printable(
       print = "Print",
       printMaps = "Print maps",
-      printRules = "Print rules"
+      printRules = "Print rules",
+      blackAndWhite = "Black and white"
     ),
     timer = Timer(
       name = "Timer",
@@ -1809,7 +1811,8 @@ object Strings:
     printable = Printable(
       print = "Drukuj",
       printMaps = "Drukuj plansze",
-      printRules = "Drukuj zasady"
+      printRules = "Drukuj zasady",
+      blackAndWhite = "Czarno-białe"
     ),
     timer = Timer(
       name = "Stoper",
@@ -2595,7 +2598,8 @@ object Strings:
     printable = Printable(
       print = "Imprimir",
       printMaps = "Imprimir tableros",
-      printRules = "Imprimir reglas"
+      printRules = "Imprimir reglas",
+      blackAndWhite = "Blanco y negro"
     ),
     timer = Timer(
       name = "Cronómetro",
@@ -3381,7 +3385,8 @@ object Strings:
     printable = Printable(
       print = "Imprimer",
       printMaps = "Imprimer les plateaux",
-      printRules = "Imprimer les règles"
+      printRules = "Imprimer les règles",
+      blackAndWhite = "Noir et blanc"
     ),
     timer = Timer(
       name = "Minuteur",
@@ -4167,7 +4172,8 @@ object Strings:
     printable = Printable(
       print = "Drucken",
       printMaps = "Felder drucken",
-      printRules = "Regeln drucken"
+      printRules = "Regeln drucken",
+      blackAndWhite = "Schwarz-weiß"
     ),
     timer = Timer(
       name = "Stoppuhr",

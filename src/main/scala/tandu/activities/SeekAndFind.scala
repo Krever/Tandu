@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable, RulesCard}
 import tandu.ui.Components.s
 
 import scala.collection.mutable
@@ -662,26 +662,11 @@ object SeekAndFind extends Activity:
 
   // ---------- print ----------
 
-  /** Chrome's print preview is crash-prone rasterising sheets full of large
-    * colour-emoji glyphs (macOS's emoji font is bitmap-based); the screen
-    * renderer is fine. So printed sheets never draw emoji as text — each
-    * distinct emoji is rasterised once to a PNG data URL (cached for the
-    * session) and placed as an image, the same dodge dot-to-dot uses. */
-  private val rasterCache = mutable.Map.empty[String, String]
-  private val RasterPx = 192
-
-  private def emojiUrl(emoji: String): String =
-    rasterCache.getOrElseUpdate(emoji, {
-      val c = dom.document.createElement("canvas").asInstanceOf[dom.HTMLCanvasElement]
-      c.width = RasterPx
-      c.height = RasterPx
-      val ctx = c.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-      ctx.textAlign = "center"
-      ctx.textBaseline = "middle"
-      ctx.font = s"${(RasterPx * 0.8).toInt}px sans-serif"
-      ctx.fillText(emoji, RasterPx / 2.0, RasterPx / 2.0)
-      c.toDataURL("image/png")
-    })
+  /** Printed sheets do not draw the pictures as text. The print preview of
+    * Chrome is not stable with a sheet full of large colour glyphs, and an
+    * image keeps an exact position in the scene. Thus each picture is an
+    * image made from the picture font (`Pictures.src`), which also follows
+    * the black-and-white switch. */
 
   // ---------- workbook ----------
 
@@ -820,6 +805,7 @@ object SeekAndFind extends Activity:
               testId = "snf-pages"
             )
           ),
+          Pictures.bwToggle(),
           div(
             cls := "row snf-builder__actions",
             newSceneButton(seed),
@@ -983,7 +969,7 @@ object SeekAndFind extends Activity:
         p.targets.map(t =>
           span(
             cls := "snf-print-chip",
-            img(cls := "snf-print-emoji", src := emojiUrl(t.emoji), alt := t.emoji),
+            img(cls := "snf-print-emoji", src <-- Pictures.src(t.emoji), alt := t.emoji),
             if showCounts then s" × ${t.count}" else ""
           )
         )
@@ -1013,7 +999,7 @@ object SeekAndFind extends Activity:
         p.targets.map(t =>
           div(
             cls := "snf-count-cell",
-            img(cls := "snf-print-emoji", src := emojiUrl(t.emoji), alt := t.emoji),
+            img(cls := "snf-print-emoji", src <-- Pictures.src(t.emoji), alt := t.emoji),
             answer match
               // The child circles the answer. Pre-readers do not know how
               // to write digits, and the ordered line lets them count along
@@ -1042,7 +1028,7 @@ object SeekAndFind extends Activity:
           svg.width := fmt(side),
           svg.height := fmt(side),
           svg.transform := s"translate(${fmt(item.x)} ${fmt(item.y)}) rotate(${fmt(item.tilt)})$flip",
-          svg.href := emojiUrl(item.emoji)
+          svg.href <-- Pictures.src(item.emoji)
         )
       }
     )

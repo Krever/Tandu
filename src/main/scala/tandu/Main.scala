@@ -39,4 +39,5 @@ import tandu.pages.{ActivityPage, HomePage, ToolPage, WorkbookPage}
         case Page.WorkbookShared(_) => WorkbookPage.render()
       }
   )
+  tandu.ui.Pictures.preload()
   val _ = render(container, app)

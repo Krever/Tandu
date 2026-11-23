@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable, RulesCard}
 import tandu.ui.Components.s
 
 import scala.collection.mutable
@@ -64,7 +64,7 @@ object DotToDot extends Activity:
   /** Dot-count guard rails: below MinDots a puzzle is over too fast even when
     * faithful; above MaxDots the shape is too intricate to be fun. */
   private val MinDots = 18
-  private val MaxDots = 60
+  private val MaxDots = 44
 
   /** Minimum dot gap in raster px — comfortably above a fingertip once the
     * board is scaled to screen size, and wide enough that adjacent number
@@ -79,13 +79,32 @@ object DotToDot extends Activity:
 
   /** Emoji whose *outline alone* still reads as the thing — solid one-blob
     * silhouettes. Faces, donuts and anything whose identity lives in interior
-    * detail or thin strokes don't survive silhouetting and are left out. */
+    * detail or thin strokes don't survive silhouetting and are left out.
+    *
+    * The pool is selected for the Noto picture font: each entry traces to a
+    * puzzle there (see the /lab page). Pictures that show two objects (a pair
+    * of socks, two gloves) are not in the pool, because only one object
+    * gets dots and the other one stays as loose lines. */
   private val emojis = Vector(
-    "🐟", "🐠", "🦋", "⭐", "❤️", "🚀", "⛵", "🏠", "☂️", "🍎",
-    "🍐", "🍓", "🥕", "🐢", "🐘", "🦆", "🐇", "🐳", "🦈", "🌙",
-    "🎈", "👕", "🧦", "🎩", "🔔", "🌵", "🐦", "🍄", "✈️", "🚗",
-    "🐬", "🌻", "🧸", "🦴", "🍦", "🦖", "🐧", "🎸", "👟", "🐌",
-    "🎁", "⚽", "🍕", "🐙"
+    // animals
+    "🐟", "🐠", "🦋", "🐢", "🐘", "🦆", "🐇", "🐳", "🦈", "🐦", "🐬", "🐧",
+    "🐌", "🐈", "🐕", "🐖", "🐄", "🐑", "🦛", "🦏", "🐋", "🦭", "🦢",
+    "🦜", "🦔", "🦇", "🦕", "🦄", "🐅", "🦍",
+    "🐒", "🦅", "🦉", "🐸", "🐍", "🐡", "🐿️",
+    // food
+    "🍎", "🍐", "🍓", "🥕", "🍄", "🍦", "🍕", "🍌", "🍉", "🍍", "🥑", "🍆",
+    "🌽", "🥐", "🧁", "🍭", "🍔", "🍋", "🧀", "🍗", "☕",
+    // nature and weather
+    "⭐", "🌙", "🌲", "🌷", "🌳", "🪶", "☁️", "⚡", "🔥",
+    "💧", "⛄", "🎄",
+    // vehicles and buildings
+    "🚀", "🚗", "🚌", "🚜", "🚒", "🚚", "🚢", "🚤", "🛶", "🛸", "🏠",
+    "🏰", "⛺",
+    // clothes
+    "👕", "🎩", "👟", "👗", "🧢", "👢", "🥾", "👒", "🕶️", "🎀",
+    // objects
+    "❤️", "☂️", "🎈", "🔔", "🧸", "🦴", "🎸", "🎁", "⚽", "🔑", "💡", "🔨",
+    "🎃", "👻", "🧲", "🔦", "🪣", "🪓", "🦷", "🖐️"
   )
 
   // ---------- model ----------
@@ -131,10 +150,7 @@ object DotToDot extends Activity:
     * data (for tracing) and a PNG data URL (for the reveal). */
   private def rasterize(emoji: String): Rastered =
     val ctx = scratchCtx()
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.font = s"${(Raster * 0.8).toInt}px sans-serif"
-    ctx.fillText(emoji, Raster / 2.0, Raster / 2.0)
+    Pictures.drawSquare(ctx, emoji, Raster)
     Rastered(ctx.getImageData(0, 0, Raster, Raster).data, scratchCanvas.toDataURL("image/png"))
 
   /** Anti-aliased fringe pixels (alpha ≤ 40) count as background so the traced
@@ -176,6 +192,57 @@ object DotToDot extends Activity:
     val out = new Array[Boolean](mask.length)
     best.foreach(out(_) = true)
     (out, best.size)
+
+  /** Thin parts narrower than approximately two times this value (raster px)
+    * are removed from the outline. */
+  private val ThinPartPx = 4
+
+  /** One step of erosion (`grow = false`) or dilation (`grow = true`) with a
+    * plus-shaped element, from `src` into `dst`: a pixel changes if one of
+    * its four neighbours has the other state. Pixels off the raster count as
+    * background. */
+  private def morphStep(src: Array[Boolean], dst: Array[Boolean], grow: Boolean): Unit =
+    val w = Raster
+    var y = 0
+    while y < w do
+      val row = y * w
+      var x = 0
+      while x < w do
+        val i = row + x
+        val l = x > 0 && src(i - 1)
+        val r = x < w - 1 && src(i + 1)
+        val u = y > 0 && src(i - w)
+        val d = y < w - 1 && src(i + w)
+        dst(i) = if grow then src(i) || l || r || u || d else src(i) && l && r && u && d
+        x += 1
+      y += 1
+
+  /** `steps` steps of erosion or dilation. The steps alternate between two
+    * work buffers. `mask` is only read, and the result is a new array. */
+  private def morph(mask: Array[Boolean], steps: Int, grow: Boolean): Array[Boolean] =
+    var src = mask
+    var dst = new Array[Boolean](mask.length)
+    val spare = new Array[Boolean](mask.length)
+    for _ <- 0 until steps do
+      morphStep(src, dst, grow)
+      val free = if src eq mask then spare else src
+      src = dst
+      dst = free
+    if src eq mask then mask.clone() else src
+
+  /** Remove thin parts (whiskers, antennae, strings) from the shape: erode
+    * it, then grow it back. A part that the erosion deletes fully does not
+    * come back. The outline that goes out along a thin part and back gives a
+    * tight group of dots with no space for the numbers. The removed parts
+    * stay visible, because the detail layer draws them as faint lines. */
+  private def withoutThinParts(mask: Array[Boolean]): Array[Boolean] =
+    val out = morph(morph(mask, ThinPartPx, grow = false), ThinPartPx, grow = true)
+    // The grow step must not add pixels that the shape did not have.
+    var i = 0
+    while i < out.length do
+      out(i) = out(i) && mask(i)
+      i += 1
+    out
 
   /** The 8 Moore neighbours in clockwise order (y grows downward), starting
     * west: W NW N NE E SE S SW. */
@@ -438,34 +505,161 @@ object DotToDot extends Activity:
       i += 1
     in
 
-  private val LabelOffset = 3.4
+  // ---------- number labels ----------
+  //
+  // A label is the text box of a dot number. Its centre is (lx, ly). The
+  // placement tries a ring of positions around each dot and keeps the one
+  // with the lowest cost. All values are in view units.
 
-  /** Place each number along the corner's bisector, flipped outward when the
-    * first guess lands inside the polygon, then clamped into the view box. */
+  /** Radius of the ring that marks dot 1 (the start). The print sheet draws
+    * it, and labels keep clear of it. */
+  private val StartRingR = 2.6
+
+  /** Radius of a dot mark in the app. The print mark is smaller. */
+  private val DotR = 1.4
+
+  /** Free space between a label and a dot mark or the start ring. */
+  private val LabelMargin = 0.35
+
+  /** Space that a label must keep clear around a dot. */
+  private val DotClearR = DotR + LabelMargin
+
+  /** Half size of the text box of a number. A digit is approximately 1.9
+    * wide and 2.9 high at the label font size. */
+  private def labelHalfW(number: Int): Double = 0.95 * number.toString.length + 0.2
+  private val LabelHalfH = 1.5
+
+  /** Distances from the dot to the label centre, nearest first. */
+  private val LabelRadii = Vector(3.0, 3.6, 4.3, 5.2, 6.2)
+  private val LabelAngles = 16
+
+  // Costs. A hard collision must always lose against a soft preference.
+  private val CostCollision = 1000.0 // on a dot or on a different label
+  // Off the board, where the SVG cuts the number. This must lose against a
+  // position on the board that has some collisions.
+  private val CostOffBoard = 10 * CostCollision
+  private val CostOnLine    = 40.0   // on a line that the child draws
+  private val CostInside    = 30.0   // inside the shape, where the detail lines are
+  private val CostFarther   = 3.0    // for each step away from the dot
+  private val CostOffAxis   = 3.0    // turned away from the outward direction
+
+  private def circleHitsBox(cx: Double, cy: Double, r: Double, bx: Double, by: Double, hw: Double, hh: Double): Boolean =
+    val dx = math.max(math.abs(cx - bx) - hw, 0.0)
+    val dy = math.max(math.abs(cy - by) - hh, 0.0)
+    dx * dx + dy * dy < r * r
+
+  /** Liang–Barsky clip test: does the segment cross the box? The four
+    * sides of the box are clipped in a loop with local variables only,
+    * because this runs many times for each label. */
+  private def segmentHitsBox(
+      x0: Double, y0: Double, x1: Double, y1: Double,
+      bx: Double, by: Double, hw: Double, hh: Double
+  ): Boolean =
+    val dx = x1 - x0
+    val dy = y1 - y0
+    var t0 = 0.0
+    var t1 = 1.0
+    var ok = true
+    var side = 0
+    while ok && side < 4 do
+      val p = side match
+        case 0 => -dx
+        case 1 => dx
+        case 2 => -dy
+        case _ => dy
+      val q = side match
+        case 0 => x0 - (bx - hw)
+        case 1 => (bx + hw) - x0
+        case 2 => y0 - (by - hh)
+        case _ => (by + hh) - y0
+      if p == 0 then { if q < 0 then ok = false }
+      else
+        val r = q / p
+        if p < 0 then { if r > t1 then ok = false else if r > t0 then t0 = r }
+        else if r < t0 then ok = false
+        else if r < t1 then t1 = r
+      side += 1
+    ok
+
+  /** Give each dot a label position. A label must not cover a dot or a
+    * different label. It also stays off the lines of the shape, outside the
+    * shape, and near its dot, in this order of importance.
+    *
+    * The first pass places the labels one after the other. The subsequent
+    * passes move each label again with all other labels known, which repairs
+    * a bad early choice. */
   private def withLabels(pts: Vector[(Double, Double)]): Vector[Dot] =
     val n = pts.length
-    pts.zipWithIndex.map { case ((x, y), i) =>
+    val lx = new Array[Double](n)
+    val ly = new Array[Double](n)
+    val placed = new Array[Boolean](n)
+    val xs = Array.tabulate(n)(i => pts(i)._1)
+    val ys = Array.tabulate(n)(i => pts(i)._2)
+    val halfW = Array.tabulate(n)(i => labelHalfW(i + 1))
+    // The candidate positions: (cos, sin, radius, step from the dot).
+    val candidates =
+      for
+        (r, step) <- LabelRadii.zipWithIndex
+        a         <- 0 until LabelAngles
+      yield
+        val ang = a * 2 * math.Pi / LabelAngles
+        (math.cos(ang), math.sin(ang), r, step)
+    def dotR(j: Int): Double = if j == 0 then StartRingR + LabelMargin else DotClearR
+
+    // The outward direction of the corner at dot i: the bisector, pointed
+    // away from the two adjacent dots.
+    val axis = Vector.tabulate(n) { i =>
+      val (x, y) = pts(i)
       val (px, py) = pts((i - 1 + n) % n)
       val (nx, ny) = pts((i + 1) % n)
       val ul = math.hypot(px - x, py - y).max(1e-9)
       val vl = math.hypot(nx - x, ny - y).max(1e-9)
       var dx = -((px - x) / ul + (nx - x) / vl)
       var dy = -((py - y) / ul + (ny - y) / vl)
-      val bl = math.hypot(dx, dy)
-      if bl < 1e-6 then
-        // collinear neighbours — use the perpendicular of the through-line
+      if math.hypot(dx, dy) < 1e-6 then
+        // The adjacent dots are in one line with this dot: use the perpendicular.
         dx = -(ny - py)
         dy = nx - px
       val l = math.hypot(dx, dy).max(1e-9)
-      dx /= l
-      dy /= l
-      if inside(pts, x + dx * LabelOffset, y + dy * LabelOffset) then
-        dx = -dx
-        dy = -dy
-      val lx = (x + dx * LabelOffset).max(2.5).min(View - 2.5)
-      val ly = (y + dy * LabelOffset).max(2.5).min(View - 2.5)
-      Dot(x, y, lx, ly)
+      val (ax, ay) = (dx / l, dy / l)
+      if inside(pts, x + ax * LabelRadii.head, y + ay * LabelRadii.head) then (-ax, -ay) else (ax, ay)
     }
+
+    /** The cost of a label position. Costs only increase, thus the loop
+      * stops when the cost reaches `limit` (the best cost found): such a
+      * position cannot win. */
+    def cost(i: Int, cx: Double, cy: Double, step: Int, dirX: Double, dirY: Double, limit: Double): Double =
+      val hw = halfW(i)
+      var c = step * CostFarther + (1 - (dirX * axis(i)._1 + dirY * axis(i)._2)) * CostOffAxis
+      if cx - hw < 1 || cx + hw > View - 1 || cy - LabelHalfH < 1 || cy + LabelHalfH > View - 1 then c += CostOffBoard
+      var j = 0
+      while j < n && c < limit do
+        if circleHitsBox(xs(j), ys(j), dotR(j), cx, cy, hw, LabelHalfH) then c += CostCollision
+        if j != i && placed(j) then
+          val ow = hw + halfW(j) + 0.3
+          val oh = 2 * LabelHalfH + 0.2
+          if math.abs(cx - lx(j)) < ow && math.abs(cy - ly(j)) < oh then c += CostCollision
+        val k = (j + 1) % n
+        if segmentHitsBox(xs(j), ys(j), xs(k), ys(k), cx, cy, hw, LabelHalfH) then c += CostOnLine
+        j += 1
+      if c < limit && inside(pts, cx, cy) then c += CostInside
+      c
+
+    def place(i: Int): Unit =
+      val extra = if i == 0 then StartRingR - DotR else 0.0
+      var best = Double.MaxValue
+      for (dirX, dirY, r, step) <- candidates do
+        val cx = xs(i) + dirX * (r + extra)
+        val cy = ys(i) + dirY * (r + extra)
+        val c = cost(i, cx, cy, step, dirX, dirY, best)
+        if c < best then
+          best = c
+          lx(i) = cx
+          ly(i) = cy
+      placed(i) = true
+
+    for _ <- 0 until 3; i <- 0 until n do place(i)
+    Vector.tabulate(n)(i => Dot(xs(i), ys(i), lx(i), ly(i)))
 
   /** Scale raster-space dots into the padded view square (aspect preserved,
     * centred), start numbering at the topmost dot, and map the raster square
@@ -485,7 +679,14 @@ object DotToDot extends Activity:
     val offX = (View - (maxX - minX) * k) / 2
     val offY = (View - (maxY - minY) * k) / 2
     val view = raster.map((x, y) => ((x - minX) * k + offX, (y - minY) * k + offY))
-    val topIdx = view.indices.minBy(i => view(i)._2)
+    // Dot 1 gets a ring on paper. Start at the topmost dot that has no other
+    // dot in or near that ring. If there is none, start at the topmost dot.
+    val ringClear = view.indices.filter { i =>
+      view.indices.forall { j =>
+        j == i || math.hypot(view(i)._1 - view(j)._1, view(i)._2 - view(j)._2) >= StartRingR + DotR + 0.2
+      }
+    }
+    val topIdx = (if ringClear.nonEmpty then ringClear else view.indices).minBy(i => view(i)._2)
     val rotated = view.drop(topIdx) ++ view.take(topIdx)
     Puzzle(
       emoji,
@@ -503,7 +704,9 @@ object DotToDot extends Activity:
   private def tracePuzzleInfo(emoji: String): Either[String, (Puzzle, Double)] =
     val r = rasterize(emoji)
     val mask = alphaMask(r.data)
-    val (comp, size) = largestComponent(mask)
+    // The removal of thin parts can cut the shape in two, thus take the
+    // largest blob again.
+    val (comp, size) = largestComponent(withoutThinParts(largestComponent(mask)._1))
     if size < Raster * Raster * 0.04 then Left("blob too small")
     else
       val contour = traceBoundary(comp)
@@ -514,7 +717,13 @@ object DotToDot extends Activity:
           case None => Left("can't stay faithful within dot budget")
           case Some(dots) =>
             val iou = polygonIoU(comp, dots)
-            Right((assemble(emoji, dots, r.url, detailLayer(r.data, mask, comp)), iou))
+            // The removal of thin parts also takes a rim of single pixels off
+            // corners and bumps. Those pixels are not a detached part: drawn
+            // as detail, they would show pieces of the outline, which is the
+            // puzzle. Thus the detail layer gets the shape grown back past
+            // that rim, and only real thin parts stay outside it.
+            val body = morph(comp, ThinPartPx + 2, grow = true)
+            Right((assemble(emoji, dots, r.url, detailLayer(r.data, mask, body)), iou))
 
   /** Whether an emoji traces well is a fixed property of this platform's
     * font, so rejections are remembered and never re-traced. */
@@ -529,7 +738,9 @@ object DotToDot extends Activity:
       val e = emojis(rng.nextInt(emojis.size))
       if e != avoid && !knownBad(e) then
         result = tracePuzzleInfo(e).toOption.map(_._1)
-        if result.isEmpty then knownBad += e
+        // A late font: the trace used the emoji of the device. Do not
+        // remember that rejection, the picture font can give a good trace.
+        if result.isEmpty && Pictures.colorFontFinal then knownBad += e
       attempts += 1
     result.getOrElse(starPuzzle())
 
@@ -546,7 +757,10 @@ object DotToDot extends Activity:
 
   // ---------- UI ----------
 
-  def render(): HtmlElement =
+  // Tracing draws the picture on a canvas, thus wait for the picture font.
+  def render(): HtmlElement = Pictures.whenDrawable(renderReady())
+
+  private def renderReady(): HtmlElement =
     // The dev lab lives outside the mode chooser; resolve it reactively so
     // URL edits within the activity (chooser ↔ /lab) re-render correctly.
     val labPage: Signal[Option[Int]] = Routing.router.currentPageSignal.map {
@@ -638,7 +852,7 @@ object DotToDot extends Activity:
           svg.cls <-- progress.signal.map(k => if i < k then "dots-dot is-linked" else "dots-dot"),
           onPointerDown --> (_ => tap(i)),
           svg.circle(svg.cls := "dots-hit", svg.cx := fmt(d.x), svg.cy := fmt(d.y), svg.r := "4.5"),
-          svg.circle(svg.cls := "dots-mark", svg.cx := fmt(d.x), svg.cy := fmt(d.y), svg.r := "1.4"),
+          svg.circle(svg.cls := "dots-mark", svg.cx := fmt(d.x), svg.cy := fmt(d.y), svg.r := fmt(DotR)),
           svg.text(
             svg.cls := "dots-num",
             svg.x := fmt(d.lx),
@@ -796,6 +1010,35 @@ object DotToDot extends Activity:
       )
     )
 
+  /** A dashed arrow from the last dot to dot 1. On paper, nothing closes the
+    * shape automatically. The arrow shows the child that the picture is
+    * complete only after one more line, from the last number back to the
+    * start. The arrow stops at the start ring. */
+  private def closingHint(p: Puzzle): SvgElement =
+    val last = p.dots.last
+    val first = p.dots.head
+    val len = math.hypot(first.x - last.x, first.y - last.y)
+    if p.dots.size < 3 || len < 1e-6 then svg.g()
+    else
+      val ux = (first.x - last.x) / len
+      val uy = (first.y - last.y) / len
+      val head = 1.5 // length of the arrowhead
+      // The tip touches the start ring. The tail starts clear of the last dot.
+      val tipD = (len - StartRingR - 0.2).max(head)
+      val tailD = 1.5
+      def at(d: Double, side: Double = 0): String =
+        s"${fmt(last.x + ux * d - uy * side)},${fmt(last.y + uy * d + ux * side)}"
+      svg.g(
+        svg.cls := "dots-print-close",
+        if tipD - head > tailD + 0.5 then
+          svg.polyline(svg.cls := "dots-print-close__line", svg.points := s"${at(tailD)} ${at(tipD - head)}")
+        else emptyNode,
+        svg.polygon(
+          svg.cls := "dots-print-close__head",
+          svg.points := s"${at(tipD)} ${at(tipD - head, 0.75)} ${at(tipD - head, -0.75)}"
+        )
+      )
+
   private def printablePuzzle(p: Puzzle): HtmlElement =
     div(
       cls := "dots-print-board",
@@ -804,11 +1047,12 @@ object DotToDot extends Activity:
         svg.cls := "dots-print-svg",
         svg.viewBox := s"0 0 ${View.toInt} ${View.toInt}",
         if p.detailUrl.nonEmpty then imageLayer(p, p.detailUrl, "dots-detail") else emptyNode,
+        closingHint(p),
         p.dots.zipWithIndex.map { (d, i) =>
           svg.g(
             // A ring around dot 1 so the start is findable on paper.
             if i == 0 then
-              svg.circle(svg.cls := "dots-print-start", svg.cx := fmt(d.x), svg.cy := fmt(d.y), svg.r := "2.6")
+              svg.circle(svg.cls := "dots-print-start", svg.cx := fmt(d.x), svg.cy := fmt(d.y), svg.r := fmt(StartRingR))
             else emptyNode,
             svg.circle(svg.cls := "dots-print-mark", svg.cx := fmt(d.x), svg.cy := fmt(d.y), svg.r := "0.9"),
             svg.text(

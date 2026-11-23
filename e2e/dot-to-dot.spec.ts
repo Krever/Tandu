@@ -37,8 +37,10 @@ test("print mode fills an A4 sheet with two puzzles", async ({ page }) => {
   await expect(page.locator(".dots-print-board")).toHaveCount(2)
   // Each printable board carries dots, numbers, and the detail line-art.
   const first = page.locator(".dots-print-board").first()
-  expect(await first.locator(".dots-print-mark").count()).toBeGreaterThanOrEqual(15)
-  expect(await first.locator(".dots-print-num").count()).toBeGreaterThanOrEqual(15)
+  expect(await first.locator(".dots-print-mark").count()).toBeGreaterThanOrEqual(12)
+  expect(await first.locator(".dots-print-num").count()).toBeGreaterThanOrEqual(12)
+  // The dashed arrow from the last dot back to dot 1 shows where to finish.
+  await expect(first.locator(".dots-print-close__head")).toHaveCount(1)
 
   // The two puzzles must differ (lastEmoji guard).
   const emoji = await page.locator(".dots-print-board").evaluateAll(

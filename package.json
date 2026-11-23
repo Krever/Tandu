@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "fonts": "node scripts/picture-fonts.mjs",
+    "fonts:check": "node scripts/picture-fonts.mjs --check",
+    "prebuild": "npm run fonts:check",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "./deploy.sh",

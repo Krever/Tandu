@@ -3,7 +3,7 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.{AppState, Kind, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Printable}
+import tandu.ui.{Components, Mode, ModeChooser, Pictures, Printable}
 import tandu.ui.Components.s
 
 import scala.scalajs.js
@@ -449,6 +449,7 @@ object MathPractice extends Activity:
       cls := "stack-lg",
       div(
         cls := "no-print stack",
+        Pictures.bwToggle(),
         div(
           cls := "row",
           styleAttr := "justify-content: center; gap: 0.5rem; flex-wrap: wrap;",

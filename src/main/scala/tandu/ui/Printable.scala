@@ -12,7 +12,35 @@ import scala.scalajs.js
   * activity-specific content (boards, cards, grids). */
 object Printable:
 
-  def print(): Unit = dom.window.print()
+  private val DecodeTimeoutMs = 3000
+
+  /** `true` during the wait for the images. A second click on a print
+    * button in that time must not open a second print dialog. */
+  private var printPending = false
+
+  /** Open the print dialog of the browser, then run `done`.
+    *
+    * The printed sheets are hidden on the screen, thus the browser has not
+    * decoded their images. A print that starts immediately can show a sheet
+    * with no pictures. This function first waits until all images in the
+    * print-only areas are decoded, with a time limit. A call during that
+    * wait does nothing, and its `done` does not run. */
+  def print(done: () => Unit = () => ()): Unit = if !printPending then
+    printPending = true
+    def go(): Unit =
+      printPending = false
+      dom.window.print()
+      done()
+    val images = dom.document.querySelectorAll(".print-only img, .print-only image")
+    val decodes = (0 until images.length).flatMap { i =>
+      val el = images(i).asInstanceOf[js.Dynamic]
+      if js.typeOf(el.decode) == "function" then
+        // An image that cannot decode must not stop the print.
+        Some(el.decode().asInstanceOf[js.Promise[Any]].`catch`[Any]((_: Any) => ()))
+      else None
+    }
+    if decodes.isEmpty then go()
+    else DomExt.afterOrTimeout(js.Promise.all(js.Array(decodes*)), DecodeTimeoutMs)(() => go())
 
   def render(
       title: Strings => String,
@@ -64,8 +92,7 @@ object Printable:
     def trigger(key: K): Unit =
       current.set(Some(key))
       val _ = js.timers.setTimeout(50) {
-        print()
-        current.set(None)
+        print(() => current.set(None))
       }
 
   def printSlot[K](): PrintSlot[K] = new PrintSlot[K]

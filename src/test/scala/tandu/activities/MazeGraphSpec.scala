@@ -63,7 +63,7 @@ class MazeGraphSpec extends AnyFunSuite:
       val _ = assert(l.ringSizes(i) % l.ringSizes(i - 1) == 0, s"ring $i: ${l.ringSizes}")
     for i <- 1 to 8 do
       val w = 2 * math.Pi * i / l.ringSizes(i)
-      val _ = assert(w >= 0.7 && w <= 2.2, s"ring $i arc width $w: ${l.ringSizes}")
+      val _ = assert(w >= 0.7 && w <= 1.5, s"ring $i arc width $w: ${l.ringSizes}")
   }
 
   test("circle neighbours are symmetric; centre is the goal; start is on the outer ring at the bottom") {

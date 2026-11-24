@@ -125,7 +125,12 @@ class MazeSpec extends AnyFunSuite:
       val (rows, cols) = sq.dims
       val _ = assert(math.min(w / cols, h / rows) >= 5.5, s"square $pp")
       val ci = cfg(pp.maxSize, pp, Shape.Circle)
-      val _ = assert(math.min(w, h) / 2 / (ci.rings + 1) >= 5.5, s"circle $pp")
+      val ring = math.min(w, h) / 2 / (ci.rings + 1)
+      val _ = assert(ring >= 5.5, s"circle $pp")
+      // The doorway between two rings is the inner arc of a cell.
+      val layout = MazeGraph.CircleLayout(ci.rings)
+      val doorway = (1 to ci.rings).map(i => 2 * math.Pi * i / layout.ringSizes(i)).min * ring
+      val _ = assert(doorway >= 4.0, s"circle doorway $pp: $doorway")
       val side = hexSide(cfg(pp.maxSize, pp, Shape.Hex))
       val _ = assert(side >= 4.0, s"hex edge $pp: $side")
       val _ = assert(math.sqrt(3) * side >= 5.5, s"hex width $pp")

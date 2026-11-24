@@ -15,6 +15,11 @@ object MazeGraph:
     def neighbours(cell: Int): Vector[Int]
     def start: Int
     def goal: Int
+    /** The cells that can be the start. When there is more than one,
+      * [[carve]] takes the one with the longest path to the goal. */
+    def startChoices: Vector[Int] = Vector(start)
+    /** When true, [[carve]] gives the goal exactly one passage. */
+    def goalHasOneDoor: Boolean = false
 
   /** A square grid. Cell `r * cols + c`; up to 4 neighbours. Start is the
     * top-left cell, goal the bottom-right cell. */
@@ -49,15 +54,16 @@ object MazeGraph:
   /** Rings of cells around one centre cell. Ring `i` spans the radius
     * `i .. i + 1` (in ring widths); ring 0 is the centre cell (the goal).
     * A ring has two times the cells of the ring inside it when its cells
-    * would otherwise be wider than 2 ring widths, so all cells keep about
-    * the same size. The start is the outer-ring cell at the bottom; the
+    * would otherwise be wider than 1.5 ring widths (at the inner side), so
+    * all cells keep about the same size, from 0.75 to 1.5 ring widths. More
+    * and smaller cells give a harder maze in the same circle. The start is the outer-ring cell at the bottom; the
     * angles are turned so that this cell is centred at the bottom.
     * Angles are in radians, clockwise from the right (y points down). */
   final case class CircleLayout(rings: Int) extends Layout:
     val ringSizes: Vector[Int] =
       (2 to rings).foldLeft(Vector(1, 6)) { (acc, i) =>
         val prev = acc.last
-        acc :+ (if 2 * math.Pi * i / prev > 2 then prev * 2 else prev)
+        acc :+ (if 2 * math.Pi * i / prev > 1.5 then prev * 2 else prev)
       }.take(rings + 1)
     private val firstCell: Vector[Int] = ringSizes.scanLeft(0)(_ + _)
     val cellCount: Int = firstCell.last
@@ -66,6 +72,12 @@ object MazeGraph:
     def indexInRing(cell: Int): Int = cell - firstCell(ringOf(cell))
     val goal: Int = 0
     val start: Int = cellAt(rings, ringSizes(rings) / 4)
+    // The centre is near every outer cell, so a fixed entrance gives a
+    // short path, and a centre with many doors can be reached from many
+    // sides. Therefore the entrance is the outer cell farthest from the centre,
+    // and the centre has one door.
+    override val startChoices: Vector[Int] = (0 until ringSizes(rings)).map(cellAt(rings, _)).toVector
+    override val goalHasOneDoor: Boolean = true
     /** Turns the circle so that the start cell is centred at the bottom. */
     private val offset: Double = math.Pi / 2 - (indexInRing(start) + 0.5) * 2 * math.Pi / ringSizes(rings)
 
@@ -98,7 +110,7 @@ object MazeGraph:
 
   /** The carved maze: the open passages between neighbour cells. Each pair
     * is stored as (smaller cell, larger cell). */
-  final case class Carved(layout: Layout, passages: Set[(Int, Int)]):
+  final case class Carved(layout: Layout, passages: Set[(Int, Int)], start: Int):
     def open(a: Int, b: Int): Boolean = passages.contains(if a < b then (a, b) else (b, a))
     def degree(cell: Int): Int = layout.neighbours(cell).count(open(cell, _))
 
@@ -106,8 +118,8 @@ object MazeGraph:
     * of the layout, with exactly one path between any two cells.
     *
     * `braid` (0..1) then opens an extra wall at that fraction of the dead
-    * ends, which makes loops. The start and the goal are never opened
-    * more. */
+    * ends, which makes loops. The start and the goal never get an extra
+    * passage. */
   def carve(layout: Layout, style: Maze.Style, braid: Double, rng: Random): Carved =
     val n = layout.cellCount
     val visited = Array.fill(n)(false)
@@ -175,11 +187,43 @@ object MazeGraph:
       case Maze.Style.Balanced => balanced()
       case Maze.Style.Branchy  => branchy()
 
+    val goal = layout.goal
+    if layout.goalHasOneDoor then
+      // Keep one random door of the goal. Close each other door; the part
+      // of the maze behind it is then cut off, so connect that part to the
+      // rest through a random wall that does not touch the goal.
+      val doors = rng.shuffle(layout.neighbours(goal).filter(linked(goal, _)))
+      for door <- doors.drop(1) do
+        passages -= (if goal < door then (goal, door) else (door, goal))
+        val part = mutable.Set(door)
+        val queue = mutable.Queue(door)
+        while queue.nonEmpty do
+          val cell = queue.dequeue()
+          for next <- layout.neighbours(cell) if next != goal && linked(cell, next) && part.add(next) do queue.enqueue(next)
+        val bridges = part.toVector.sorted.flatMap(a => layout.neighbours(a).filter(b => b != goal && !part(b)).map(a -> _))
+        val (a, b) = bridges(rng.nextInt(bridges.size))
+        link(a, b)
+
+    // The start: of the choices, the one with the longest path to the goal.
+    val start =
+      if layout.startChoices.size == 1 then layout.startChoices.head
+      else
+        val dist = Array.fill(n)(-1)
+        dist(goal) = 0
+        val queue = mutable.Queue(goal)
+        while queue.nonEmpty do
+          val cell = queue.dequeue()
+          for next <- layout.neighbours(cell) if linked(cell, next) && dist(next) < 0 do
+            dist(next) = dist(cell) + 1
+            queue.enqueue(next)
+        layout.startChoices.maxBy(dist(_))
+
     if braid > 0 then
       def degree(cell: Int): Int = layout.neighbours(cell).count(linked(cell, _))
+      def kept(cell: Int): Boolean = cell == start || cell == goal
       for cell <- 0 until n do
-        if degree(cell) == 1 && cell != layout.start && cell != layout.goal && rng.nextDouble() < braid then
-          val closed = layout.neighbours(cell).filterNot(linked(cell, _))
+        if degree(cell) == 1 && !kept(cell) && rng.nextDouble() < braid then
+          val closed = layout.neighbours(cell).filterNot(next => linked(cell, next) || kept(next))
           if closed.nonEmpty then link(cell, closed(rng.nextInt(closed.size)))
 
-    Carved(layout, passages.toSet)
+    Carved(layout, passages.toSet, start)

@@ -671,7 +671,7 @@ object Maze extends Activity:
         val (x1, y1) = corner(cell, k)
         val (x2, y2) = corner(cell, (k + 1) % 6)
         wall(x1, y1, x2, y2)
-    val (sx, sy) = centre(l.start)
+    val (sx, sy) = centre(m.start)
     val (gx, gy) = centre(l.goal)
     board("hex", widthMm, across * (l.cols + 0.5), side * (1.5 * l.rows + 0.5),
       walls,
@@ -684,8 +684,12 @@ object Maze extends Activity:
   private def circleMaze(m: MazeGraph.Carved, l: MazeGraph.CircleLayout, widthMm: Double): HtmlElement =
     val unit = CELL.toDouble
     val outer = unit * (l.rings + 1)
+    // The start can be any outer cell; turn the drawing so that it is
+    // centred at the bottom.
+    val (startFrom, startTo) = l.arc(m.start)
+    val turn = math.Pi / 2 - (startFrom + startTo) / 2
     def point(radius: Double, angle: Double): String =
-      f"${outer + radius * math.cos(angle)}%.3f ${outer + radius * math.sin(angle)}%.3f"
+      f"${outer + radius * math.cos(angle + turn)}%.3f ${outer + radius * math.sin(angle + turn)}%.3f"
     def arcPath(radius: Double, from: Double, to: Double): String =
       val large = if to - from > math.Pi then 1 else 0
       f"M ${point(radius, from)} A $radius%.3f $radius%.3f 0 $large 1 ${point(radius, to)}"
@@ -704,13 +708,10 @@ object Maze extends Activity:
             path("maze-wall", s"M ${point(ring * unit, to)} L ${point((ring + 1) * unit, to)}"))
         ).flatten
       yield part
-    val (gapFrom, gapTo) = l.arc(l.start)
-    val border = path("maze-border", arcPath(outer, gapTo, gapFrom + 2 * math.Pi))
-    val startAngle = (gapFrom + gapTo) / 2
+    val border = path("maze-border", arcPath(outer, startTo, startFrom + 2 * math.Pi))
     board("circle", widthMm, 2 * outer, 2 * outer,
       walls, border,
-      mazeGlyph("maze-start-glyph",
-        svg.x := f"${outer + (outer - unit / 2) * math.cos(startAngle)}%.3f",
-        svg.y := f"${outer + (outer - unit / 2) * math.sin(startAngle)}%.3f", "🐭"),
+      // At the bottom, in the start cell.
+      mazeGlyph("maze-start-glyph", svg.x := f"$outer%.3f", svg.y := f"${outer + outer - unit / 2}%.3f", "🐭"),
       mazeGlyph("maze-goal", svg.x := f"$outer%.3f", svg.y := f"$outer%.3f", "🧀")
     )

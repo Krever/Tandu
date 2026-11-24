@@ -45,3 +45,38 @@ class MazeGraphSpec extends AnyFunSuite:
       val _ = assert(deadEnds.forall(d => d == l.start || d == l.goal), s"$style: $deadEnds")
       val _ = assert(reachable(c) == l.cellCount)
   }
+
+  // ---------- hex and circle ----------
+
+  test("hex neighbours are symmetric; interior cells have 6") {
+    val l = HexLayout(7, 9)
+    val _ = assert(symmetric(l))
+    val _ = assert(l.neighbours(3 * 9 + 4).size == 6)
+    assert(Set(2, 3).contains(l.neighbours(0).size))
+  }
+
+  test("circle rings: centre is one cell, outer rings subdivide evenly") {
+    val l = CircleLayout(8)
+    val _ = assert(l.ringSizes.size == 9)
+    val _ = assert(l.ringSizes(0) == 1)
+    for i <- 2 to 8 do
+      val _ = assert(l.ringSizes(i) % l.ringSizes(i - 1) == 0, s"ring $i: ${l.ringSizes}")
+    for i <- 1 to 8 do
+      val w = 2 * math.Pi * i / l.ringSizes(i)
+      val _ = assert(w >= 0.7 && w <= 2.2, s"ring $i arc width $w: ${l.ringSizes}")
+  }
+
+  test("circle neighbours are symmetric; centre is the goal; start is on the outer ring at the bottom") {
+    val l = CircleLayout(8)
+    val _ = assert(symmetric(l))
+    val _ = assert(l.goal == 0)
+    val _ = assert(l.neighbours(0).size == l.ringSizes(1))
+    val _ = assert(l.ringOf(l.start) == 8)
+    val (a0, a1) = l.arc(l.start)
+    assert(a0 < math.Pi / 2 && math.Pi / 2 < a1, s"start arc ($a0, $a1)")
+  }
+
+  test("every style carves a perfect maze on hex and circle") {
+    perfect(HexLayout(9, 11))
+    perfect(CircleLayout(7))
+  }

@@ -68,3 +68,17 @@ class SudokuDifficultySpec extends AnyFunSuite:
     info(f"one Hard 9×9 page: $ms%.0f ms")
     assert(ms <= 300, f"one Hard 9×9 page: $ms%.0f ms")
   }
+
+  // 6×6 Hard almost never needs Hard, so each puzzle uses every try.
+  // The answer page makes all pages at once; it must not freeze the
+  // preview for long.
+  test("one 6×6 Hard page (6 puzzles) takes at most about 60 ms") {
+    val _ = generate(GridSize.G6, Level.Hard, new Random(0)) // warm up
+    val ms = (1 to 3).map { s =>
+      val t = System.nanoTime()
+      (1 to 6).foreach(i => generate(GridSize.G6, Level.Hard, new Random(s * 10 + i)))
+      (System.nanoTime() - t) / 1e6
+    }.sum / 3
+    info(f"one 6×6 Hard page: $ms%.0f ms")
+    assert(ms <= 60, f"one 6×6 Hard page: $ms%.0f ms")
+  }

@@ -57,3 +57,48 @@ class SudokuLogicSpec extends AnyFunSuite:
   test("the generator is deterministic for a seed") {
     assert(generate(GridSize.G6, Level.Medium, new Random(9)) == generate(GridSize.G6, Level.Medium, new Random(9)))
   }
+
+  // ---------- Hard techniques, on hand-made grids ----------
+
+  /** A 9×9 grid with the given cells: ((row, column), symbol). */
+  private def cells(gs: ((Int, Int), Int)*): Vector[Int] =
+    gs.foldLeft(Vector.fill(81)(0)) { case (g, ((r, c), v)) => g.updated(r * 9 + c, v) }
+
+  private def has(mask: Int, v: Int): Boolean = (mask & (1 << v)) != 0
+
+  /** True when symbol v is placed in the cell or is still a candidate. */
+  private def possible(size: GridSize, givens: Vector[Int], level: Level, cell: Int, v: Int): Boolean =
+    rate(size, givens, level).grid(cell) == v || has(candidates(size, givens, level)(cell), v)
+
+  test("naked pair: (0,0) and (0,1) can only be 1 or 2, so 1 and 2 go out of the rest of row 0") {
+    // Box 0 rows 1-2 hold 3..8; 9 in columns 0 and 1 further down.
+    val g = cells((1, 0) -> 3, (1, 1) -> 4, (1, 2) -> 5, (2, 0) -> 6, (2, 1) -> 7, (2, 2) -> 8, (5, 0) -> 9, (6, 1) -> 9)
+    val medium = candidates(GridSize.G9, g, Level.Medium)
+    val _ = assert((3 until 9).forall(c => has(medium(c), 1) && has(medium(c), 2)))
+    val hard = rate(GridSize.G9, g, Level.Hard)
+    val _ = assert(hard.steps.getOrElse(Technique.NakedPair, 0) >= 1)
+    val after = candidates(GridSize.G9, g, Level.Hard)
+    val _ = assert((3 until 9).forall(c => !has(after(c), 1) && !has(after(c), 2) && hard.grid(c) != 1 && hard.grid(c) != 2))
+    // The pair keeps its two candidates.
+    assert(List(0, 1).forall(c => has(after(c), 1) && has(after(c), 2)))
+  }
+
+  test("pointing: in box 0, 5 can only be in row 0, so 5 goes out of the rest of row 0") {
+    val g = cells((1, 0) -> 1, (1, 1) -> 2, (1, 2) -> 3, (2, 0) -> 4, (2, 1) -> 6, (2, 2) -> 7)
+    val _ = assert(rate(GridSize.G9, g, Level.Medium).steps.isEmpty)
+    val _ = assert(rate(GridSize.G9, g, Level.Hard).steps.getOrElse(Technique.LockedCandidates, 0) >= 1)
+    val _ = assert((3 until 9).forall(c => !possible(GridSize.G9, g, Level.Hard, c, 5)))
+    // The three places in the box stay candidates.
+    val after = candidates(GridSize.G9, g, Level.Hard)
+    assert((0 until 3).forall(c => has(after(c), 5)))
+  }
+
+  test("box-line: in column 0, 5 can only be in box 0, so 5 goes out of the rest of box 0") {
+    val g = cells((3, 0) -> 1, (4, 0) -> 2, (5, 0) -> 3, (6, 0) -> 4, (7, 0) -> 6, (8, 0) -> 7)
+    val _ = assert(rate(GridSize.G9, g, Level.Medium).steps.isEmpty)
+    val _ = assert(rate(GridSize.G9, g, Level.Hard).steps.getOrElse(Technique.LockedCandidates, 0) >= 1)
+    val _ = assert((0 until 3).forall(r => (1 until 3).forall(c => !possible(GridSize.G9, g, Level.Hard, r * 9 + c, 5))))
+    // The three places in column 0 stay candidates.
+    val after = candidates(GridSize.G9, g, Level.Hard)
+    assert((0 until 3).forall(r => has(after(r * 9), 5)))
+  }

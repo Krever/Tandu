@@ -236,6 +236,13 @@ object SudokuLogic:
     val solved = solver.run(level, t => steps(t) = steps.getOrElse(t, 0) + 1)
     Rating(solved, solver.grid.toVector, steps.toMap)
 
+  /** The candidates of each cell (bit v for symbol v; 0 for a filled
+    * cell) when the solver stops at `level`. For tests of the techniques. */
+  private[activities] def candidates(size: GridSize, givens: IndexedSeq[Int], level: Level): Vector[Int] =
+    val solver = Solver(geometries(size), givens)
+    val _ = solver.run(level, _ => ())
+    solver.cand.toVector
+
   private def solvable(g: Geometry, givens: Array[Int], level: Level): Boolean =
     Solver(g, givens.toIndexedSeq).run(level, _ => ())
 
@@ -260,12 +267,21 @@ object SudokuLogic:
     * does not need its level. */
   val MaxTries = 20
 
+  /** Levels that the generator does not reach on a grid size: a small grid
+    * does not need the harder techniques (measured; see the report in
+    * `SudokuDifficultySpec`). More tries do not help there and only make
+    * the preview slow, so [[generate]] makes one try. */
+  def outOfReach(size: GridSize, level: Level): Boolean = (size, level) match
+    case (GridSize.G4, Level.Medium | Level.Hard) | (GridSize.G6, Level.Hard) => true
+    case _                                                                => false
+
   /** A puzzle that is solvable at `level`. From a full random grid, givens
     * are removed in random order; a removal stays only when the puzzle is
     * still solvable at the level. The puzzle must also need the level (not
     * be solvable at the level below). If no try in [[MaxTries]] needs the
-    * level, the last try is kept: it is never harder than asked. A puzzle
-    * that logic solves has exactly one solution. */
+    * level, the last try is kept: it is never harder than asked. A level
+    * that is [[outOfReach]] gets one try. A puzzle that logic solves has
+    * exactly one solution. */
   def generate(size: GridSize, level: Level, rng: Random): Puzzle =
     val g = geometries(size)
     def once(): Puzzle =
@@ -277,7 +293,7 @@ object SudokuLogic:
         if !solvable(g, givens, level) then givens(pos) = saved
       Puzzle(givens.toVector, solution)
     def needsLevel(p: Puzzle): Boolean = level.below.forall(b => !solvable(g, p.givens.toArray, b))
-    val tries = Iterator.continually(once()).take(MaxTries)
+    val tries = Iterator.continually(once()).take(if outOfReach(size, level) then 1 else MaxTries)
     var last = tries.next()
     while !needsLevel(last) && tries.hasNext do last = tries.next()
     last

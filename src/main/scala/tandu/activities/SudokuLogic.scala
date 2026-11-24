@@ -75,6 +75,7 @@ object SudokuLogic:
       }.toArray
     }
     val full: Int = ((1 << (n + 1)) - 1) & ~1
+    val boxIdx: Array[Int] = Array.tabulate(cells)(boxOf)
 
   private lazy val geometries: Map[GridSize, Geometry] = GridSize.values.map(s => s -> Geometry(s)).toMap
 
@@ -85,11 +86,15 @@ object SudokuLogic:
   private final class Solver(g: Geometry, givens: IndexedSeq[Int]):
     val grid: Array[Int] = new Array[Int](g.cells)
     val cand: Array[Int] = Array.fill(g.cells)(g.full)
+
+    /** The number of empty cells. */
+    var empty: Int = g.cells
     for i <- 0 until g.cells if givens(i) != 0 do place(i, givens(i))
 
     def place(cell: Int, v: Int): Unit =
       grid(cell) = v
       cand(cell) = 0
+      empty -= 1
       val bit = ~(1 << v)
       val ps = g.peers(cell)
       var i = 0
@@ -97,63 +102,111 @@ object SudokuLogic:
         cand(ps(i)) &= bit
         i += 1
 
+    /** True when an empty cell has no candidate left. */
+    def stuck: Boolean =
+      var cell = 0
+      while cell < g.cells && !(grid(cell) == 0 && cand(cell) == 0) do cell += 1
+      cell < g.cells
+
+    // The techniques use plain loops and bit masks: the generator calls the
+    // solver once for each removed given, so this is the hot path.
+
     /** Remove the bits of `mask` from the cells of `unit` for which `keep`
       * is false. True when a candidate was removed. */
     private def eliminate(unit: Array[Int], mask: Int, keep: Int => Boolean): Boolean =
       var changed = false
-      for cell <- unit if grid(cell) == 0 && !keep(cell) && (cand(cell) & mask) != 0 do
-        cand(cell) &= ~mask
-        changed = true
+      var i = 0
+      while i < unit.length do
+        val cell = unit(i)
+        if (cand(cell) & mask) != 0 && !keep(cell) then
+          cand(cell) &= ~mask
+          changed = true
+        i += 1
       changed
 
-    private def value(mask: Int): Int = Integer.numberOfTrailingZeros(mask)
+    private def value(bit: Int): Int = Integer.numberOfTrailingZeros(bit)
 
     def nakedSingle(): Boolean =
       var cell = 0
-      while cell < g.cells do
-        if grid(cell) == 0 && Integer.bitCount(cand(cell)) == 1 then
-          place(cell, value(cand(cell)))
-          return true
-        cell += 1
-      false
+      while cell < g.cells && !(grid(cell) == 0 && Integer.bitCount(cand(cell)) == 1) do cell += 1
+      cell < g.cells && { place(cell, value(cand(cell))); true }
 
+    /** For each unit: the symbols that are a candidate in exactly one cell
+      * (seen once, not twice). Filled cells have no candidates. */
     def hiddenSingle(): Boolean =
       g.units.exists { unit =>
-        (1 to g.n).exists { v =>
-          val bit = 1 << v
-          val ps = unit.filter(cell => grid(cell) == 0 && (cand(cell) & bit) != 0)
-          ps.length == 1 && { place(ps(0), v); true }
+        var once = 0
+        var twice = 0
+        var i = 0
+        while i < unit.length do
+          val m = cand(unit(i))
+          twice |= once & m
+          once |= m
+          i += 1
+        val single = once & ~twice
+        single != 0 && {
+          val bit = Integer.lowestOneBit(single)
+          var j = 0
+          while (cand(unit(j)) & bit) == 0 do j += 1
+          place(unit(j), value(bit))
+          true
         }
       }
 
     def nakedPair(): Boolean =
       g.units.exists { unit =>
-        val two = unit.filter(cell => grid(cell) == 0 && Integer.bitCount(cand(cell)) == 2)
-        two.indices.exists { i =>
-          (i + 1 until two.length).exists { j =>
-            val (a, b) = (two(i), two(j))
-            cand(a) == cand(b) && eliminate(unit, cand(a), cell => cell == a || cell == b)
-          }
-        }
+        var found = false
+        var i = 0
+        while !found && i < unit.length do
+          val a = unit(i)
+          val m = cand(a)
+          if Integer.bitCount(m) == 2 then
+            var j = i + 1
+            while !found && j < unit.length do
+              val b = unit(j)
+              if cand(b) == m then found = eliminate(unit, m, cell => cell == a || cell == b)
+              j += 1
+          i += 1
+        found
       }
 
+    /** The cells of `unit` that have `bit` as a candidate, as (count, the
+      * first cell, all in one row, all in one column, all in one box). */
+    private def places(unit: Array[Int], bit: Int): (Int, Int, Boolean, Boolean, Boolean) =
+      var count = 0
+      var first = -1
+      var row = true
+      var col = true
+      var box = true
+      var i = 0
+      while i < unit.length do
+        val cell = unit(i)
+        if (cand(cell) & bit) != 0 then
+          if first < 0 then first = cell
+          else
+            row &&= cell / g.n == first / g.n
+            col &&= cell % g.n == first % g.n
+            box &&= g.boxIdx(cell) == g.boxIdx(first)
+          count += 1
+        i += 1
+      (count, first, row, col, box)
+
     def lockedCandidates(): Boolean =
-      def places(unit: Array[Int], bit: Int): Array[Int] = unit.filter(cell => grid(cell) == 0 && (cand(cell) & bit) != 0)
       (1 to g.n).exists { v =>
         val bit = 1 << v
         // Pointing: a box's places in one row or one column.
-        val pointing = g.boxes.exists { box =>
-          val ps = places(box, bit)
-          ps.nonEmpty && {
-            val inBox = box.toSet
-            (ps.forall(_ / g.n == ps(0) / g.n) && eliminate(g.rows(ps(0) / g.n), bit, inBox)) ||
-            (ps.forall(_ % g.n == ps(0) % g.n) && eliminate(g.cols(ps(0) % g.n), bit, inBox))
-          }
+        val pointing = g.boxes.indices.exists { b =>
+          val (count, first, row, col, _) = places(g.boxes(b), bit)
+          def inBox(cell: Int) = g.boxIdx(cell) == b
+          count > 0 && (
+            (row && eliminate(g.rows(first / g.n), bit, inBox)) ||
+            (col && eliminate(g.cols(first % g.n), bit, inBox)))
         }
         // Box-line: a line's places in one box.
-        pointing || g.lines.exists { line =>
-          val ps = places(line, bit)
-          ps.nonEmpty && ps.forall(g.boxOf(_) == g.boxOf(ps(0))) && eliminate(g.boxes(g.boxOf(ps(0))), bit, line.toSet)
+        pointing || g.lines.indices.exists { l =>
+          val (count, first, _, _, box) = places(g.lines(l), bit)
+          def inLine(cell: Int) = if l < g.n then cell / g.n == l else cell % g.n == l - g.n
+          count > 0 && box && eliminate(g.boxes(g.boxIdx(first)), bit, inLine)
         }
       }
 
@@ -170,8 +223,8 @@ object SudokuLogic:
       val order = Technique.values.filter(level.techniques)
       var result: Option[Boolean] = None
       while result.isEmpty do
-        if !grid.contains(0) then result = Some(true)
-        else if (0 until g.cells).exists(cell => grid(cell) == 0 && cand(cell) == 0) then result = Some(false)
+        if empty == 0 then result = Some(true)
+        else if stuck then result = Some(false)
         else order.find(apply) match
           case Some(t) => count(t)
           case None    => result = Some(false)

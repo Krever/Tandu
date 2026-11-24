@@ -174,6 +174,8 @@ test.describe("print", () => {
     await page.getByTestId("sudoku-size-9").click()
     await expect(page.getByTestId("sudoku-symbols-shapes")).toBeDisabled()
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
+    // Kids who solve 9×9 know the digits; the board has no room for a legend.
+    await expect(page.getByTestId("sudoku-preview").locator(".sudoku-print-legend")).toHaveCount(0)
   })
 
   test("both symbol kinds: puzzles alternate on the page", async ({ page }) => {
@@ -183,19 +185,21 @@ test.describe("print", () => {
     await expect(page.getByTestId("sudoku-symbols-shapes")).toHaveClass(/is-active/)
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
     await expect(page).toHaveURL(/\.shapes-digits\./)
-    // One page: three shape puzzles (with a legend) and three digit
-    // puzzles (a blank legend line keeps the boards in line).
-    await expect(preview.locator(".sudoku-print-puzzle")).toHaveCount(6)
-    await expect(preview.locator(".sudoku-print-legend:not(.sudoku-print-legend--blank)")).toHaveCount(3)
-    await expect(preview.locator(".sudoku-print-legend--blank")).toHaveCount(3)
+    // One page: three shape puzzles and three digit puzzles, each with
+    // its legend.
+    const legends = preview.locator(".sudoku-print-legend")
+    await expect(legends).toHaveCount(6)
+    const texts = await legends.allTextContents()
+    expect(texts.filter(t => t === "● ▲ ■ ✚")).toHaveLength(3)
+    expect(texts.filter(t => t === "1 2 3 4")).toHaveLength(3)
     // The print is the preview.
     await startPrinting(page)
-    await expect(page.locator(".print-only .sudoku-print-legend--blank")).toHaveCount(3)
-    // The last kind cannot be turned off.
+    expect(await page.locator(".print-only .sudoku-print-legend").allTextContents()).toEqual(texts)
+    // The last kind cannot be turned off; digits only keeps the digit legend.
     await page.getByTestId("sudoku-symbols-shapes").click()
     await page.getByTestId("sudoku-symbols-digits").click()
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
-    await expect(preview.locator(".sudoku-print-legend")).toHaveCount(0)
+    await expect(legends).toHaveText(Array(6).fill("1 2 3 4"))
   })
 
   test("the URL recipe is read back", async ({ page }) => {

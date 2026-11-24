@@ -202,8 +202,9 @@ Decided (user picked "technique + givens" and "chips, one per page"):
 - **Mixed symbols:** Symbols become multi-select chips (Shapes, Digits),
   like Maze shapes. With both on, the puzzles alternate on the page and
   from page to page (user, after trying "one kind per page": a one-page
-  sheet showed no change). On a mixed page a digit puzzle has a blank
-  legend line, so the boards are in line. The
+  sheet showed no change). On 4×4 and 6×6, every puzzle has its legend
+  on top, digits too (user: uniform, and a young child may not know
+  every digit). 9×9 has no legend (no room; its solvers know digits). The
   last chip cannot be turned off. 9×9 is digits only (Shapes chip
   disabled). URL: `shapes`, `digits`, `shapes-digits`; old tokens keep
   working. Presets: Easy and Medium shapes, Hard digits (as before).

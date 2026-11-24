@@ -236,19 +236,18 @@ object SudokuSheet:
   def sheetBody(c: SheetConfig, page: SheetPage): HtmlElement =
     page match
       case SheetPage.Puzzles(ps) =>
-        // On a page with both kinds, a digit puzzle gets a blank legend
-        // line, so that all boards are in line.
-        val mixed = ps.map(_.symbols).distinct.size > 1
-        val shapes = symbolsOf(c.size, Symbols.Shapes).mkString(" ")
         div(
           cls := s"sudoku-print-sheet sudoku-print-sheet--pp${c.perPage.n}",
           ps.map { p =>
+            val symbols = symbolsOf(c.size, p.symbols)
             div(
               cls := "sudoku-print-puzzle",
-              if p.symbols == Symbols.Shapes then div(cls := "sudoku-print-legend", shapes)
-              else if mixed then div(cls := "sudoku-print-legend sudoku-print-legend--blank", aria.hidden := true, shapes)
-              else emptyNode,
-              board(c.size, p.puzzle.givens, symbolsOf(c.size, p.symbols), boardMm(c), None)
+              // The symbols to use, above each small board: shapes and
+              // digits alike (a young child may not know every digit). Not
+              // on 9×9: the board has no room for it, and a child who
+              // solves 9×9 knows the digits.
+              when(c.size != GridSize.G9)(div(cls := "sudoku-print-legend", symbols.mkString(" "))),
+              board(c.size, p.puzzle.givens, symbols, boardMm(c), None)
             )
           }
         )

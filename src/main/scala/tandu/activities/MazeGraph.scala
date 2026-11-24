@@ -60,11 +60,7 @@ object MazeGraph:
     * angles are turned so that this cell is centred at the bottom.
     * Angles are in radians, clockwise from the right (y points down). */
   final case class CircleLayout(rings: Int) extends Layout:
-    val ringSizes: Vector[Int] =
-      (2 to rings).foldLeft(Vector(1, 6)) { (acc, i) =>
-        val prev = acc.last
-        acc :+ (if 2 * math.Pi * i / prev > 1.5 then prev * 2 else prev)
-      }.take(rings + 1)
+    val ringSizes: Vector[Int] = CircleLayout.ringSizes(rings)
     private val firstCell: Vector[Int] = ringSizes.scanLeft(0)(_ + _)
     val cellCount: Int = firstCell.last
     def cellAt(ring: Int, i: Int): Int = firstCell(ring) + i
@@ -107,6 +103,15 @@ object MazeGraph:
       inward ++ beside ++ outward
     }
     def neighbours(cell: Int): Vector[Int] = table(cell)
+
+  object CircleLayout:
+    /** The cell count of each ring, 0 to `rings` (see [[CircleLayout]]).
+      * Cheap: it does not make the neighbour table. */
+    def ringSizes(rings: Int): Vector[Int] =
+      (2 to rings).foldLeft(Vector(1, 6)) { (acc, i) =>
+        val prev = acc.last
+        acc :+ (if 2 * math.Pi * i / prev > 1.5 then prev * 2 else prev)
+      }.take(rings + 1)
 
   /** The carved maze: the open passages between neighbour cells. Each pair
     * is stored as (smaller cell, larger cell). */

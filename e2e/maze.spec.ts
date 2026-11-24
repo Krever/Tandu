@@ -40,7 +40,7 @@ test("print mode: presets fill the form, the preview follows, print matches it",
   // Easy: 4 mazes, 10 cells wide and 12 high (the slot is tall).
   await expect(page.getByTestId("maze-preset-easy")).toHaveClass(/is-active/)
   await expect(boards).toHaveCount(4)
-  expect(await viewBox(boards.first())).toBe("0 0 100 120")
+  expect(await viewBox(boards.first())).toBe("0 0 110 130")
 
   // The preview page has padding on the screen; the mazes must still fit
   // in its body, not run off the right edge.
@@ -59,7 +59,7 @@ test("print mode: presets fill the form, the preview follows, print matches it",
   // 2 per page: the slot is wide, so the maze is 16 wide and 10 high.
   await page.getByTestId("maze-per-page-2").click()
   await expect(boards).toHaveCount(2)
-  expect(await viewBox(boards.first())).toBe("0 0 160 100")
+  expect(await viewBox(boards.first())).toBe("0 0 180 110")
   await expect(page.getByTestId("maze-preset-easy")).not.toHaveClass(/is-active/)
 
   // Hard: one big maze.
@@ -97,7 +97,7 @@ test("print mode: the style changes the maze and is kept in the URL", async ({ p
   const before = await walls(first)
 
   await page.getByTestId("maze-style-branchy").click()
-  await expect(page).toHaveURL(/\/print\/s10\.branchy\.few\.pp4$/)
+  await expect(page).toHaveURL(/\/print\/s11\.branchy\.few\.pp4$/)
   await expect(page.getByTestId("maze-preset-easy")).not.toHaveClass(/is-active/)
   expect(await walls(first)).not.toBe(before)
 
@@ -128,13 +128,13 @@ test("print mode: walls have the same line width at every maze size", async ({ p
 test("print mode: the recipe is kept in the URL", async ({ page }) => {
   await page.goto("/activity/maze/print")
   await page.getByTestId("maze-preset-medium").click()
-  await page.getByTestId("maze-loops-many").click()
-  await expect(page).toHaveURL(/\/print\/s16\.balanced\.many\.pp4$/)
+  await page.getByTestId("maze-loops-few").click()
+  await expect(page).toHaveURL(/\/print\/s13\.balanced\.few\.pp4$/)
 
   // Opening the link restores the form.
   await page.goto(page.url())
-  await expect(page.getByTestId("maze-loops-many")).toHaveClass(/is-active/)
-  await expect(page.getByTestId("maze-size")).toContainText("16")
+  await expect(page.getByTestId("maze-loops-few")).toHaveClass(/is-active/)
+  await expect(page.getByTestId("maze-size")).toContainText("13")
 
   // Bad values are clamped or ignored, not trusted.
   await page.goto("/activity/maze/print/s99.pp3.bogus")
@@ -148,7 +148,7 @@ test("print mode: the recipe is kept in the URL", async ({ page }) => {
 
   // A number too long for an Int is ignored; the page still works.
   await page.goto("/activity/maze/print/s99999999999")
-  await expect(page.getByTestId("maze-size")).toContainText("10")
+  await expect(page.getByTestId("maze-size")).toContainText("11")
   await expect(page.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(4)
 })
 

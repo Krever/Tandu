@@ -204,23 +204,20 @@ object Maze extends Activity:
       if w <= h then ((c.size * h / w).toInt, c.size)
       else (c.size, (c.size * w / h).toInt)
 
-    /** (rows, cols) of a hex maze. A passage is one hex edge, only 0.58 of
-      * the cell width, so hex uses 3/4 of `size` cells on the short side.
-      * The other count follows from the slot: the width across the flats
-      * is √3·s and the row step is 1.5·s (s = side length). */
+    /** (rows, cols) of a hex maze. The count of cells is the nearest to
+      * the square maze of the same size, up to the largest that the paper
+      * allows (see [[hexMaxShort]]). */
     def hexDims: (Int, Int) =
-      val n = math.max(3, c.size * 3 / 4)
-      val (w, h) = c.perPage.slotMm
-      if w <= h then
-        val side = w / (math.sqrt(3) * (n + 0.5))
-        (((h / side - 0.5) / 1.5).toInt, n)
-      else
-        val side = h / (1.5 * n + 0.5)
-        (n, (w / (math.sqrt(3) * side) - 0.5).toInt)
+      val (rows, cols) = c.dims
+      val n = nearest(3 to hexMaxShort(c.perPage), rows * cols)(k => hexDimsFor(c.perPage, k)._1 * hexDimsFor(c.perPage, k)._2)
+      hexDimsFor(c.perPage, n)
 
-    /** The rings of a circle maze. The ring width is then about the same
-      * as the square cell width at the same size. */
-    def rings: Int = math.max(2, c.size / 2 - 1)
+    /** The rings of a circle maze. The count of cells is the nearest to
+      * the square maze of the same size, up to the largest that the paper
+      * allows (see [[circleMaxRings]]). */
+    def rings: Int =
+      val (rows, cols) = c.dims
+      nearest(2 to circleMaxRings(c.perPage), rows * cols)(r => MazeGraph.CircleLayout.ringSizes(r).sum)
 
     /** Add or remove one shape. The last shape cannot be removed. */
     def withShape(s: Shape): SheetConfig =
@@ -230,9 +227,47 @@ object Maze extends Activity:
 
     def withAllShapes: SheetConfig = c.copy(shapes = Shape.values.toSet)
 
+  /** Of `options`, the one whose `cells` is nearest to `target` by ratio.
+    * By ratio, not by difference: the cell counts of circle mazes grow in
+    * large steps when the mazes are small. */
+  private def nearest(options: Range, target: Int)(cells: Int => Int): Int =
+    options.minBy(k => math.abs(math.log(cells(k).toDouble / target)))
+
+  /** The hex side length in mm when `n` cells are on the short side. */
+  private def hexSide(pp: PerPage, n: Int): Double =
+    val (w, h) = pp.slotMm
+    if w <= h then w / (math.sqrt(3) * (n + 0.5)) else h / (1.5 * n + 0.5)
+
+  /** (rows, cols) of a hex maze with `n` cells on the short side. The other
+    * count follows from the slot: the width across the flats is √3·s and
+    * the row step is 1.5·s (s = side length). */
+  private def hexDimsFor(pp: PerPage, n: Int): (Int, Int) =
+    val (w, h) = pp.slotMm
+    val side = hexSide(pp, n)
+    if w <= h then (((h / side - 0.5) / 1.5).toInt, n)
+    else (n, (w / (math.sqrt(3) * side) - 0.5).toInt)
+
+  /** The most hex cells on the short side that the paper allows: a
+    * passage is one hex edge, which must be at least 4 mm, and the width
+    * across the flats at least 5.5 mm. */
+  private def hexMaxShort(pp: PerPage): Int =
+    (3 to 200).takeWhile(n => hexSide(pp, n) >= 4.0 && math.sqrt(3) * hexSide(pp, n) >= 5.5).last
+
+  /** The most circle rings that the paper allows: the ring width must be
+    * at least 5.5 mm, and the narrowest doorway (inner arc of a cell) at
+    * least 4 mm. */
+  private def circleMaxRings(pp: PerPage): Int =
+    val (w, h) = pp.slotMm
+    (2 to 200).takeWhile { r =>
+      val ring = math.min(w, h) / 2 / (r + 1)
+      val sizes = MazeGraph.CircleLayout.ringSizes(r)
+      val doorway = (1 to r).map(i => 2 * math.Pi * i / sizes(i)).min * ring
+      ring >= 5.5 && doorway >= 4.0
+    }.last
+
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
-    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(10, Loops.Few, PerPage.Four, Style.Winding)),
-    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(16, Loops.Off, PerPage.Four, Style.Balanced)),
+    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(11, Loops.Few, PerPage.Four, Style.Winding)),
+    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(13, Loops.Off, PerPage.Four, Style.Balanced)),
     SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One, Style.Branchy))
   )
 

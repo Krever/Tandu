@@ -12,8 +12,8 @@ class MazeSpec extends AnyFunSuite:
   private val easy = preset("easy")
 
   test("presets have today's sizes on the short side; the long side fills the slot") {
-    val _ = assert(preset("easy").dims == (12, 10))
-    val _ = assert(preset("medium").dims == (19, 16))
+    val _ = assert(preset("easy").dims == (13, 11))
+    val _ = assert(preset("medium").dims == (15, 13))
     assert(preset("hard").dims == (29, 24))
   }
 
@@ -31,7 +31,7 @@ class MazeSpec extends AnyFunSuite:
   test("codec round trip") {
     for c <- sheetPresets.map(_.config) :+ SheetConfig(7, Loops.Many, PerPage.Two, Style.Branchy) do
       val _ = assert(decodeConfig(encodeConfig(c)) == c)
-    assert(encodeConfig(easy) == "s10.winding.few.pp4")
+    assert(encodeConfig(easy) == "s11.winding.few.pp4")
   }
 
   test("bad tokens are clamped or ignored") {
@@ -40,7 +40,7 @@ class MazeSpec extends AnyFunSuite:
     val _ = assert(decodeConfig("s99999999999") == easy)
     val _ = assert(decodeConfig("s2.pp1").size == 5)
     // The page count is not part of the recipe.
-    assert(decodeConfig("s10.few.pp4.p3") == easy)
+    assert(decodeConfig("s11.few.pp4.p3") == easy)
   }
 
   test("adding pages keeps the earlier pages") {
@@ -108,14 +108,15 @@ class MazeSpec extends AnyFunSuite:
 
   test("hex dims follow the slot") {
     val _ = assert(cfg(16, PerPage.Four, Shape.Hex).hexDims == (17, 12))
-    val _ = assert(cfg(20, PerPage.Two, Shape.Hex).hexDims == (15, 22))
-    assert(cfg(30, PerPage.One, Shape.Hex).hexDims == (31, 22))
+    val _ = assert(cfg(20, PerPage.Two, Shape.Hex).hexDims == (18, 26))
+    assert(cfg(30, PerPage.One, Shape.Hex).hexDims == (36, 26))
   }
 
   test("circle rings from size") {
-    val _ = assert(cfg(10, PerPage.Four, Shape.Circle).rings == 4)
-    val _ = assert(cfg(30, PerPage.One, Shape.Circle).rings == 14)
-    assert(cfg(5, PerPage.Four, Shape.Circle).rings == 2)
+    val _ = assert(cfg(10, PerPage.Four, Shape.Circle).rings == 6)
+    val _ = assert(cfg(30, PerPage.One, Shape.Circle).rings == 16)
+    // 30 square cells: 43 (3 rings) is nearer by ratio than 19 (2 rings).
+    assert(cfg(5, PerPage.Four, Shape.Circle).rings == 3)
   }
 
   test("every shape stays drawable at every max size") {
@@ -137,7 +138,7 @@ class MazeSpec extends AnyFunSuite:
   }
 
   test("shapes codec") {
-    val _ = assert(encodeConfig(easy) == "s10.winding.few.pp4")
+    val _ = assert(encodeConfig(easy) == "s11.winding.few.pp4")
     val sc = easy.withShape(Shape.Circle)
     val _ = assert(encodeConfig(sc).endsWith(".square-circle"))
     val _ = assert(decodeConfig(encodeConfig(sc)) == sc)
@@ -163,4 +164,21 @@ class MazeSpec extends AnyFunSuite:
         case Shape.Circle => m.layout.isInstanceOf[MazeGraph.CircleLayout]
         case Shape.Hex    => m.layout.isInstanceOf[MazeGraph.HexLayout]
       val _ = assert(ok, s"${p.shape}: ${m.layout}")
+  }
+
+  /** Cells of a maze of this shape: the layout's cell count. */
+  private def cellsOf(c: SheetConfig, shape: Shape): Int =
+    sheetPages(c.copy(shapes = Set(shape)), 1, seed = 1L).head.mazes.head.layout.cellCount
+
+  test("circle and hex have about as many cells as square, as far as the paper allows") {
+    for pp <- PerPage.values; size <- SheetConfig.MinSize to pp.maxSize do
+      val c = cfg(size, pp, Shape.Square)
+      val square = cellsOf(c, Shape.Square)
+      for shape <- List(Shape.Circle, Shape.Hex) do
+        val cells = cellsOf(c, shape)
+        val atMax = cellsOf(cfg(pp.maxSize, pp, shape), shape)
+        // Circle cell counts grow in large steps at small sizes (19, 43,
+        // 67, …), so the band is wide.
+        val _ = assert(cells <= 1.5 * square, s"$shape $pp size $size: $cells cells, square $square")
+        val _ = assert(cells >= math.min(0.66 * square, atMax), s"$shape $pp size $size: $cells cells, square $square, max $atMax")
   }

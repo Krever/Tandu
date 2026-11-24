@@ -3,7 +3,6 @@ package tandu.workbook
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 import tandu.activities.{Battleships, DotToDot, GuideRobot, LetterTracing, MathPractice, Maze, SeekAndFind, SudokuSheet, WordBuilder, WordSearch}
-import tandu.activities.SudokuLogic.Level
 import tandu.i18n.{Lang, Strings}
 
 import scala.scalajs.js
@@ -259,14 +258,16 @@ object Workbook:
     * mechanism. Rows only — cover settings belong to the parent's recipe. */
   final case class Preset(id: String, name: Strings => String, rows: Vector[Row])
 
-  /** A one-page Seek & Find row with the given settings token. */
-  private def seekRow(token: String): Row = Row("seek-and-find", 1, Some(token))
+  /** A one-page row of a source with settings, with the given token. */
+  private def settingsRow(sourceId: String, token: String): Row = Row(sourceId, 1, Some(token))
 
-  /** A one-page Sudoku row with the given settings token. */
-  private def sudokuRow(token: String): Row = Row("sudoku", 1, Some(token))
+  private def seekRow(token: String): Row = settingsRow("seek-and-find", token)
+
+  /** A one-page Sudoku row with the sheet of an old Sudoku source id. */
+  private def sudokuRow(oldId: String): Row = settingsRow("sudoku", SudokuSheet.legacyTokens(oldId))
 
   /** A one-page Maze row with the settings of a preset. */
-  private def mazeRow(presetId: String): Row = Row("maze", 1, Some(Maze.presetToken(presetId)))
+  private def mazeRow(presetId: String): Row = settingsRow("maze", Maze.presetToken(presetId))
 
   val presets: List[Preset] = List(
     // Pre-readers: pictures, pens and counting; no word puzzles yet.
@@ -275,7 +276,7 @@ object Workbook:
       Row("dot-to-dot", 1),
       seekRow(SeekAndFind.presetToken("easy")),
       seekRow(SeekAndFind.countSheetToken),
-      sudokuRow(SudokuSheet.presetToken("easy")),
+      sudokuRow("sudoku-emoji4"),
       Row("math-easy", 1),
       mazeRow("easy")
     )),
@@ -284,7 +285,7 @@ object Workbook:
       Row("dot-to-dot", 1),
       Row("letter-tracing-lower", 1),
       seekRow(SeekAndFind.presetToken("medium")),
-      sudokuRow(SudokuSheet.presetToken("medium")),
+      sudokuRow("sudoku-emoji6"),
       Row("word-builder-easy", 1),
       Row("word-search-easy", 1),
       Row("math-medium", 1),
@@ -293,8 +294,8 @@ object Workbook:
     )),
     // Confident readers: mid/hard everything.
     Preset("age-8", _.workbook.age8plus, Vector(
-      sudokuRow(SudokuSheet.classicToken(Level.Medium)),
-      sudokuRow(SudokuSheet.classicToken(Level.Hard)),
+      sudokuRow("sudoku-medium"),
+      sudokuRow("sudoku-hard"),
       mazeRow("hard"),
       Row("word-search-medium", 1),
       Row("word-search-hard", 1),
@@ -307,7 +308,7 @@ object Workbook:
     Preset("travel", _.workbook.travel, Vector(
       Row("tic-tac-toe-grids", 1),
       mazeRow("easy"),
-      sudokuRow(SudokuSheet.presetToken("medium")),
+      sudokuRow("sudoku-emoji6"),
       Row("dot-to-dot", 1),
       seekRow(SeekAndFind.presetToken("medium")),
       Row("word-search-easy", 1),
@@ -318,8 +319,8 @@ object Workbook:
       Row("math-medium", 1),
       Row("math-hard", 1),
       seekRow(SeekAndFind.countSheetToken),
-      sudokuRow(SudokuSheet.presetToken("medium")),
-      sudokuRow(SudokuSheet.classicToken(Level.Easy))
+      sudokuRow("sudoku-emoji6"),
+      sudokuRow("sudoku-easy")
     )),
     // Doubles as "empty the book" via the replace-with-preset panel.
     Preset("empty", _.workbook.emptyPreset, Vector.empty)
@@ -345,10 +346,8 @@ object Workbook:
       val levels = List("easy", "medium", "hard")
       levels.map(p => s"seek-and-find-$p" -> ("seek-and-find", SeekAndFind.presetToken(p))).toMap +
         ("seek-and-find-count" -> ("seek-and-find", SeekAndFind.countSheetToken)) ++
-        levels.map(p => s"maze-$p" -> ("maze", Maze.presetToken(p))) +
-        ("sudoku-emoji4" -> ("sudoku", SudokuSheet.presetToken("easy"))) +
-        ("sudoku-emoji6" -> ("sudoku", SudokuSheet.presetToken("medium"))) ++
-        Level.values.map(l => s"sudoku-${l.toString.toLowerCase}" -> ("sudoku", SudokuSheet.classicToken(l)))
+        levels.map(p => s"maze-$p" -> ("maze", Maze.presetToken(p))) ++
+        SudokuSheet.legacyTokens.map((id, token) => id -> ("sudoku", token))
 
     private def migrate(row: Row): Row =
       legacyRows.get(row.sourceId).fold(row)((id, token) => row.copy(sourceId = id, params = Some(token)))

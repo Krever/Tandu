@@ -28,9 +28,10 @@ object SheetBuilder:
     *   - `encode` / `decode`: the recipe as one URL path segment. `decode`
     *     must accept any text and give a valid recipe.
     *   - `pagesOf(c, n, seed)`: `n` pages from one seed, then optional
-    *     extra pages (Sudoku answers). Page k must not change when pages
-    *     are added after it. The preview reads only the page it shows, so
-    *     a lazy sequence can make pages when they are read.
+    *     extra pages that depend on the recipe (for example answer pages).
+    *     Page k must not change when pages are added after it. The preview
+    *     reads only the page it shows, so [[lazyPages]] can make pages
+    *     when they are read.
     *   - `body`: one page body, without the printable frame.
     *   - `form`: the form rows; they read and write only the given Var.
     *   - `newLabel`: the label of the button that makes new pages. */
@@ -56,6 +57,22 @@ object SheetBuilder:
 
   /** The enum case whose lower-case name is `t`. */
   def named[E](values: Array[E], t: String): Option[E] = values.find(_.toString.toLowerCase == t)
+
+  /** A set of enum cases as one token: the lower-case names in enum
+    * order, joined by '-' (for example `square-circle`). */
+  def encodeSet[E](values: Array[E], set: Set[E]): String =
+    values.filter(set).map(_.toString.toLowerCase).mkString("-")
+
+  /** The set of enum cases of a token made by [[encodeSet]]. None when a
+    * part is not a case name; a token of only dashes has no parts, and
+    * gives None too, so a recipe never gets an empty set. */
+  def namedSet[E](values: Array[E], t: String): Option[Set[E]] =
+    val parts = t.split('-').toList.map(named(values, _))
+    Option.when(parts.nonEmpty && parts.forall(_.isDefined))(parts.flatten.toSet)
+
+  /** Add `k` to `set`, or remove it; the last element stays. */
+  def toggle[E](set: Set[E], k: E): Set[E] =
+    if !set(k) then set + k else if set.size > 1 then set - k else set
 
   /** The page count is a token in the same URL segment as the recipe
     * (`.p3`), but it is not part of the recipe: a workbook row has its own
@@ -84,6 +101,20 @@ object SheetBuilder:
 
   // ---------- pages ----------
 
+  /** Pages that are made when they are read, once (for example a slow
+    * generator: the preview shows one page only). Equality is by
+    * reference: element equality would make every page. */
+  final class LazyPages[A](n: Int, make: Int => A) extends IndexedSeq[A]:
+    private val cache = new Array[Any](n)
+    def length: Int = n
+    def apply(i: Int): A =
+      if cache(i) == null then cache(i) = make(i)
+      cache(i).asInstanceOf[A]
+    override def equals(o: Any): Boolean = o.asInstanceOf[AnyRef] eq this
+    override def hashCode(): Int = System.identityHashCode(this)
+
+  def lazyPages[A](n: Int)(make: Int => A): IndexedSeq[A] = LazyPages(n, make)
+
   /** The print mode of an activity. `intro` comes first (the rules card).
     * The recipe and the page count are kept in the URL segment after
     * "print". */
@@ -107,7 +138,7 @@ object SheetBuilder:
       (c, spec.pagesOf(c, n, sd))
     }
     // The number of pages, extra pages included. It can change without a
-    // change of the page count (Sudoku answers on or off).
+    // change of the page count (for example answer pages on or off).
     val total = sheets.map(_._2.size)
     val at = shown.signal.combineWith(total).map((i, n) => math.min(i, n - 1))
     def pagerButton(testId: String, label: String, isDisabled: Signal[Boolean], go: Int => Int): HtmlElement =
@@ -127,7 +158,9 @@ object SheetBuilder:
       // Ctrl+P and the browser menu print too, not only the Print button.
       windowEvents(_.onBeforePrint) --> (_ => printing.set(true)),
       windowEvents(_.onAfterPrint) --> (_ => printing.set(false)),
-      total.changes --> (n => shown.update(i => math.min(i, n - 1))),
+      // Write `shown` only when it is out of range: a write makes the
+      // preview again, and `at` already clamps it for the render.
+      total.changes --> (n => if shown.now() > n - 1 then shown.set(n - 1)),
       div(cls := "no-print", intro),
       div(cls := "no-print", presetPills(spec, config)),
       div(

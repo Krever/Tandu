@@ -18,8 +18,6 @@ object SudokuSheet:
   enum Symbols:
     case Shapes, Digits
 
-  val AllSymbols: Set[Symbols] = Symbols.values.toSet
-
   enum PerPage(val n: Int):
     case One extends PerPage(1)
     case Two extends PerPage(2)
@@ -27,25 +25,34 @@ object SudokuSheet:
     case Six extends PerPage(6)
 
   /** The recipe of a sheet. `symbols` holds one or both kinds; with both,
-    * the puzzles alternate (on a page, and from page to page). 9×9 is digits only. When
-    * `answers` is on, the sheet ends with pages of the solved grids. */
+    * the puzzles alternate (on a page, and from page to page). 9×9 is
+    * digits only. When `answers` is on, the sheet ends with pages of the
+    * solved grids. */
   final case class SheetConfig(size: GridSize, symbols: Set[Symbols], level: Level, perPage: PerPage, answers: Boolean)
+
+  /** 9×9 is for children who know the digits, and its board has no room
+    * for a legend: digits only, without a legend. */
+  private def digitsOnly(size: GridSize): Boolean = size == GridSize.G9
 
   extension (c: SheetConfig)
     /** A new grid size. 9×9 sets digits; the other sizes keep the symbols. */
     def withSize(g: GridSize): SheetConfig =
-      c.copy(size = g, symbols = if g == GridSize.G9 then Set(Symbols.Digits) else c.symbols)
+      c.copy(size = g, symbols = if digitsOnly(g) then Set(Symbols.Digits) else c.symbols)
 
     /** Turn one kind of symbols on or off. The last kind stays on, and 9×9
       * stays digits. */
-    def withSymbol(k: Symbols): SheetConfig =
-      val next = if c.symbols(k) then c.symbols - k else c.symbols + k
-      if next.isEmpty then c else c.copy(symbols = next).withSize(c.size)
+    def withSymbol(k: Symbols): SheetConfig = c.copy(symbols = SheetBuilder.toggle(c.symbols, k)).withSize(c.size)
+
+  /** The name of a level (the same names as the in-app Sudoku). */
+  private def levelLabel(l: Level): Strings => String = l match
+    case Level.Easy   => _.sudoku.easy.name
+    case Level.Medium => _.sudoku.medium.name
+    case Level.Hard   => _.sudoku.hard.name
 
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
-    SheetBuilder.Preset("easy", form(_.levelEasy), SheetConfig(GridSize.G4, Set(Symbols.Shapes), Level.Easy, PerPage.Six, answers = false)),
-    SheetBuilder.Preset("medium", form(_.levelMedium), SheetConfig(GridSize.G6, Set(Symbols.Shapes), Level.Medium, PerPage.Six, answers = false)),
-    SheetBuilder.Preset("hard", form(_.levelHard), SheetConfig(GridSize.G9, Set(Symbols.Digits), Level.Hard, PerPage.Four, answers = false))
+    SheetBuilder.Preset("easy", levelLabel(Level.Easy), SheetConfig(GridSize.G4, Set(Symbols.Shapes), Level.Easy, PerPage.Six, answers = false)),
+    SheetBuilder.Preset("medium", levelLabel(Level.Medium), SheetConfig(GridSize.G6, Set(Symbols.Shapes), Level.Medium, PerPage.Six, answers = false)),
+    SheetBuilder.Preset("hard", levelLabel(Level.Hard), SheetConfig(GridSize.G9, Set(Symbols.Digits), Level.Hard, PerPage.Four, answers = false))
   )
 
   /** A label of the sheet form. */
@@ -69,17 +76,21 @@ object SudokuSheet:
     * level (for example "9×9 · Hard"). */
   def tokenSummary(token: String): Strings => String =
     val c = decodeConfig(token)
-    SheetBuilder.presetName(sheetSpec, c).getOrElse { str =>
-      val level = c.level match
-        case Level.Easy   => str.offline.sudoku.form.levelEasy
-        case Level.Medium => str.offline.sudoku.form.levelMedium
-        case Level.Hard   => str.offline.sudoku.form.levelHard
-      s"${c.size.n}×${c.size.n} · $level"
-    }
+    SheetBuilder.presetName(sheetSpec, c).getOrElse(str => s"${c.size.n}×${c.size.n} · ${levelLabel(c.level)(str)}")
 
   /** The token of the old 9×9 print sheets: digits, six per page. */
   def classicToken(level: Level): String =
     encodeConfig(SheetConfig(GridSize.G9, Set(Symbols.Digits), level, PerPage.Six, answers = false))
+
+  /** The old workbook source ids (one per variant) and the token of the
+    * same sheet. The ids are literal: saved books keep them. */
+  lazy val legacyTokens: Map[String, String] = Map(
+    "sudoku-emoji4" -> presetToken("easy"),
+    "sudoku-emoji6" -> presetToken("medium"),
+    "sudoku-easy"   -> classicToken(Level.Easy),
+    "sudoku-medium" -> classicToken(Level.Medium),
+    "sudoku-hard"   -> classicToken(Level.Hard)
+  )
 
   // ---------- codec ----------
 
@@ -88,8 +99,7 @@ object SudokuSheet:
     * are on. */
   def encodeConfig(c: SheetConfig): String =
     val ans = if c.answers then ".ans" else ""
-    val symbols = Symbols.values.filter(c.symbols).map(_.toString.toLowerCase).mkString("-")
-    s"g${c.size.n}.$symbols.${c.level.toString.toLowerCase}.pp${c.perPage.n}$ans"
+    s"g${c.size.n}.${SheetBuilder.encodeSet(Symbols.values, c.symbols)}.${c.level.toString.toLowerCase}.pp${c.perPage.n}$ans"
 
   private val SizeToken = "g(\\d+)".r
   private val PerPageToken = "pp(\\d+)".r
@@ -99,18 +109,13 @@ object SudokuSheet:
     * Without `ans`, answers are off. 9×9 always gets digits. Therefore an
     * edited or old link always gives a valid recipe. */
   def decodeConfig(token: String): SheetConfig =
-    val start = sheetPresets.head.config.copy(answers = false)
-    val raw = token.split('.').foldLeft(start) { (c, t) =>
+    val raw = token.split('.').foldLeft(sheetPresets.head.config) { (c, t) =>
       SheetBuilder.named(Level.values, t).map(v => c.copy(level = v))
         .getOrElse(t match
           case "ans"           => c.copy(answers = true)
           case SizeToken(n)    => GridSize.values.find(g => n.toIntOption.contains(g.n)).fold(c)(g => c.copy(size = g))
           case PerPageToken(n) => PerPage.values.find(p => n.toIntOption.contains(p.n)).fold(c)(p => c.copy(perPage = p))
-          case _ =>
-            // Symbol kinds joined by '-'. A token of only dashes has no
-            // parts; it must not give a recipe with no symbols.
-            val parts = t.split('-').toList.map(SheetBuilder.named(Symbols.values, _))
-            if parts.nonEmpty && parts.forall(_.isDefined) then c.copy(symbols = parts.flatten.toSet) else c
+          case _               => SheetBuilder.namedSet(Symbols.values, t).fold(c)(v => c.copy(symbols = v))
         )
     }
     raw.withSize(raw.size)
@@ -120,59 +125,49 @@ object SudokuSheet:
   /** One puzzle of a page and the kind of symbols that it is printed in. */
   final case class SheetPuzzle(symbols: Symbols, puzzle: Puzzle)
 
-  /** The solved grid of one puzzle, labelled "page·puzzle" (both from 1),
-    * in the symbols of the puzzle. */
-  final case class AnswerEntry(label: String, symbols: Symbols, puzzle: Puzzle)
+  /** The solved grid of one puzzle, labelled "page·puzzle" (both from 1). */
+  final case class AnswerEntry(label: String, puzzle: SheetPuzzle)
 
   /** A page of the sheet: puzzles, or answers. */
   enum SheetPage:
     case Puzzles(puzzles: Vector[SheetPuzzle])
     case Answers(entries: Vector[AnswerEntry])
 
-  /** Answers are small: more of them fit on a page than puzzles. */
-  def answersPerPage(size: GridSize): Int = size match
-    case GridSize.G4 => 56
-    case GridSize.G6 => 36
-    case GridSize.G9 => 25
+  /** The answer page: the board size in mm, and the boards in a row and in
+    * a column. Answers are small: more of them fit on a page than puzzles. */
+  private def answerLayout(size: GridSize): (Int, Int, Int) = size match
+    case GridSize.G4 => (21, 8, 7)
+    case GridSize.G6 => (28, 6, 6)
+    case GridSize.G9 => (34, 5, 5)
 
-  /** Pages that are made when they are read, once. A Hard 9×9 page takes a
-    * noticeable time to make, and the preview shows one page only.
-    * Equality is by reference: element equality would make every page. */
-  private final class LazyPages(n: Int, make: Int => SheetPage) extends IndexedSeq[SheetPage]:
-    private val cache = new Array[SheetPage](n)
-    def length: Int = n
-    def apply(i: Int): SheetPage =
-      if cache(i) == null then cache(i) = make(i)
-      cache(i)
-    override def equals(o: Any): Boolean = o.asInstanceOf[AnyRef] eq this
-    override def hashCode(): Int = System.identityHashCode(this)
-
-  private[activities] def lazyPages(n: Int, make: Int => SheetPage): IndexedSeq[SheetPage] = LazyPages(n, make)
+  def answersPerPage(size: GridSize): Int =
+    val (_, cols, rows) = answerLayout(size)
+    cols * rows
 
   /** `n` puzzle pages from one seed, then the answer pages when answers
     * are on. Puzzle page k has its own seed, so it does not change when
-    * pages are added, and it can be made without the other pages. With
-    * both kinds of symbols, the puzzles go through them in shuffled rounds
+    * pages are added, and it can be made without the other pages. An
+    * answer page makes only the puzzle pages that it shows. With both
+    * kinds of symbols, the puzzles go through them in shuffled rounds
     * (with two kinds: they alternate), on a page and from page to page.
     * The rounds are made for [[SheetBuilder.MaxPages]] pages, so they also
     * do not change when pages are added. */
   def sheetPages(c: SheetConfig, n: Int, seed: Long): IndexedSeq[SheetPage] =
     val per = c.perPage.n
     val kinds = SheetBuilder.rounds(Symbols.values.toVector.filter(c.symbols), math.max(n, SheetBuilder.MaxPages) * per, new Random(seed))
-    val puzzlePages = lazyPages(n, k =>
+    val puzzlePages = SheetBuilder.lazyPages(n) { k =>
       val rng = new Random(seed + 1_000_003L * k)
-      SheetPage.Puzzles(Vector.tabulate(per)(j => SheetPuzzle(kinds(k * per + j), generate(c.size, c.level, rng)))))
+      Vector.tabulate(per)(j => SheetPuzzle(kinds(k * per + j), generate(c.size, c.level, rng)))
+    }
     val perAnswerPage = answersPerPage(c.size)
-    val answerPages = if c.answers then (n * c.perPage.n + perAnswerPage - 1) / perAnswerPage else 0
-    def entries: IndexedSeq[AnswerEntry] =
-      (0 until n).flatMap { k =>
-        puzzlePages(k) match
-          case SheetPage.Puzzles(ps) => ps.zipWithIndex.map((p, j) => AnswerEntry(s"${k + 1}·${j + 1}", p.symbols, p.puzzle))
-          case SheetPage.Answers(_)  => Nil
-      }
-    lazyPages(n + answerPages, i =>
-      if i < n then puzzlePages(i)
-      else SheetPage.Answers(entries.slice((i - n) * perAnswerPage, (i - n + 1) * perAnswerPage).toVector))
+    val answerPages = if c.answers then (n * per + perAnswerPage - 1) / perAnswerPage else 0
+    def answers(a: Int): Vector[AnswerEntry] =
+      (a * perAnswerPage until math.min((a + 1) * perAnswerPage, n * per)).map { i =>
+        val (k, j) = (i / per, i % per)
+        AnswerEntry(s"${k + 1}·${j + 1}", puzzlePages(k)(j))
+      }.toVector
+    SheetBuilder.lazyPages(n + answerPages)(i =>
+      if i < n then SheetPage.Puzzles(puzzlePages(i)) else SheetPage.Answers(answers(i - n)))
 
   // ---------- sheet builder ----------
 
@@ -197,20 +192,14 @@ object SudokuSheet:
     case Symbols.Shapes => PrintShapes.take(size.n)
     case Symbols.Digits => (1 to size.n).map(_.toString).toVector
 
-  /** The board size in mm. Small grids leave room for the legend. */
+  /** The board size in mm. A board with a legend leaves room for it. */
   private def boardMm(c: SheetConfig): Int =
-    val nine = c.size == GridSize.G9
+    val legend = !digitsOnly(c.size)
     c.perPage match
-      case PerPage.Six  => if nine then 75 else 65
-      case PerPage.Four => if nine then 88 else 80
-      case PerPage.Two  => if nine then 105 else 95
-      case PerPage.One  => if nine then 170 else 150
-
-  /** The board size in mm of one answer, and the answers in a row. */
-  private def answerLayout(size: GridSize): (Int, Int) = size match
-    case GridSize.G4 => (21, 8)
-    case GridSize.G6 => (28, 6)
-    case GridSize.G9 => (34, 5)
+      case PerPage.Six  => if legend then 65 else 75
+      case PerPage.Four => if legend then 80 else 88
+      case PerPage.Two  => if legend then 95 else 105
+      case PerPage.One  => if legend then 150 else 170
 
   /** One board. `givens`, when set, marks the given cells (answers show
     * them bold and the rest light). */
@@ -219,8 +208,7 @@ object SudokuSheet:
     div(
       cls := "sudoku-print-board",
       cls(s"sudoku-print-board--$n") := n != 9,
-      styleAttr := s"width: ${mm}mm; height: ${mm}mm; font-size: ${"%.2f".format(0.6 * mm / n)}mm; " +
-        s"grid-template-columns: repeat($n, 1fr); grid-template-rows: repeat($n, 1fr);",
+      styleAttr := s"width: ${mm}mm; height: ${mm}mm; font-size: ${"%.2f".format(0.6 * mm / n)}mm; " + Sudoku.gridTemplate(n),
       grid.indices.map { i =>
         val (r, c) = (i / n, i % n)
         div(
@@ -243,27 +231,26 @@ object SudokuSheet:
             div(
               cls := "sudoku-print-puzzle",
               // The symbols to use, above each small board: shapes and
-              // digits alike (a young child may not know every digit). Not
-              // on 9×9: the board has no room for it, and a child who
-              // solves 9×9 knows the digits.
-              when(c.size != GridSize.G9)(div(cls := "sudoku-print-legend", symbols.mkString(" "))),
+              // digits alike (a young child may not know every digit).
+              when(!digitsOnly(c.size))(div(cls := "sudoku-print-legend", symbols.mkString(" "))),
               board(c.size, p.puzzle.givens, symbols, boardMm(c), None)
             )
           }
         )
       case SheetPage.Answers(entries) =>
-        val (mm, perRow) = answerLayout(c.size)
+        val (mm, cols, _) = answerLayout(c.size)
         div(
           cls := "sudoku-answers",
-          h3(cls := "sudoku-answers__title", child.text <-- s(form(_.answersTitle))),
+          h3(cls := "sudoku-answers__title", child.text <-- s(form(_.answers))),
           div(
             cls := "sudoku-answers__grid",
-            styleAttr := s"grid-template-columns: repeat($perRow, auto);",
+            styleAttr := s"grid-template-columns: repeat($cols, auto);",
             entries.map { e =>
+              val p = e.puzzle
               div(
                 cls := "sudoku-answer",
                 div(cls := "sudoku-answer__label", e.label),
-                board(c.size, e.puzzle.solution, symbolsOf(c.size, e.symbols), mm, Some(e.puzzle.givens))
+                board(c.size, p.puzzle.solution, symbolsOf(c.size, p.symbols), mm, Some(p.puzzle.givens))
               )
             }
           )
@@ -282,13 +269,12 @@ object SudokuSheet:
         cls := "sb-chips",
         List((Symbols.Shapes, "shapes", form(_.symbolsShapes)), (Symbols.Digits, "digits", form(_.symbolsDigits))).map { (kind, key, label) =>
           SheetBuilder.chip(s"sudoku-symbols-$key", c.map(_.symbols(kind)), s(label), () => config.update(_.withSymbol(kind)),
-            isDisabled = c.map(k => kind == Symbols.Shapes && k.size == GridSize.G9))
+            isDisabled = c.map(k => kind == Symbols.Shapes && digitsOnly(k.size)))
         }
       )),
       SheetBuilder.formRow(form(_.level), SheetBuilder.pills(
         "sudoku-level", c.map(_.level),
-        List((Level.Easy, form(_.levelEasy)), (Level.Medium, form(_.levelMedium)), (Level.Hard, form(_.levelHard)))
-          .map((l, label) => (l, l.toString.toLowerCase, s(label))),
+        Level.values.toList.map(l => (l, l.toString.toLowerCase, s(levelLabel(l)))),
         l => config.update(_.copy(level = l)))),
       SheetBuilder.formRow(form(_.perPage), SheetBuilder.pills(
         "sudoku-per-page", c.map(_.perPage),

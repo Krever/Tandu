@@ -222,10 +222,7 @@ object Maze extends Activity:
       nearest(2 to circleMaxRings(c.perPage), rows * cols)(r => MazeGraph.CircleLayout.ringSizes(r).sum)
 
     /** Add or remove one shape. The last shape cannot be removed. */
-    def withShape(s: Shape): SheetConfig =
-      if !c.shapes(s) then c.copy(shapes = c.shapes + s)
-      else if c.shapes.size > 1 then c.copy(shapes = c.shapes - s)
-      else c
+    def withShape(s: Shape): SheetConfig = c.copy(shapes = SheetBuilder.toggle(c.shapes, s))
 
     def withAllShapes: SheetConfig = c.copy(shapes = AllShapes)
 
@@ -290,7 +287,7 @@ object Maze extends Activity:
   def encodeConfig(c: SheetConfig): String =
     val shapes =
       if c.shapes == AllShapes then ""
-      else "." + Shape.values.filter(c.shapes).map(_.toString.toLowerCase).mkString("-")
+      else "." + SheetBuilder.encodeSet(Shape.values, c.shapes)
     s"s${c.size}.${c.style.toString.toLowerCase}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}$shapes"
 
   private val SizeToken = "s(\\d+)".r
@@ -308,11 +305,7 @@ object Maze extends Activity:
         // toIntOption: a digit run too long for an Int must not throw.
         case SizeToken(n)    => n.toIntOption.fold(c)(v => c.copy(size = v))
         case PerPageToken(n) => PerPage.values.find(p => n.toIntOption.contains(p.n)).fold(c)(v => c.copy(perPage = v))
-        case _ =>
-          val parts = t.split('-').toList.map(p => SheetBuilder.named(Shape.values, p))
-          // A token of only dashes splits into no parts; it must not give
-          // a recipe with no shapes.
-          if parts.nonEmpty && parts.forall(_.isDefined) then c.copy(shapes = parts.flatten.toSet) else c
+        case _ => SheetBuilder.namedSet(Shape.values, t).fold(c)(v => c.copy(shapes = v))
       )
     }
     raw.copy(size = SheetBuilder.clamp(raw.size, SheetConfig.MinSize, raw.perPage.maxSize))

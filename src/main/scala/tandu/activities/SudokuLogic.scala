@@ -1,5 +1,6 @@
 package tandu.activities
 
+import scala.annotation.tailrec
 import scala.util.Random
 
 /** Printed Sudoku: a rating solver and a generator that makes puzzles at a
@@ -10,11 +11,17 @@ import scala.util.Random
   * the symbols are 1..n. */
 object SudokuLogic:
 
-  /** The grid size and the box shape (rows × columns of a box). */
-  enum GridSize(val n: Int, val boxRows: Int, val boxCols: Int):
-    case G4 extends GridSize(4, 2, 2)
-    case G6 extends GridSize(6, 2, 3)
-    case G9 extends GridSize(9, 3, 3)
+  /** The grid size and the box shape (rows × columns of a box).
+    * `hardest` is the hardest level whose techniques the grid needs: every
+    * 4×4 puzzle is solvable with naked singles, and 6×6 puzzles do not
+    * need the Hard techniques (measured; see the report in
+    * `SudokuDifficultySpec`). */
+  enum GridSize(val n: Int, val boxRows: Int, val boxCols: Int, hardest: => Level):
+    case G4 extends GridSize(4, 2, 2, Level.Easy)
+    case G6 extends GridSize(6, 2, 3, Level.Medium)
+    case G9 extends GridSize(9, 3, 3, Level.Hard)
+
+    def hardestLevel: Level = hardest
 
   /** The solving techniques of the rating solver, from easy to hard. */
   enum Technique:
@@ -39,10 +46,7 @@ object SudokuLogic:
     case Hard extends Level(Set(NakedSingle, HiddenSingle, NakedPair, LockedCandidates))
 
     /** The level below this one; Easy has none. */
-    def below: Option[Level] = this match
-      case Easy   => None
-      case Medium => Some(Easy)
-      case Hard   => Some(Medium)
+    def below: Option[Level] = Level.values.lift(ordinal - 1)
 
   /** The result of the rating solver.
     *   - `solved`: the level's techniques filled every cell.
@@ -132,24 +136,28 @@ object SudokuLogic:
 
     private def value(bit: Int): Int = Integer.numberOfTrailingZeros(bit)
 
+    // A filled cell has no candidates, so one candidate means an empty cell.
     def nakedSingle(): Boolean =
       var cell = 0
-      while cell < g.cells && !(grid(cell) == 0 && Integer.bitCount(cand(cell)) == 1) do cell += 1
+      while cell < g.cells && Integer.bitCount(cand(cell)) != 1 do cell += 1
       cell < g.cells && { place(cell, value(cand(cell))); true }
 
-    /** For each unit: the symbols that are a candidate in exactly one cell
-      * (seen once, not twice). Filled cells have no candidates. */
+    /** The symbols that are a candidate in exactly one cell of `unit` (seen
+      * once, not twice). */
+    private def singles(unit: Array[Int]): Int =
+      var once = 0
+      var twice = 0
+      var i = 0
+      while i < unit.length do
+        val m = cand(unit(i))
+        twice |= once & m
+        once |= m
+        i += 1
+      once & ~twice
+
     def hiddenSingle(): Boolean =
       g.units.exists { unit =>
-        var once = 0
-        var twice = 0
-        var i = 0
-        while i < unit.length do
-          val m = cand(unit(i))
-          twice |= once & m
-          once |= m
-          i += 1
-        val single = once & ~twice
+        val single = singles(unit)
         single != 0 && {
           val bit = Integer.lowestOneBit(single)
           var j = 0
@@ -176,10 +184,10 @@ object SudokuLogic:
         found
       }
 
-    /** The cells of `unit` that have `bit` as a candidate, as (count, the
-      * first cell, all in one row, all in one column, all in one box). */
-    private def places(unit: Array[Int], bit: Int): (Int, Int, Boolean, Boolean, Boolean) =
-      var count = 0
+    /** The cells of `unit` that have `bit` as a candidate, as (the first
+      * cell or -1 for none, all in one row, all in one column, all in one
+      * box). */
+    private def places(unit: Array[Int], bit: Int): (Int, Boolean, Boolean, Boolean) =
       var first = -1
       var row = true
       var col = true
@@ -193,40 +201,34 @@ object SudokuLogic:
             row &&= cell / g.n == first / g.n
             col &&= cell % g.n == first % g.n
             box &&= g.boxIdx(cell) == g.boxIdx(first)
-          count += 1
         i += 1
-      (count, first, row, col, box)
+      (first, row, col, box)
 
     def lockedCandidates(): Boolean =
       (1 to g.n).exists { v =>
         val bit = 1 << v
         // Pointing: a box's places in one row or one column.
         val pointing = g.boxes.indices.exists { b =>
-          val (count, first, row, col, _) = places(g.boxes(b), bit)
+          val (first, row, col, _) = places(g.boxes(b), bit)
           def inBox(cell: Int) = g.boxIdx(cell) == b
-          count > 0 && (
+          first >= 0 && (
             (row && eliminate(g.rows(first / g.n), bit, inBox)) ||
             (col && eliminate(g.cols(first % g.n), bit, inBox)))
         }
         // Box-line: a line's places in one box.
         pointing || g.lines.indices.exists { l =>
-          val (count, first, _, _, box) = places(g.lines(l), bit)
+          val (first, _, _, box) = places(g.lines(l), bit)
           def inLine(cell: Int) = if l < g.n then cell / g.n == l else cell % g.n == l - g.n
-          count > 0 && box && eliminate(g.boxes(g.boxIdx(first)), bit, inLine)
+          first >= 0 && box && eliminate(g.boxes(g.boxIdx(first)), bit, inLine)
         }
       }
 
     /** The open moves now (see [[Rating]]). */
     def openMoves(): Int =
       val open = new Array[Boolean](g.cells)
-      for cell <- 0 until g.cells if grid(cell) == 0 && Integer.bitCount(cand(cell)) == 1 do open(cell) = true
+      for cell <- 0 until g.cells if Integer.bitCount(cand(cell)) == 1 do open(cell) = true
       for unit <- g.units do
-        var once = 0
-        var twice = 0
-        for cell <- unit do
-          twice |= once & cand(cell)
-          once |= cand(cell)
-        val single = once & ~twice
+        val single = singles(unit)
         if single != 0 then for cell <- unit if (cand(cell) & single) != 0 do open(cell) = true
       open.count(identity)
 
@@ -240,18 +242,17 @@ object SudokuLogic:
       * makes progress. Each step uses the easiest technique that works.
       * `before()` is called before each try of a step, and `count(t)` once
       * for each step. */
-    def run(level: Level, count: Technique => Unit, before: () => Unit = () => ()): Boolean =
+    def run(level: Level, count: Technique => Unit = _ => (), before: () => Unit = () => ()): Boolean =
       val order = Technique.values.filter(level.techniques)
-      var result: Option[Boolean] = None
-      while result.isEmpty do
-        if empty == 0 then result = Some(true)
-        else if stuck then result = Some(false)
+      @tailrec def loop(): Boolean =
+        if empty == 0 then true
+        else if stuck then false
         else
           before()
           order.find(apply) match
-            case Some(t) => count(t)
-            case None    => result = Some(false)
-      result.get
+            case Some(t) => count(t); loop()
+            case None    => false
+      loop()
 
   def rate(size: GridSize, givens: IndexedSeq[Int], level: Level): Rating =
     val solver = Solver(geometries(size), givens)
@@ -265,11 +266,11 @@ object SudokuLogic:
     * cell) when the solver stops at `level`. For tests of the techniques. */
   private[activities] def candidates(size: GridSize, givens: IndexedSeq[Int], level: Level): Vector[Int] =
     val solver = Solver(geometries(size), givens)
-    val _ = solver.run(level, _ => ())
+    val _ = solver.run(level)
     solver.cand.toVector
 
-  private def solvable(g: Geometry, givens: Array[Int], level: Level): Boolean =
-    Solver(g, givens.toIndexedSeq).run(level, _ => ())
+  private def solvable(g: Geometry, givens: IndexedSeq[Int], level: Level): Boolean =
+    Solver(g, givens).run(level)
 
   // ---------- generator ----------
 
@@ -293,15 +294,11 @@ object SudokuLogic:
   val MaxTries = 20
 
   /** The level whose techniques the generator uses for `level` on a grid
-    * size: the level itself, or the hardest level that the grid reaches.
-    * Every 4×4 puzzle is solvable with naked singles, and 6×6 puzzles do
-    * not need the Hard techniques (measured; see the report in
-    * `SudokuDifficultySpec`). The givens target still makes the level
-    * differ, so on average Hard is harder than Medium. */
-  def effective(size: GridSize, level: Level): Level = (size, level) match
-    case (GridSize.G4, _)          => Level.Easy
-    case (GridSize.G6, Level.Hard) => Level.Medium
-    case _                         => level
+    * size: the level itself, but not above the grid's hardest level. The
+    * givens target still makes the levels differ, so on average Hard is
+    * harder than Medium. */
+  def effective(size: GridSize, level: Level): Level =
+    if level.ordinal > size.hardestLevel.ordinal then size.hardestLevel else level
 
   /** The fewest givens that digging leaves for a level; 0 means dig to the
     * minimum. More givens leave more open moves at each step. */
@@ -326,25 +323,28 @@ object SudokuLogic:
     val g = geometries(size)
     val techniques = effective(size, level)
     val target = givensTarget(size, level)
-    def needs(givens: Array[Int]): Boolean = techniques.below.forall(b => !solvable(g, givens, b))
+    def needs(givens: IndexedSeq[Int]): Boolean = techniques.below.forall(b => !solvable(g, givens, b))
     // Dig down to the target. If the puzzle does not need the techniques
     // there, dig on in the same order and stop as soon as it needs them.
     // A new grid is necessary only when the minimum does not need them.
     def once(): Puzzle =
       val solution = fill(size, rng)
       val givens = solution.toArray
+      val view = scala.collection.immutable.ArraySeq.unsafeWrapArray(givens)
       var left = g.cells
       var done = false
       for pos <- rng.shuffle((0 until g.cells).toVector) if !done do
         val saved = givens(pos)
         givens(pos) = 0
-        if !solvable(g, givens, techniques) then givens(pos) = saved
+        // A cell whose peers hold every other symbol is a naked single:
+        // the solver fills it at once, so its removal changes nothing at
+        // any level. Then no solve is necessary, and `needs` is still false
+        // below the target (else digging would have stopped).
+        val forced = Integer.bitCount(g.full & ~g.peers(pos).foldLeft(0)((m, p) => m | (1 << givens(p)))) == 1
+        if !forced && !solvable(g, view, techniques) then givens(pos) = saved
         else
           left -= 1
-          done = left <= target && needs(givens)
+          done = left <= target && !(forced && left < target) && needs(view)
       Puzzle(givens.toVector, solution)
-    def needsLevel(p: Puzzle): Boolean = needs(p.givens.toArray)
-    val tries = Iterator.continually(once()).take(MaxTries)
-    var last = tries.next()
-    while !needsLevel(last) && tries.hasNext do last = tries.next()
-    last
+    def needsLevel(p: Puzzle): Boolean = needs(p.givens)
+    Iterator.continually(once()).take(MaxTries - 1).find(needsLevel).getOrElse(once())

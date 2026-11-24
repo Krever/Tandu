@@ -221,7 +221,7 @@ object Sudoku extends Activity:
 
   // ---------- UI ----------
 
-  private def gridTemplate(size: Int): String =
+  private[activities] def gridTemplate(size: Int): String =
     s"grid-template-columns: repeat($size, 1fr); grid-template-rows: repeat($size, 1fr);"
 
   def render(): HtmlElement =

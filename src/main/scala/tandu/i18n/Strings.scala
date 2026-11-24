@@ -263,12 +263,8 @@ object Strings:
       symbolsShapes: String,
       symbolsDigits: String,
       level: String,
-      levelEasy: String,
-      levelMedium: String,
-      levelHard: String,
       perPage: String,
-      answers: String,
-      answersTitle: String
+      answers: String
   )
 
   final case class MazeOff(
@@ -1234,12 +1230,8 @@ object Strings:
           symbolsShapes = "Shapes",
           symbolsDigits = "Digits",
           level = "Difficulty",
-          levelEasy = "Easy",
-          levelMedium = "Medium",
-          levelHard = "Hard",
           perPage = "Puzzles per page",
-          answers = "Answers",
-          answersTitle = "Answers"
+          answers = "Answers"
         ),
         rules = Rules("How to play", List(
           "Fill the grid so every row, every column, and every 3×3 box contains each digit 1–9 exactly once.",
@@ -2072,12 +2064,8 @@ object Strings:
           symbolsShapes = "Kształty",
           symbolsDigits = "Cyfry",
           level = "Trudność",
-          levelEasy = "Łatwe",
-          levelMedium = "Średnie",
-          levelHard = "Trudne",
           perPage = "Zagadek na stronie",
-          answers = "Rozwiązania",
-          answersTitle = "Rozwiązania"
+          answers = "Rozwiązania"
         ),
         rules = Rules("Jak grać", List(
           "Wypełnij planszę tak, by w każdym wierszu, każdej kolumnie i każdym kwadracie 3×3 znalazła się każda cyfra od 1 do 9 dokładnie raz.",
@@ -2910,12 +2898,8 @@ object Strings:
           symbolsShapes = "Formas",
           symbolsDigits = "Números",
           level = "Dificultad",
-          levelEasy = "Fácil",
-          levelMedium = "Medio",
-          levelHard = "Difícil",
           perPage = "Enigmas por página",
-          answers = "Soluciones",
-          answersTitle = "Soluciones"
+          answers = "Soluciones"
         ),
         rules = Rules("Cómo jugar", List(
           "Rellena la cuadrícula de modo que cada fila, cada columna y cada caja 3×3 contenga los dígitos del 1 al 9 exactamente una vez.",
@@ -3748,12 +3732,8 @@ object Strings:
           symbolsShapes = "Formes",
           symbolsDigits = "Chiffres",
           level = "Difficulté",
-          levelEasy = "Facile",
-          levelMedium = "Moyen",
-          levelHard = "Difficile",
           perPage = "Grilles par page",
-          answers = "Solutions",
-          answersTitle = "Solutions"
+          answers = "Solutions"
         ),
         rules = Rules("Comment jouer", List(
           "Remplissez la grille pour que chaque ligne, chaque colonne et chaque carré 3×3 contienne chaque chiffre de 1 à 9 exactement une fois.",
@@ -4586,12 +4566,8 @@ object Strings:
           symbolsShapes = "Formen",
           symbolsDigits = "Ziffern",
           level = "Schwierigkeit",
-          levelEasy = "Leicht",
-          levelMedium = "Mittel",
-          levelHard = "Schwer",
           perPage = "Rätsel pro Seite",
-          answers = "Lösungen",
-          answersTitle = "Lösungen"
+          answers = "Lösungen"
         ),
         rules = Rules("So wird gespielt", List(
           "Füllt das Gitter so aus, dass jede Reihe, jede Spalte und jeder 3×3-Block die Ziffern 1–9 jeweils genau einmal enthält.",

@@ -176,6 +176,25 @@ test.describe("print", () => {
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
   })
 
+  test("both symbol kinds: pages alternate between shapes and digits", async ({ page }) => {
+    await page.goto("/activity/sudoku/print")
+    await page.getByTestId("sudoku-symbols-digits").click()
+    await expect(page.getByTestId("sudoku-symbols-shapes")).toHaveClass(/is-active/)
+    await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
+    await expect(page).toHaveURL(/\.shapes-digits\./)
+    await stepperPlus(page, "sudoku-pages").click()
+    await startPrinting(page)
+    const sheets = page.locator(".print-only .sudoku-print-sheet")
+    await expect(sheets).toHaveCount(2)
+    // One page of shapes (with legends), one of digits (without).
+    const legends = [await sheets.nth(0).locator(".sudoku-print-legend").count(), await sheets.nth(1).locator(".sudoku-print-legend").count()]
+    expect(legends.sort()).toEqual([0, 6])
+    // The last kind cannot be turned off.
+    await page.getByTestId("sudoku-symbols-shapes").click()
+    await page.getByTestId("sudoku-symbols-digits").click()
+    await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
+  })
+
   test("the URL recipe is read back", async ({ page }) => {
     await page.goto("/activity/sudoku/print/g6.digits.medium.pp2.ans.p2")
     await expect(page.getByTestId("sudoku-size-6")).toHaveClass(/is-active/)

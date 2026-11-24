@@ -3776,6 +3776,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
    buttons, so several can be on at once. */
 .sb-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
 .sb-chip-btn { min-height: 36px; min-width: 40px; padding: 0 var(--space-2); color: var(--color-text); font-weight: 600; }
+.sb-chip-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 @media (min-width: 620px) {
   .sb-builder__preview { order: 2; position: sticky; top: var(--space-3); }
 }

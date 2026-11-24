@@ -251,13 +251,12 @@ object SheetBuilder:
     )
 
   /** Exclusive choice. Each option is (value, key, label); the test id of
-    * an option is `testId-key`. `isDisabled` can disable an option. */
+    * an option is `testId-key`. */
   def pills[A](
       testId: String,
       current: Signal[A],
       options: List[(A, String, Signal[String])],
-      pick: A => Unit,
-      isDisabled: A => Signal[Boolean] = (_: A) => Val(false)
+      pick: A => Unit
   ): HtmlElement =
     div(
       cls := "pill-toggle",
@@ -267,20 +266,20 @@ object SheetBuilder:
           cls := "pill-btn",
           dataAttr("testid") := s"$testId-$key",
           cls("is-active") <-- current.map(_ == value),
-          disabled <-- isDisabled(value),
           child.text <-- label,
           onClick --> (_ => pick(value))
         )
       }
     )
 
-  /** One button of a multi-select. */
-  def chip(testId: String, on: Signal[Boolean], label: Signal[String], tap: () => Unit): HtmlElement =
+  /** One button of a multi-select. `isDisabled` can disable it. */
+  def chip(testId: String, on: Signal[Boolean], label: Signal[String], tap: () => Unit, isDisabled: Signal[Boolean] = Val(false)): HtmlElement =
     button(
       typ := "button",
       cls := "sb-chip-btn",
       dataAttr("testid") := testId,
       cls("is-active") <-- on,
+      disabled <-- isDisabled,
       aria.pressed <-- on.map(_.toString),
       child.text <-- label,
       onClick --> (_ => tap())

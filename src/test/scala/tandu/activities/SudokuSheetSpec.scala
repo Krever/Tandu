@@ -9,7 +9,8 @@ class SudokuSheetSpec extends AnyFunSuite:
   private def preset(id: String): SheetConfig = sheetPresets.find(_.presetId == id).get.config
 
   test("codec round trip, presets and others") {
-    for c <- sheetPresets.map(_.config) :+ SheetConfig(GridSize.G6, Symbols.Digits, Level.Hard, PerPage.Two, answers = true) do
+    for c <- sheetPresets.map(_.config) :+ SheetConfig(GridSize.G6, Set(Symbols.Digits), Level.Hard, PerPage.Two, answers = true) :+
+        SheetConfig(GridSize.G4, AllSymbols, Level.Easy, PerPage.Four, answers = false) do
       val _ = assert(decodeConfig(encodeConfig(c)) == c)
   }
 
@@ -24,7 +25,8 @@ class SudokuSheetSpec extends AnyFunSuite:
     val easy = preset("easy")
     val _ = assert(decodeConfig("") == easy)
     val _ = assert(decodeConfig("g5.pp3.bogus") == easy)
-    val _ = assert(decodeConfig("g9.shapes").symbols == Symbols.Digits)
+    val _ = assert(decodeConfig("g9.shapes").symbols == Set(Symbols.Digits))
+    val _ = assert(decodeConfig("g9.shapes-digits").symbols == Set(Symbols.Digits))
     val _ = assert(decodeConfig("hard.hard").level == Level.Hard)
     // The page count is not part of the recipe.
     assert(decodeConfig("g4.shapes.easy.pp6.p3") == easy)
@@ -32,8 +34,35 @@ class SudokuSheetSpec extends AnyFunSuite:
 
   test("withSize: 9×9 sets digits; back to 4×4 keeps digits") {
     val nine = preset("easy").withSize(GridSize.G9)
-    val _ = assert(nine.symbols == Symbols.Digits)
-    assert(nine.withSize(GridSize.G4).symbols == Symbols.Digits)
+    val _ = assert(nine.symbols == Set(Symbols.Digits))
+    assert(nine.withSize(GridSize.G4).symbols == Set(Symbols.Digits))
+  }
+
+  test("symbols codec: one token, kinds joined by '-'") {
+    val mixed = preset("easy").copy(symbols = AllSymbols)
+    val _ = assert(encodeConfig(mixed) == "g4.shapes-digits.easy.pp6")
+    val _ = assert(decodeConfig("g4.digits-shapes").symbols == AllSymbols)
+    val _ = assert(decodeConfig("g4.digits").symbols == Set(Symbols.Digits))
+    // Unknown or empty kinds: the token is ignored.
+    val _ = assert(decodeConfig("g4.digits.shapes-bogus").symbols == Set(Symbols.Digits))
+    assert(decodeConfig("g4.-").symbols == Set(Symbols.Shapes))
+  }
+
+  test("withSymbol toggles a kind; the last kind stays; 9×9 stays digits") {
+    val easy = preset("easy")
+    val both = easy.withSymbol(Symbols.Digits)
+    val _ = assert(both.symbols == AllSymbols)
+    val _ = assert(both.withSymbol(Symbols.Shapes).symbols == Set(Symbols.Digits))
+    val _ = assert(easy.withSymbol(Symbols.Shapes) == easy)
+    assert(preset("hard").withSymbol(Symbols.Shapes).symbols == Set(Symbols.Digits))
+  }
+
+  test("both kinds: pages go through the kinds in rounds; adding pages keeps them") {
+    val c = preset("easy").copy(symbols = AllSymbols)
+    val kinds = sheetPages(c, 6, 3L).collect { case SheetPage.Puzzles(k, _) => k }
+    for round <- kinds.grouped(2) do
+      val _ = assert(round.toSet == AllSymbols, kinds)
+    assert(sheetPages(c, 2, 3L).collect { case SheetPage.Puzzles(k, _) => k } == kinds.take(2))
   }
 
   test("adding pages keeps the earlier pages; each page has perPage puzzles") {
@@ -42,24 +71,24 @@ class SudokuSheetSpec extends AnyFunSuite:
     val three = sheetPages(c, 3, 42L)
     val _ = assert(three.head == one.head && three.size == 3)
     val _ = assert(three.distinct.size == 3)
-    assert(three.forall { case SheetPage.Puzzles(ps) => ps.size == 6; case _ => false })
+    assert(three.forall { case SheetPage.Puzzles(_, ps) => ps.size == 6; case _ => false })
   }
 
   test("puzzles are at the recipe's size and level") {
     val c = preset("hard")
-    val SheetPage.Puzzles(ps) = sheetPages(c, 1, 5L).head: @unchecked
+    val SheetPage.Puzzles(_, ps) = sheetPages(c, 1, 5L).head: @unchecked
     for p <- ps do
       val _ = assert(p.givens.size == 81)
       val _ = assert(rate(GridSize.G9, p.givens, Level.Hard).solved)
   }
 
-  test("answers: extra pages at the end, labelled page·puzzle, matching the puzzles") {
-    val c = SheetConfig(GridSize.G4, Symbols.Shapes, Level.Easy, PerPage.Six, answers = true)
+  test("answers: extra pages at the end, labelled page·puzzle, matching the puzzles and their kind") {
+    val c = SheetConfig(GridSize.G4, AllSymbols, Level.Easy, PerPage.Six, answers = true)
     val ps = sheetPages(c, 10, 7L)
     val _ = assert(ps.size == 12) // 60 puzzles, 56 per 4×4 answer page
     val puzzles = ps.take(10).zipWithIndex.flatMap {
-      case (SheetPage.Puzzles(xs), k) => xs.zipWithIndex.map((p, j) => (s"${k + 1}·${j + 1}", p))
-      case _                          => Nil
+      case (SheetPage.Puzzles(kind, xs), k) => xs.zipWithIndex.map((p, j) => AnswerEntry(s"${k + 1}·${j + 1}", kind, p))
+      case _                                => Nil
     }
     val answers = ps.drop(10).flatMap { case SheetPage.Answers(es) => es; case _ => Nil }
     val _ = assert(answers == puzzles)
@@ -73,7 +102,7 @@ class SudokuSheetSpec extends AnyFunSuite:
 
   test("reading one page makes only that page, once") {
     val made = scala.collection.mutable.ListBuffer.empty[Int]
-    val pages = lazyPages(10, i => { made += i; SheetPage.Puzzles(Vector.empty) })
+    val pages = lazyPages(10, i => { made += i; SheetPage.Puzzles(Symbols.Shapes, Vector.empty) })
     val _ = assert(pages.size == 10 && made.isEmpty)
     val _ = pages(3)
     val _ = pages(3)

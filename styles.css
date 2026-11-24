@@ -1924,45 +1924,36 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   color: white;
   border-color: var(--color-primary);
 }
-.sudoku-print-actions {
-  max-width: 360px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Sudoku printable sheet — 2 columns x 3 rows = 6 puzzles per page.
-   A4 body area after page margins, printable header and footer leaves
-   ~247mm tall. Three 75mm puzzles + two 5mm gaps = 235mm, comfortable. */
+/* Sudoku printable sheet. The board size (mm) and the symbol size are set
+   inline per recipe; the grid here places the slots. A4 body area after
+   page margins, printable header and footer leaves ~247mm tall. */
 .sudoku-print-sheet {
   display: grid;
-  grid-template-columns: repeat(2, 75mm);
-  grid-auto-rows: 75mm;
   gap: 5mm;
   justify-content: center;
+  align-content: start;
 }
+.sudoku-print-sheet--pp6, .sudoku-print-sheet--pp4 { grid-template-columns: repeat(2, auto); }
+.sudoku-print-sheet--pp2, .sudoku-print-sheet--pp1 { grid-template-columns: auto; }
 .sudoku-print-board {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(9, 1fr);
   border: 2px solid black;
-  width: 75mm;
-  height: 75mm;
+  max-width: 100%;
 }
 .sudoku-print-cell {
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 11pt;
   font-weight: 700;
+  line-height: 1;
   border: 1px solid #aaa;
   min-width: 0;
   min-height: 0;
 }
 .sudoku-print-cell--boxl { border-left: 2px solid black; }
 .sudoku-print-cell--boxt { border-top: 2px solid black; }
-/* Emoji variants: legend above each board, board shrunk to leave room for it
-   inside the same 75mm sheet slot. */
+/* Shape symbols: a legend above each board. */
 .sudoku-print-puzzle {
   display: flex;
   flex-direction: column;
@@ -1970,9 +1961,20 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
   gap: 2mm;
 }
 .sudoku-print-legend { font-size: 13pt; line-height: 1; letter-spacing: 1.5mm; }
-.sudoku-print-board--4, .sudoku-print-board--6 { width: 65mm; height: 65mm; }
-.sudoku-print-board--4 .sudoku-print-cell { font-size: 18pt; }
-.sudoku-print-board--6 .sudoku-print-cell { font-size: 13pt; }
+/* Answers: small solved boards; the givens bold, the solved cells light. */
+.sudoku-answers__title { margin: 0 0 4mm; font-size: 13pt; }
+.sudoku-answers__grid {
+  display: grid;
+  gap: 4mm 3mm;
+  justify-content: center;
+}
+.sudoku-answer { display: flex; flex-direction: column; align-items: center; gap: 1mm; }
+.sudoku-answer__label { font-size: 8pt; line-height: 1; }
+.sudoku-answer .sudoku-print-board { border-width: 1px; }
+.sudoku-answer .sudoku-print-cell { font-weight: 400; color: #666; border-width: 0.5px; }
+.sudoku-answer .sudoku-print-cell--boxl { border-left-width: 1px; }
+.sudoku-answer .sudoku-print-cell--boxt { border-top-width: 1px; }
+.sudoku-answer .sudoku-print-cell--given { font-weight: 700; color: black; }
 
 /* Minesweeper */
 .ms-board {

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test"
+import { stepperPlus, startPrinting } from "./helpers"
 
 // Solve an n×n sudoku with boxRows×boxCols boxes by backtracking.
 // Small grids (4×4, 6×6) solve instantly.
@@ -129,17 +130,91 @@ test("classic 9×9 still renders with pencil and digit pad", async ({ page }) =>
   await page.screenshot({ path: "/tmp/sudoku-classic.png" })
 })
 
-test("print mode fills a sheet with six emoji puzzles with legends", async ({ page }) => {
-  await page.goto("/activity/sudoku/print")
-  await page.evaluate(() => { window.print = () => {} })
-  await page.locator(".sudoku-print-actions button").first().click() // emoji 4×4
+// The print page is a sheet builder: presets fill a form, a live preview
+// shows the page, and the print matches the preview.
+test.describe("print", () => {
+  // Errors that Airstream catches go to the console and do not fail a
+  // step. Therefore each test also checks that the console has no errors.
+  let consoleErrors: string[] = []
 
-  await expect(page.locator(".sudoku-print-board")).toHaveCount(6)
-  await expect(page.locator(".sudoku-print-legend")).toHaveCount(6)
-  const legend = (await page.locator(".sudoku-print-legend").first().textContent())!.trim()
-  expect(legend.split(/\s+/)).toHaveLength(4)
+  test.beforeEach(async ({ page }) => {
+    consoleErrors = []
+    page.on("console", m => { if (m.type() === "error") consoleErrors.push(m.text()) })
+    page.on("pageerror", e => consoleErrors.push(e.message))
+    await page.addInitScript(() => { window.print = () => {} })
+  })
 
-  await page.emulateMedia({ media: "print" })
-  await page.setViewportSize({ width: 794, height: 1123 }) // A4 @ 96dpi
-  await page.screenshot({ path: "/tmp/sudoku-print-emoji.png", fullPage: true })
+  test.afterEach(() => {
+    expect(consoleErrors).toEqual([])
+  })
+
+  const cells = (board) => board.locator(".sudoku-print-cell").allTextContents()
+
+  test("presets fill the form, the preview follows, print matches it", async ({ page }) => {
+    await page.goto("/activity/sudoku/print")
+    const preview = page.getByTestId("sudoku-preview")
+    // Easy: six 4×4 boards with shape legends.
+    await expect(preview.locator(".sudoku-print-board--4")).toHaveCount(6)
+    await expect(preview.locator(".sudoku-print-legend").first()).toHaveText("● ▲ ■ ✚")
+    await page.getByTestId("sudoku-preset-hard").click()
+    await expect(preview.locator(".sudoku-print-board")).toHaveCount(4)
+    await expect(preview.locator(".sudoku-print-legend")).toHaveCount(0)
+    await expect(page).toHaveURL(/\/print\/g9\.digits\.hard\.pp4$/)
+    // The print copies are the preview (same seed).
+    await startPrinting(page)
+    expect(await cells(page.locator(".print-only .sudoku-print-board").first()))
+      .toEqual(await cells(preview.locator(".sudoku-print-board").first()))
+    await page.emulateMedia({ media: "print" })
+    await page.setViewportSize({ width: 794, height: 1123 }) // A4 @ 96dpi
+    await page.screenshot({ path: "/tmp/sudoku-print-hard.png", fullPage: true })
+  })
+
+  test("9×9 disables Shapes and switches to digits", async ({ page }) => {
+    await page.goto("/activity/sudoku/print")
+    await page.getByTestId("sudoku-size-9").click()
+    await expect(page.getByTestId("sudoku-symbols-shapes")).toBeDisabled()
+    await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
+  })
+
+  test("the URL recipe is read back", async ({ page }) => {
+    await page.goto("/activity/sudoku/print/g6.digits.medium.pp2.ans.p2")
+    await expect(page.getByTestId("sudoku-size-6")).toHaveClass(/is-active/)
+    await expect(page.getByTestId("sudoku-per-page-2")).toHaveClass(/is-active/)
+    await expect(page.getByTestId("sudoku-answers")).toHaveAttribute("aria-pressed", "true")
+    // Two puzzle pages and one answer page.
+    await expect(page.getByTestId("sudoku-page-label")).toHaveText("1 / 3")
+  })
+
+  test("answers: off by default; on adds an answer page whose grids match the puzzles", async ({ page }) => {
+    await page.goto("/activity/sudoku/print")
+    const preview = page.getByTestId("sudoku-preview")
+    // One page: the pager is hidden.
+    await expect(page.getByTestId("sudoku-page-label")).toBeHidden()
+    await page.getByTestId("sudoku-answers").click()
+    await expect(page.getByTestId("sudoku-page-label")).toHaveText("1 / 2")
+    // The givens of puzzle 1 are in answer 1, at the same cells.
+    const givens = await cells(preview.locator(".sudoku-print-board").first())
+    await page.getByTestId("sudoku-page-next").click()
+    await expect(preview.locator(".sudoku-answer")).toHaveCount(6)
+    await expect(preview.locator(".sudoku-answer__label").first()).toHaveText("1·1")
+    const solved = await cells(preview.locator(".sudoku-answer").first())
+    expect(solved).toHaveLength(16)
+    givens.forEach((g, i) => { if (g.trim()) expect(solved[i]).toBe(g) })
+    expect(solved.every(t => t.trim() !== "")).toBe(true)
+    // On the answer page, answers off: a puzzle page shows.
+    await page.getByTestId("sudoku-answers").click()
+    await expect(preview.locator(".sudoku-print-board--4")).toHaveCount(6)
+    await expect(page.getByTestId("sudoku-page-label")).toBeHidden()
+  })
+
+  test("pages: 3 pages with answers print 3 puzzle pages and 1 answer page", async ({ page }) => {
+    await page.goto("/activity/sudoku/print")
+    await page.getByTestId("sudoku-answers").click()
+    await stepperPlus(page, "sudoku-pages").click()
+    await stepperPlus(page, "sudoku-pages").click()
+    await expect(page.getByTestId("sudoku-page-label")).toHaveText("1 / 4")
+    await startPrinting(page)
+    await expect(page.locator(".print-only .sudoku-print-sheet")).toHaveCount(3)
+    await expect(page.locator(".print-only .sudoku-answer")).toHaveCount(18)
+  })
 })

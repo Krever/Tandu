@@ -3,10 +3,9 @@ package tandu.activities
 import com.raquo.laminar.api.L.*
 import tandu.{AppState, Page, Routing}
 import tandu.i18n.Strings
-import tandu.ui.{Components, Mode, ModeChooser, Printable, RulesCard}
+import tandu.ui.{Components, Mode, ModeChooser, RulesCard, SheetBuilder}
 import tandu.ui.Components.s
 
-import scala.scalajs.js
 import scala.util.Random
 
 object Sudoku extends Activity:
@@ -74,18 +73,6 @@ object Sudoku extends Activity:
 
   private def symbolsFor(v: Variant, rng: Random): Vector[String] =
     if v.emoji then emojiThemes(rng.nextInt(emojiThemes.size)).take(v.size)
-    else (1 to v.size).map(_.toString).toVector
-
-  /** Print symbols: a kid can't *draw* an emoji into an empty cell, so paper
-    * picture-sudoku uses simple drawable shapes instead. Ordered easiest-first
-    * so the 4×4 takes the four most basic strokes (circle, triangle, square,
-    * plus) and the 6×6 adds an X and a diamond — all far easier for a small
-    * hand than a star or a heart. */
-  private val printShapes: Vector[String] =
-    Vector("●", "▲", "■", "✚", "✕", "◆")
-
-  private def printSymbolsFor(v: Variant): Vector[String] =
-    if v.emoji then printShapes.take(v.size)
     else (1 to v.size).map(_.toString).toVector
 
   // ---------- generator ----------
@@ -249,83 +236,13 @@ object Sudoku extends Activity:
         label = _.mode.offline,
         materials = List(_.offline.materials.printer, _.offline.materials.paperPen),
         hint = Some(_.offline.sudoku.sheetHint),
-        render = () => renderOffline()
-      )
-    ))
-
-  private final case class PrintPuzzle(variant: Variant, grid: Grid, symbols: Vector[String])
-
-  /** One printed page's worth of puzzles (the same six-up sheet the offline
-    * mode prints), as a bare body for composed documents like workbooks. */
-  def printSheetBody(v: Variant): HtmlElement =
-    div(
-      cls := "sudoku-print-sheet",
-      List.fill(6) {
-        val rng = new Random()
-        printablePuzzle(PrintPuzzle(v, generate(v, rng)._1, printSymbolsFor(v)))
-      }
-    )
-
-  private def renderOffline(): HtmlElement =
-    val puzzles: Var[List[PrintPuzzle]] = Var(Nil)
-
-    def printBatch(v: Variant): Unit =
-      puzzles.set(List.fill(6) {
-        val rng = new Random()
-        PrintPuzzle(v, generate(v, rng)._1, printSymbolsFor(v))
-      })
-      val _ = js.timers.setTimeout(50)(Printable.print())
-
-    div(
-      cls := "stack-lg",
-      div(
-        cls := "no-print",
-        RulesCard.render(List(RulesCard.fromRules(_.offline.sudoku.rules)))
-      ),
-      div(
-        cls := "no-print stack-lg sudoku-print-actions",
-        variants.map { v =>
-          button(
-            cls := "btn btn--lg btn--block",
-            child.text <-- AppState.strings.map(str => s"${str.printable.print} — ${v.nameKey(str)}"),
-            onClick --> (_ => printBatch(v))
-          )
-        }
-      ),
-      div(
-        cls := "print-only",
-        Printable.render(
-          title = _.offline.sudoku.printTitle,
-          body = div(
-            cls := "sudoku-print-sheet",
-            children <-- puzzles.signal.map(_.map(printablePuzzle))
-          )
+        render = () => SheetBuilder.printPage(
+          SudokuSheet.sheetSpec,
+          id,
+          RulesCard.render(List(RulesCard.fromRules(_.offline.sudoku.rules)))
         )
       )
-    )
-
-  private def printablePuzzle(p: PrintPuzzle): HtmlElement =
-    val v = p.variant
-    div(
-      cls := "sudoku-print-puzzle",
-      when(v.emoji)(div(cls := "sudoku-print-legend", p.symbols.mkString(" "))),
-      div(
-        cls := "sudoku-print-board",
-        cls(s"sudoku-print-board--${v.size}") := v.size != 9,
-        styleAttr := gridTemplate(v.size),
-        (0 until v.size).flatMap { r =>
-          (0 until v.size).map { c =>
-            val value = p.grid(r)(c)
-            div(
-              cls := "sudoku-print-cell",
-              cls("sudoku-print-cell--boxl") := c > 0 && c % v.boxCols == 0,
-              cls("sudoku-print-cell--boxt") := r > 0 && r % v.boxRows == 0,
-              if value == 0 then "" else p.symbols(value - 1)
-            )
-          }
-        }
-      )
-    )
+    ))
 
   // The "medium" variant is the implicit default when the URL has no variant
   // segment after the in-app mode.

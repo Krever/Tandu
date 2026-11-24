@@ -27,8 +27,10 @@ object SheetBuilder:
     *   - `testIdPrefix`: the prefix of all test ids (for example "snf").
     *   - `encode` / `decode`: the recipe as one URL path segment. `decode`
     *     must accept any text and give a valid recipe.
-    *   - `pagesOf(c, n, seed)`: `n` pages from one seed. Page k must not
-    *     change when pages are added after it.
+    *   - `pagesOf(c, n, seed)`: `n` pages from one seed, then optional
+    *     extra pages (Sudoku answers). Page k must not change when pages
+    *     are added after it. The preview reads only the page it shows, so
+    *     a lazy sequence can make pages when they are read.
     *   - `body`: one page body, without the printable frame.
     *   - `form`: the form rows; they read and write only the given Var.
     *   - `newLabel`: the label of the button that makes new pages. */
@@ -38,7 +40,7 @@ object SheetBuilder:
       encode: C => String,
       decode: String => C,
       title: C => Strings => String,
-      pagesOf: (C, Int, Long) => Vector[P],
+      pagesOf: (C, Int, Long) => IndexedSeq[P],
       body: (C, P) => HtmlElement,
       form: Var[C] => HtmlElement,
       newLabel: Strings => String
@@ -92,7 +94,8 @@ object SheetBuilder:
     val config = Var(urlToken.fold(spec.presets.head.config)(spec.decode))
     val pages = Var(urlToken.fold(1)(decodePages))
     val seed = Var(Random.nextLong())
-    // The page that the preview shows, 0-based. `setPages` keeps it in range.
+    // The page that the preview shows, 0-based. An observer below keeps it
+    // in range; `at` is also in range before that observer runs.
     val shown = Var(0)
     // The print copies exist only while printing: building every page in
     // hidden DOM on each change in the form is wasted work.
@@ -103,12 +106,10 @@ object SheetBuilder:
     val sheets = recipe.combineWith(pages.signal, seed.signal).map { (c, n, sd) =>
       (c, spec.pagesOf(c, n, sd))
     }
-    // Move the shown page into range first. Each `set` is a separate
-    // transaction, and the preview must never see a shown page that is
-    // not in the list of pages.
-    def setPages(n: Int): Unit =
-      shown.update(i => math.min(i, n - 1))
-      pages.set(n)
+    // The number of pages, extra pages included. It can change without a
+    // change of the page count (Sudoku answers on or off).
+    val total = sheets.map(_._2.size)
+    val at = shown.signal.combineWith(total).map((i, n) => math.min(i, n - 1))
     def pagerButton(testId: String, label: String, isDisabled: Signal[Boolean], go: Int => Int): HtmlElement =
       Components.ghost(Val(label), shown.update(go), isDisabled).amend(
         typ := "button",
@@ -126,24 +127,25 @@ object SheetBuilder:
       // Ctrl+P and the browser menu print too, not only the Print button.
       windowEvents(_.onBeforePrint) --> (_ => printing.set(true)),
       windowEvents(_.onAfterPrint) --> (_ => printing.set(false)),
+      total.changes --> (n => shown.update(i => math.min(i, n - 1))),
       div(cls := "no-print", intro),
       div(cls := "no-print", presetPills(spec, config)),
       div(
         cls := "sb-builder no-print",
         previewBox(
           spec,
-          sheets.combineWith(shown.signal).map((c, ps, i) => spec.page(c, ps(i))),
+          sheets.combineWith(at).map((c, ps, i) => spec.page(c, ps(i))),
           // Flip through the pages; hidden for a single page.
           div(
             cls := "row sb-pager",
-            cls("is-hidden") <-- pages.signal.map(_ == 1),
-            pagerButton("page-prev", "‹", shown.signal.map(_ == 0), _ - 1),
+            cls("is-hidden") <-- total.map(_ == 1),
+            pagerButton("page-prev", "‹", at.map(_ == 0), _ - 1),
             span(
               cls := "sb-pager__label",
               dataAttr("testid") := spec.testId("page-label"),
-              child.text <-- shown.signal.combineWith(pages.signal).map((i, n) => s"${i + 1} / $n")
+              child.text <-- at.combineWith(total).map((i, n) => s"${i + 1} / $n")
             ),
-            pagerButton("page-next", "›", shown.signal.combineWith(pages.signal).map((i, n) => i >= n - 1), _ + 1)
+            pagerButton("page-next", "›", at.combineWith(total).map((i, n) => i >= n - 1), _ + 1)
           ),
           div(
             cls := "row sb-builder__actions",
@@ -152,8 +154,8 @@ object SheetBuilder:
               pages.signal,
               pages.signal.map(_ > 1),
               pages.signal.map(_ < MaxPages),
-              () => setPages(pages.now() - 1),
-              () => setPages(pages.now() + 1),
+              () => pages.update(_ - 1),
+              () => pages.update(_ + 1),
               testId = spec.testId("pages")
             )
           ),
@@ -202,12 +204,12 @@ object SheetBuilder:
   def presetName[C](spec: Spec[C, ?], c: C): Option[Strings => String] =
     spec.presets.find(_.config == c).map(_.name)
 
-  /** The workbook row label: the preset name, or "Custom". */
   /** The recipe token of a preset (the first preset for an unknown id),
     * for workbook rows. */
   def presetToken[C](spec: Spec[C, ?], presetId: String): String =
     spec.encode(spec.presets.find(_.presetId == presetId).getOrElse(spec.presets.head).config)
 
+  /** The workbook row label: the preset name, or "Custom". */
   def summary[C](spec: Spec[C, ?], token: String): Strings => String =
     presetName(spec, spec.decode(token)).getOrElse(_.printable.custom)
 
@@ -249,12 +251,13 @@ object SheetBuilder:
     )
 
   /** Exclusive choice. Each option is (value, key, label); the test id of
-    * an option is `testId-key`. */
+    * an option is `testId-key`. `isDisabled` can disable an option. */
   def pills[A](
       testId: String,
       current: Signal[A],
       options: List[(A, String, Signal[String])],
-      pick: A => Unit
+      pick: A => Unit,
+      isDisabled: A => Signal[Boolean] = (_: A) => Val(false)
   ): HtmlElement =
     div(
       cls := "pill-toggle",
@@ -264,6 +267,7 @@ object SheetBuilder:
           cls := "pill-btn",
           dataAttr("testid") := s"$testId-$key",
           cls("is-active") <-- current.map(_ == value),
+          disabled <-- isDisabled(value),
           child.text <-- label,
           onClick --> (_ => pick(value))
         )

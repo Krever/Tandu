@@ -1,11 +1,15 @@
 package tandu.activities
 
+import com.raquo.laminar.api.L.*
+import tandu.i18n.Strings
 import tandu.ui.SheetBuilder
+import tandu.ui.Components.s
 
 import scala.util.Random
 
-/** The printed Sudoku sheet: the recipe, its URL codec and the pages. The
-  * level of the puzzles comes from [[SudokuLogic]]. */
+/** The printed Sudoku sheet: the recipe, its URL codec, the pages, the
+  * sheet body and the form of the sheet builder. The level of the puzzles
+  * comes from [[SudokuLogic]]. */
 object SudokuSheet:
   import SudokuLogic.*
 
@@ -30,15 +34,17 @@ object SudokuSheet:
       c.copy(size = g, symbols = if g == GridSize.G9 then Symbols.Digits else c.symbols)
 
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
-    SheetBuilder.Preset("easy", _.sudoku.easy.name, SheetConfig(GridSize.G4, Symbols.Shapes, Level.Easy, PerPage.Six, answers = false)),
-    SheetBuilder.Preset("medium", _.sudoku.medium.name, SheetConfig(GridSize.G6, Symbols.Shapes, Level.Medium, PerPage.Six, answers = false)),
-    SheetBuilder.Preset("hard", _.sudoku.hard.name, SheetConfig(GridSize.G9, Symbols.Digits, Level.Hard, PerPage.Four, answers = false))
+    SheetBuilder.Preset("easy", form(_.levelEasy), SheetConfig(GridSize.G4, Symbols.Shapes, Level.Easy, PerPage.Six, answers = false)),
+    SheetBuilder.Preset("medium", form(_.levelMedium), SheetConfig(GridSize.G6, Symbols.Shapes, Level.Medium, PerPage.Six, answers = false)),
+    SheetBuilder.Preset("hard", form(_.levelHard), SheetConfig(GridSize.G9, Symbols.Digits, Level.Hard, PerPage.Four, answers = false))
   )
+
+  /** A label of the sheet form. */
+  private def form(f: Strings.SudokuForm => String): Strings => String = str => f(str.offline.sudoku.form)
 
   /** The settings token of a preset (the first preset for an unknown id),
     * for workbook rows. */
-  def presetToken(presetId: String): String =
-    encodeConfig(sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config)
+  def presetToken(presetId: String): String = SheetBuilder.presetToken(sheetSpec, presetId)
 
   /** The token of the old 9×9 print sheets: digits, six per page. */
   def classicToken(level: Level): String =
@@ -119,3 +125,120 @@ object SudokuSheet:
     lazyPages(n + answerPages, i =>
       if i < n then puzzlePages(i)
       else SheetPage.Answers(entries.slice((i - n) * perAnswerPage, (i - n + 1) * perAnswerPage).toVector))
+
+  // ---------- sheet builder ----------
+
+  lazy val sheetSpec: SheetBuilder.Spec[SheetConfig, SheetPage] = SheetBuilder.Spec(
+    testIdPrefix = "sudoku",
+    presets = sheetPresets,
+    encode = encodeConfig,
+    decode = decodeConfig,
+    title = _ => _.offline.sudoku.printTitle,
+    pagesOf = sheetPages,
+    body = sheetBody,
+    form = sheetForm,
+    newLabel = _.sudoku.newGame
+  )
+
+  /** Shapes for paper: a child cannot draw an emoji into a cell. Ordered
+    * easiest first: the 4×4 takes circle, triangle, square and plus; the
+    * 6×6 adds an X and a diamond. */
+  private val PrintShapes: Vector[String] = Vector("●", "▲", "■", "✚", "✕", "◆")
+
+  private def symbolsOf(c: SheetConfig): Vector[String] = c.symbols match
+    case Symbols.Shapes => PrintShapes.take(c.size.n)
+    case Symbols.Digits => (1 to c.size.n).map(_.toString).toVector
+
+  /** The board size in mm. Small grids leave room for the legend. */
+  private def boardMm(c: SheetConfig): Int =
+    val nine = c.size == GridSize.G9
+    c.perPage match
+      case PerPage.Six  => if nine then 75 else 65
+      case PerPage.Four => if nine then 88 else 80
+      case PerPage.Two  => if nine then 105 else 95
+      case PerPage.One  => if nine then 170 else 150
+
+  /** The board size in mm of one answer, and the answers in a row. */
+  private def answerLayout(size: GridSize): (Int, Int) = size match
+    case GridSize.G4 => (21, 8)
+    case GridSize.G6 => (28, 6)
+    case GridSize.G9 => (34, 5)
+
+  /** One board. `givens`, when set, marks the given cells (answers show
+    * them bold and the rest light). */
+  private def board(size: GridSize, grid: Vector[Int], symbols: Vector[String], mm: Int, givens: Option[Vector[Int]]): HtmlElement =
+    val n = size.n
+    div(
+      cls := "sudoku-print-board",
+      cls(s"sudoku-print-board--$n") := n != 9,
+      styleAttr := s"width: ${mm}mm; height: ${mm}mm; font-size: ${"%.2f".format(0.6 * mm / n)}mm; " +
+        s"grid-template-columns: repeat($n, 1fr); grid-template-rows: repeat($n, 1fr);",
+      grid.indices.map { i =>
+        val (r, c) = (i / n, i % n)
+        div(
+          cls := "sudoku-print-cell",
+          cls("sudoku-print-cell--boxl") := c > 0 && c % size.boxCols == 0,
+          cls("sudoku-print-cell--boxt") := r > 0 && r % size.boxRows == 0,
+          cls("sudoku-print-cell--given") := givens.exists(_(i) != 0),
+          if grid(i) == 0 then "" else symbols(grid(i) - 1)
+        )
+      }
+    )
+
+  def sheetBody(c: SheetConfig, page: SheetPage): HtmlElement =
+    val symbols = symbolsOf(c)
+    page match
+      case SheetPage.Puzzles(ps) =>
+        div(
+          cls := s"sudoku-print-sheet sudoku-print-sheet--pp${c.perPage.n}",
+          ps.map { p =>
+            div(
+              cls := "sudoku-print-puzzle",
+              when(c.symbols == Symbols.Shapes)(div(cls := "sudoku-print-legend", symbols.mkString(" "))),
+              board(c.size, p.givens, symbols, boardMm(c), None)
+            )
+          }
+        )
+      case SheetPage.Answers(entries) =>
+        val (mm, perRow) = answerLayout(c.size)
+        div(
+          cls := "sudoku-answers",
+          h3(cls := "sudoku-answers__title", child.text <-- s(form(_.answersTitle))),
+          div(
+            cls := "sudoku-answers__grid",
+            styleAttr := s"grid-template-columns: repeat($perRow, auto);",
+            entries.map { (label, p) =>
+              div(
+                cls := "sudoku-answer",
+                div(cls := "sudoku-answer__label", label),
+                board(c.size, p.solution, symbols, mm, Some(p.givens))
+              )
+            }
+          )
+        )
+
+  /** The form rows: size, symbols, difficulty, puzzles per page, answers.
+    * Shapes are disabled for 9×9. */
+  private def sheetForm(config: Var[SheetConfig]): HtmlElement =
+    val c = config.signal
+    SheetBuilder.form(
+      SheetBuilder.formRow(form(_.size), SheetBuilder.pills(
+        "sudoku-size", c.map(_.size),
+        GridSize.values.toList.map(g => (g, g.n.toString, Val(s"${g.n}×${g.n}"))),
+        g => config.update(_.withSize(g)))),
+      SheetBuilder.formRow(form(_.symbols), SheetBuilder.pills(
+        "sudoku-symbols", c.map(_.symbols),
+        List((Symbols.Shapes, "shapes", s(form(_.symbolsShapes))), (Symbols.Digits, "digits", s(form(_.symbolsDigits)))),
+        v => config.update(k => k.copy(symbols = v).withSize(k.size)),
+        isDisabled = v => c.map(k => v == Symbols.Shapes && k.size == GridSize.G9))),
+      SheetBuilder.formRow(form(_.level), SheetBuilder.pills(
+        "sudoku-level", c.map(_.level),
+        List((Level.Easy, form(_.levelEasy)), (Level.Medium, form(_.levelMedium)), (Level.Hard, form(_.levelHard)))
+          .map((l, label) => (l, l.toString.toLowerCase, s(label))),
+        l => config.update(_.copy(level = l)))),
+      SheetBuilder.formRow(form(_.perPage), SheetBuilder.pills(
+        "sudoku-per-page", c.map(_.perPage),
+        PerPage.values.toList.map(p => (p, p.n.toString, Val(p.n.toString))),
+        p => config.update(_.copy(perPage = p)))),
+      SheetBuilder.flag(config, "sudoku-answers", form(_.answers), _.answers, k => k.copy(answers = !k.answers))
+    )

@@ -2,7 +2,8 @@ package tandu.workbook
 
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
-import tandu.activities.{Battleships, DotToDot, GuideRobot, LetterTracing, MathPractice, Maze, SeekAndFind, Sudoku, WordBuilder, WordSearch}
+import tandu.activities.{Battleships, DotToDot, GuideRobot, LetterTracing, MathPractice, Maze, SeekAndFind, Sudoku, SudokuLogic, SudokuSheet, WordBuilder, WordSearch}
+import tandu.ui.SheetBuilder
 import tandu.i18n.{Lang, Strings}
 
 import scala.scalajs.js
@@ -127,8 +128,12 @@ object Workbook:
     )),
     Group("sudoku", "#", "plum", _.sudoku.name,
       Sudoku.variants.map { v =>
+        val token = v.id match
+          case "emoji4" => SudokuSheet.presetToken("easy")
+          case "emoji6" => SudokuSheet.presetToken("medium")
+          case other    => SudokuSheet.classicToken(SudokuLogic.Level.values.find(_.toString.toLowerCase == other).get)
         Source(s"sudoku-${v.id}", v.nameKey, _.offline.sudoku.printTitle,
-          _ => Sudoku.printSheetBody(v))
+          ctx => SheetBuilder.workbookPages(SudokuSheet.sheetSpec, token, 1, ctx.rng).head)
       }),
     // One source with its own form (the print page's form): size, loops,
     // mazes per page. Rows keep their settings in `params`.

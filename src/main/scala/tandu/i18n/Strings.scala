@@ -252,7 +252,23 @@ object Strings:
   final case class SudokuOff(
       printTitle: String,
       sheetHint: String,
+      form: SudokuForm,
       rules: Rules
+  )
+
+  /** Labels of the Sudoku sheet builder form (print mode). */
+  final case class SudokuForm(
+      size: String,
+      symbols: String,
+      symbolsShapes: String,
+      symbolsDigits: String,
+      level: String,
+      levelEasy: String,
+      levelMedium: String,
+      levelHard: String,
+      perPage: String,
+      answers: String,
+      answersTitle: String
   )
 
   final case class MazeOff(
@@ -1210,8 +1226,21 @@ object Strings:
         lichessLabel = "Open lidraughts"
       ),
       sudoku = SudokuOff(
-        printTitle = "Sudoku — six puzzles",
-        sheetHint = "Print the sheet, grab a pen, and solve. No solutions included — that's part of the fun.",
+        printTitle = "Sudoku",
+        sheetHint = "Print the sheet, grab a pen, and solve. Turn on Answers to add the solutions at the end.",
+        form = SudokuForm(
+          size = "Size",
+          symbols = "Symbols",
+          symbolsShapes = "Shapes",
+          symbolsDigits = "Digits",
+          level = "Difficulty",
+          levelEasy = "Easy",
+          levelMedium = "Medium",
+          levelHard = "Hard",
+          perPage = "Puzzles per page",
+          answers = "Answers",
+          answersTitle = "Answers"
+        ),
         rules = Rules("How to play", List(
           "Fill the grid so every row, every column, and every 3×3 box contains each digit 1–9 exactly once.",
           "The given numbers can't change. Use small pencil marks for candidates when you're unsure.",
@@ -2035,8 +2064,21 @@ object Strings:
         lichessLabel = "Otwórz lidraughts"
       ),
       sudoku = SudokuOff(
-        printTitle = "Sudoku — sześć zagadek",
-        sheetHint = "Wydrukuj kartkę, weź długopis i rozwiązuj. Bez rozwiązań — taka zabawa.",
+        printTitle = "Sudoku",
+        sheetHint = "Wydrukuj kartkę, weź długopis i rozwiązuj. Włącz Rozwiązania, a na końcu dojdą odpowiedzi.",
+        form = SudokuForm(
+          size = "Rozmiar",
+          symbols = "Symbole",
+          symbolsShapes = "Kształty",
+          symbolsDigits = "Cyfry",
+          level = "Trudność",
+          levelEasy = "Łatwe",
+          levelMedium = "Średnie",
+          levelHard = "Trudne",
+          perPage = "Zagadek na stronie",
+          answers = "Rozwiązania",
+          answersTitle = "Rozwiązania"
+        ),
         rules = Rules("Jak grać", List(
           "Wypełnij planszę tak, by w każdym wierszu, każdej kolumnie i każdym kwadracie 3×3 znalazła się każda cyfra od 1 do 9 dokładnie raz.",
           "Podane cyfry są niezmienne. Używaj małych notatek przy niepewnych polach.",
@@ -2860,8 +2902,21 @@ object Strings:
         lichessLabel = "Abrir lidraughts"
       ),
       sudoku = SudokuOff(
-        printTitle = "Sudoku — seis enigmas",
-        sheetHint = "Imprime la hoja, coge un lápiz y a resolver. Sin soluciones — esa es la gracia.",
+        printTitle = "Sudoku",
+        sheetHint = "Imprime la hoja, coge un lápiz y a resolver. Activa Soluciones para añadirlas al final.",
+        form = SudokuForm(
+          size = "Tamaño",
+          symbols = "Símbolos",
+          symbolsShapes = "Formas",
+          symbolsDigits = "Números",
+          level = "Dificultad",
+          levelEasy = "Fácil",
+          levelMedium = "Medio",
+          levelHard = "Difícil",
+          perPage = "Enigmas por página",
+          answers = "Soluciones",
+          answersTitle = "Soluciones"
+        ),
         rules = Rules("Cómo jugar", List(
           "Rellena la cuadrícula de modo que cada fila, cada columna y cada caja 3×3 contenga los dígitos del 1 al 9 exactamente una vez.",
           "Los números dados no cambian. Usa pequeñas anotaciones para los candidatos.",
@@ -3685,8 +3740,21 @@ object Strings:
         lichessLabel = "Ouvrir lidraughts"
       ),
       sudoku = SudokuOff(
-        printTitle = "Sudoku — six grilles",
-        sheetHint = "Imprimez la feuille, prenez un stylo et résolvez. Pas de solutions — ça fait partie du jeu.",
+        printTitle = "Sudoku",
+        sheetHint = "Imprimez la feuille, prenez un stylo et résolvez. Activez Solutions pour les ajouter à la fin.",
+        form = SudokuForm(
+          size = "Taille",
+          symbols = "Symboles",
+          symbolsShapes = "Formes",
+          symbolsDigits = "Chiffres",
+          level = "Difficulté",
+          levelEasy = "Facile",
+          levelMedium = "Moyen",
+          levelHard = "Difficile",
+          perPage = "Grilles par page",
+          answers = "Solutions",
+          answersTitle = "Solutions"
+        ),
         rules = Rules("Comment jouer", List(
           "Remplissez la grille pour que chaque ligne, chaque colonne et chaque carré 3×3 contienne chaque chiffre de 1 à 9 exactement une fois.",
           "Les chiffres donnés ne changent pas. Notez les candidats en petit quand vous hésitez.",
@@ -4510,8 +4578,21 @@ object Strings:
         lichessLabel = "lidraughts öffnen"
       ),
       sudoku = SudokuOff(
-        printTitle = "Sudoku — sechs Rätsel",
-        sheetHint = "Druckt das Blatt aus, schnappt euch einen Stift und löst los. Keine Lösungen — das gehört zum Spaß.",
+        printTitle = "Sudoku",
+        sheetHint = "Druckt das Blatt aus, schnappt euch einen Stift und löst los. Schaltet Lösungen ein, dann kommen sie ans Ende.",
+        form = SudokuForm(
+          size = "Größe",
+          symbols = "Symbole",
+          symbolsShapes = "Formen",
+          symbolsDigits = "Ziffern",
+          level = "Schwierigkeit",
+          levelEasy = "Leicht",
+          levelMedium = "Mittel",
+          levelHard = "Schwer",
+          perPage = "Rätsel pro Seite",
+          answers = "Lösungen",
+          answersTitle = "Lösungen"
+        ),
         rules = Rules("So wird gespielt", List(
           "Füllt das Gitter so aus, dass jede Reihe, jede Spalte und jeder 3×3-Block die Ziffern 1–9 jeweils genau einmal enthält.",
           "Die vorgegebenen Zahlen sind fest. Tragt kleine Kandidatennotizen ein, wenn ihr unsicher seid.",

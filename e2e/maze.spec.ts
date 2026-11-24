@@ -73,10 +73,12 @@ test("print mode: presets fill the form, the preview follows, print matches it",
 test("print mode: size is limited by mazes per page", async ({ page }) => {
   await page.goto("/activity/maze/print")
   // Mazes per page comes first in the form, because it limits the size.
+  // Shapes come first (they say what kind of maze), then mazes per page.
   const rows = page.locator(".sb-form__row")
-  await expect(rows.nth(0).getByTestId("maze-per-page-1")).toBeVisible()
-  await expect(rows.nth(1).getByTestId("maze-size")).toBeVisible()
-  await expect(rows.nth(2).getByTestId("maze-style-winding")).toBeVisible()
+  await expect(rows.nth(0).getByTestId("maze-shape-square")).toBeVisible()
+  await expect(rows.nth(1).getByTestId("maze-per-page-1")).toBeVisible()
+  await expect(rows.nth(2).getByTestId("maze-size")).toBeVisible()
+  await expect(rows.nth(3).getByTestId("maze-style-winding")).toBeVisible()
 
   await page.getByTestId("maze-preset-hard").click() // 1 per page
   const plus = stepperPlus(page, "maze-size")
@@ -171,4 +173,82 @@ test("print mode: several pages, each with new mazes", async ({ page }) => {
   await minus.click()
   await expect(page.getByTestId("maze-page-label")).toHaveText("1 / 1")
   await expect(preview.locator(".maze-print-board")).toHaveCount(4)
+})
+
+// ---------- shapes ----------
+
+const shapeOf = (sheet) => sheet.locator(".maze-print-sheet").first().getAttribute("data-shape")
+
+test("print mode: shapes are a multi-select, pages go through them", async ({ page }) => {
+  await page.goto("/activity/maze/print")
+  const preview = page.getByTestId("maze-preview")
+  await expect(page.getByTestId("maze-shape-square")).toHaveClass(/is-active/)
+
+  await page.getByTestId("maze-shape-circle").click()
+  await expect(page).toHaveURL(/\.square-circle$/)
+  await page.getByTestId("maze-shape-square").click()
+  await expect(page).toHaveURL(/\.circle$/)
+  await expect(preview.locator(".maze-print-board--circle").first()).toBeVisible()
+
+  // The last shape stays on.
+  await page.getByTestId("maze-shape-circle").click()
+  await expect(page.getByTestId("maze-shape-circle")).toHaveClass(/is-active/)
+
+  // All shapes, 3 pages: 3 different shapes.
+  await page.getByTestId("maze-shape-all").click()
+  await expect(page.getByTestId("maze-shape-all")).toHaveClass(/is-active/)
+  const plus = stepperPlus(page, "maze-pages")
+  await plus.click()
+  await plus.click()
+  const shapes: string[] = []
+  for (let i = 0; i < 3; i++) {
+    shapes.push((await shapeOf(preview))!)
+    if (i < 2) await page.getByTestId("maze-page-next").click()
+  }
+  expect(new Set(shapes).size).toBe(3)
+
+  // The print has the same shapes, in the same order.
+  await startPrinting(page)
+  const printed = await page.locator(".print-only .maze-print-sheet").evaluateAll(
+    es => es.map(e => e.getAttribute("data-shape")))
+  expect(printed).toEqual(shapes)
+})
+
+test("print mode: circle maze has one entrance; hex maze has hexagon walls", async ({ page }) => {
+  await page.goto("/activity/maze/print/s10.winding.off.pp1.circle")
+  const circle = page.getByTestId("maze-preview").locator(".maze-print-board--circle")
+  await expect(circle).toHaveCount(1)
+  expect(await circle.locator("path.maze-wall").count()).toBeGreaterThan(0)
+  // The outer wall is one arc with a gap: one path, one arc command.
+  const border = circle.locator(".maze-border")
+  await expect(border).toHaveCount(1)
+  const d = (await border.getAttribute("d"))!
+  expect(d.match(/A/g)!.length).toBe(1)
+
+  await page.goto("/activity/maze/print/s10.winding.off.pp1.hex")
+  const hex = page.getByTestId("maze-preview").locator(".maze-print-board--hex")
+  await expect(hex).toHaveCount(1)
+  expect(await hex.locator("line.maze-wall").count()).toBeGreaterThan(0)
+})
+
+test("print mode: a circle at 2 per page is round and fits", async ({ page }) => {
+  await page.goto("/activity/maze/print/s10.winding.off.pp2.circle")
+  const preview = page.getByTestId("maze-preview")
+  const boards = preview.locator(".maze-print-board--circle")
+  await expect(boards).toHaveCount(2)
+  const body = (await preview.locator(".printable__body").boundingBox())!
+  for (const b of await boards.all()) {
+    const box = (await b.boundingBox())!
+    expect(Math.abs(box.width - box.height)).toBeLessThanOrEqual(1)
+    expect(box.x + box.width).toBeLessThanOrEqual(body.x + body.width + 0.5)
+  }
+})
+
+test("print mode: a preset resets the shapes to square", async ({ page }) => {
+  await page.goto("/activity/maze/print")
+  await page.getByTestId("maze-shape-hex").click()
+  await page.getByTestId("maze-preset-hard").click()
+  await expect(page.getByTestId("maze-shape-square")).toHaveClass(/is-active/)
+  await expect(page.getByTestId("maze-shape-hex")).not.toHaveClass(/is-active/)
+  await expect(page).toHaveURL(/\.pp1$/)
 })

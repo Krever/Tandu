@@ -10,7 +10,7 @@ object MazeGraph:
 
   /** The cells of one maze shape. `neighbours` must be symmetric: if `b`
     * is a neighbour of `a`, then `a` is a neighbour of `b`. */
-  trait Layout:
+  sealed trait Layout:
     def cellCount: Int
     def neighbours(cell: Int): Vector[Int]
     def start: Int

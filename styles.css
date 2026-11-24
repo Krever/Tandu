@@ -2281,7 +2281,7 @@ label.field select { padding: var(--space-2) var(--space-3); border-radius: var(
 /* The walls have the same width on paper at every maze size: the width is
    in mm and does not scale with the viewBox. */
 .maze-print-svg .maze-border,
-.maze-print-svg .maze-wall { stroke: black; stroke-width: 0.5mm; vector-effect: non-scaling-stroke; }
+.maze-print-svg .maze-wall { fill: none; stroke: black; stroke-width: 0.5mm; vector-effect: non-scaling-stroke; }
 
 /* Dot to Dot — tap numbered dots in order; the picture is the reward.
    Geometry lives in a 100-unit viewBox (see DotToDot.scala) so the same

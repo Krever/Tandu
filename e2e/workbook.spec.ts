@@ -405,6 +405,10 @@ test("a Maze row has its own settings form; they save and print", async ({ page 
   await row.getByTestId("maze-per-page-2").click()
   await expect(row.getByTestId("wbk-row-summary")).toHaveText("Custom")
   await expect(row.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(2)
+  // Circle only.
+  await row.getByTestId("maze-shape-circle").click()
+  await row.getByTestId("maze-shape-square").click()
+  await expect(row.getByTestId("maze-preview").locator(".maze-print-board--circle")).toHaveCount(2)
 
   // Saved: a reload keeps the settings.
   await page.reload()
@@ -415,6 +419,7 @@ test("a Maze row has its own settings form; they save and print", async ({ page 
   await page.locator(".wbk-print-btn").click()
   await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
   await expect(page.locator(".print-only .maze-print-sheet--pp2")).toHaveCount(2)
+  await expect(page.locator(".print-only .maze-print-board--circle")).toHaveCount(4)
 })
 
 test("books saved with the old maze variants keep their sheets", async ({ page }) => {

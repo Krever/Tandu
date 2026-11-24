@@ -273,7 +273,12 @@ object Strings:
       style: String,
       styleWinding: String,
       styleBalanced: String,
-      styleBranchy: String
+      styleBranchy: String,
+      shapes: String,
+      shapeAll: String,
+      shapeSquare: String,
+      shapeCircle: String,
+      shapeHex: String
   )
 
   final case class DotToDotOff(
@@ -1226,7 +1231,12 @@ object Strings:
           style = "Style",
           styleWinding = "Winding",
           styleBalanced = "Balanced",
-          styleBranchy = "Branchy"
+          styleBranchy = "Branchy",
+          shapes = "Shapes",
+          shapeAll = "All",
+          shapeSquare = "Square",
+          shapeCircle = "Circle",
+          shapeHex = "Hex"
         ),
         rules = Rules("How to play", List(
           "Start at the mouse 🐭 and find a path to the cheese 🧀.",
@@ -2046,7 +2056,12 @@ object Strings:
           style = "Styl",
           styleWinding = "Kręty",
           styleBalanced = "Zrównoważony",
-          styleBranchy = "Rozgałęziony"
+          styleBranchy = "Rozgałęziony",
+          shapes = "Kształty",
+          shapeAll = "Wszystkie",
+          shapeSquare = "Kwadrat",
+          shapeCircle = "Koło",
+          shapeHex = "Sześciokąty"
         ),
         rules = Rules("Jak grać", List(
           "Zacznij przy myszce 🐭 i znajdź drogę do sera 🧀.",
@@ -2866,7 +2881,12 @@ object Strings:
           style = "Estilo",
           styleWinding = "Sinuoso",
           styleBalanced = "Equilibrado",
-          styleBranchy = "Ramificado"
+          styleBranchy = "Ramificado",
+          shapes = "Formas",
+          shapeAll = "Todas",
+          shapeSquare = "Cuadrado",
+          shapeCircle = "Círculo",
+          shapeHex = "Hexágono"
         ),
         rules = Rules("Cómo jugar", List(
           "Empieza en el ratón 🐭 y encuentra el camino hasta el queso 🧀.",
@@ -3686,7 +3706,12 @@ object Strings:
           style = "Style",
           styleWinding = "Sinueux",
           styleBalanced = "Équilibré",
-          styleBranchy = "Ramifié"
+          styleBranchy = "Ramifié",
+          shapes = "Formes",
+          shapeAll = "Toutes",
+          shapeSquare = "Carré",
+          shapeCircle = "Cercle",
+          shapeHex = "Hexagone"
         ),
         rules = Rules("Comment jouer", List(
           "Pars de la souris 🐭 et trouve le chemin jusqu'au fromage 🧀.",
@@ -4506,7 +4531,12 @@ object Strings:
           style = "Stil",
           styleWinding = "Verschlungen",
           styleBalanced = "Ausgewogen",
-          styleBranchy = "Verzweigt"
+          styleBranchy = "Verzweigt",
+          shapes = "Formen",
+          shapeAll = "Alle",
+          shapeSquare = "Quadrat",
+          shapeCircle = "Kreis",
+          shapeHex = "Sechseck"
         ),
         rules = Rules("So wird gespielt", List(
           "Starte bei der Maus 🐭 und finde den Weg zum Käse 🧀.",

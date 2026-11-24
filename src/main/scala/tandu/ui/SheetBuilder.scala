@@ -64,6 +64,19 @@ object SheetBuilder:
     token.split('.').iterator.filter(_.startsWith("p")).flatMap(_.drop(1).toIntOption).nextOption()
       .fold(1)(clamp(_, 1, MaxPages))
 
+  /** `n` values from `ids` in shuffled rounds: each value is used once
+    * before any value comes back, and a new round does not start with the
+    * value that ended the last one. Use it for the theme or shape of each
+    * page. */
+  def rounds[A](ids: Vector[A], n: Int, rng: Random): Vector[A] =
+    Iterator.iterate(Vector.empty[A]) { acc =>
+      val round = rng.shuffle(ids)
+      val fixed =
+        if round.size > 1 && acc.lastOption.contains(round.head) then round.tail.head +: round.head +: round.drop(2)
+        else round
+      acc ++ fixed
+    }.dropWhile(_.size < n).next().take(n)
+
   // ---------- pages ----------
 
   /** The print mode of an activity. `intro` comes first (the rules card).

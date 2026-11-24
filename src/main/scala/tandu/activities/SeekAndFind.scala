@@ -326,25 +326,14 @@ object SeekAndFind extends Activity:
     )
     generate(spec, PrintW, PrintH, rng, themes.find(_.themeId == themeId).getOrElse(themes.head))
 
-  /** The theme of each page. The selected themes come in shuffled rounds:
-    * each theme is used once before any theme comes back, and a new round
-    * does not start with the theme that ended the last one. */
-  private def themeOrder(ids: Vector[String], n: Int, rng: Random): Vector[String] =
-    Iterator.iterate(Vector.empty[String]) { acc =>
-      val round = rng.shuffle(ids)
-      val fixed =
-        if round.size > 1 && acc.lastOption.contains(round.head) then round.tail.head +: round.head +: round.drop(2)
-        else round
-      acc ++ fixed
-    }.dropWhile(_.size < n).next().take(n)
-
   /** `n` different sheets from one recipe. The theme order is fixed for
     * `MaxPages` first, and one generator then makes the pages in order, so
     * page k does not change when pages are added after it. The print page,
     * the workbook and both previews all use this. */
   private def sheetPuzzles(c: SheetConfig, n: Int, seed: Long): Vector[Puzzle] =
     val rng = new Random(seed)
-    val order = themeOrder(c.themeIds, math.max(n, MaxPages), rng)
+    // The theme of each page comes in shuffled rounds (see SheetBuilder.rounds).
+    val order = SheetBuilder.rounds(c.themeIds, math.max(n, MaxPages), rng)
     order.take(n).map(t => sheetPuzzle(c, rng, t))
 
   /** A random theme, not `avoid` (the in-app games). */
@@ -725,7 +714,7 @@ object SeekAndFind extends Activity:
         (Task.Find, "find", s(form(_.taskFind))),
         (Task.Count, "count", s(form(_.taskCount)))
       ), t => config.update(_.copy(task = t)))),
-      // Multi-select: pages go through the selected themes (see themeOrder).
+      // Multi-select: pages go through the selected themes (see SheetBuilder.rounds).
       formRow(form(_.theme), div(
         cls := "sb-chips",
         chip("snf-theme-all", c.map(_.themes.isEmpty), s(form(_.themeAll)),

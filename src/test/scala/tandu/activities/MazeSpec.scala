@@ -44,10 +44,10 @@ class MazeSpec extends AnyFunSuite:
   }
 
   test("adding pages keeps the earlier pages") {
-    val one = sheetGrids(easy, 1, seed = 42L)
-    val three = sheetGrids(easy, 3, seed = 42L)
+    val one = sheetPages(easy, 1, seed = 42L)
+    val three = sheetPages(easy, 3, seed = 42L)
     val _ = assert(three.head == one.head)
-    val _ = assert(three.forall(_.size == 4))
+    val _ = assert(three.forall(_.mazes.size == 4))
     assert(three.distinct.size == 3)
   }
 
@@ -93,4 +93,66 @@ class MazeSpec extends AnyFunSuite:
   test("a token without a style keeps the style of the first preset") {
     val _ = assert(decodeConfig("s16.off.pp4").style == Style.Winding)
     assert(decodeConfig("s16.branchy.off.pp4").style == Style.Branchy)
+  }
+
+  // ---------- shapes ----------
+
+  private def cfg(size: Int, perPage: PerPage, shape: Shape): SheetConfig =
+    SheetConfig(size, Loops.Off, perPage, Style.Winding, Set(shape))
+
+  /** The hex side length in mm, from the slot and the hex dims. */
+  private def hexSide(c: SheetConfig): Double =
+    val (rows, cols) = c.hexDims
+    val (w, h) = c.perPage.slotMm
+    math.min(w / (math.sqrt(3) * (cols + 0.5)), h / (1.5 * rows + 0.5))
+
+  test("hex dims follow the slot") {
+    val _ = assert(cfg(16, PerPage.Four, Shape.Hex).hexDims == (17, 12))
+    val _ = assert(cfg(20, PerPage.Two, Shape.Hex).hexDims == (15, 22))
+    assert(cfg(30, PerPage.One, Shape.Hex).hexDims == (31, 22))
+  }
+
+  test("circle rings from size") {
+    val _ = assert(cfg(10, PerPage.Four, Shape.Circle).rings == 4)
+    val _ = assert(cfg(30, PerPage.One, Shape.Circle).rings == 14)
+    assert(cfg(5, PerPage.Four, Shape.Circle).rings == 2)
+  }
+
+  test("every shape stays drawable at every max size") {
+    for pp <- PerPage.values do
+      val (w, h) = pp.slotMm
+      val sq = cfg(pp.maxSize, pp, Shape.Square)
+      val (rows, cols) = sq.dims
+      val _ = assert(math.min(w / cols, h / rows) >= 5.5, s"square $pp")
+      val ci = cfg(pp.maxSize, pp, Shape.Circle)
+      val _ = assert(math.min(w, h) / 2 / (ci.rings + 1) >= 5.5, s"circle $pp")
+      val side = hexSide(cfg(pp.maxSize, pp, Shape.Hex))
+      val _ = assert(side >= 4.0, s"hex edge $pp: $side")
+      val _ = assert(math.sqrt(3) * side >= 5.5, s"hex width $pp")
+  }
+
+  test("shapes codec") {
+    val _ = assert(encodeConfig(easy) == "s10.winding.few.pp4")
+    val sc = easy.withShape(Shape.Circle)
+    val _ = assert(encodeConfig(sc).endsWith(".square-circle"))
+    val _ = assert(decodeConfig(encodeConfig(sc)) == sc)
+    val _ = assert(decodeConfig("s10.winding.few.pp4.circle-hex").shapes == Set(Shape.Circle, Shape.Hex))
+    val _ = assert(decodeConfig("s10.square").shapes == Set(Shape.Square))
+    assert(decodeConfig("s10.bogus-hex").shapes == Set(Shape.Square))
+  }
+
+  test("the last shape cannot be removed") {
+    assert(easy.withShape(Shape.Square) == easy)
+  }
+
+  test("pages go through the shapes in rounds") {
+    val pages = sheetPages(easy.withAllShapes, 6, seed = 7L)
+    for round <- pages.map(_.shape).grouped(3) do
+      val _ = assert(round.toSet == Shape.values.toSet, pages.map(_.shape))
+    for p <- pages; m <- p.mazes do
+      val ok = p.shape match
+        case Shape.Square => m.layout.isInstanceOf[MazeGraph.RectLayout]
+        case Shape.Circle => m.layout.isInstanceOf[MazeGraph.CircleLayout]
+        case Shape.Hex    => m.layout.isInstanceOf[MazeGraph.HexLayout]
+      val _ = assert(ok, s"${p.shape}: ${m.layout}")
   }

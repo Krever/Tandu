@@ -180,11 +180,18 @@ object Maze extends Activity:
     case Two  extends PerPage(2, 20, (190.0, 112.0))
     case Four extends PerPage(4, 16, (92.0, 112.0))
 
+  /** The shape of a maze. The order is the order of the URL token and of
+    * the form chips. */
+  enum Shape:
+    case Square, Circle, Hex
+
   /** The full recipe of one printable sheet. The builder form edits this
     * value and nothing else.
     *   - `size`: cells on the short side of each maze, from
-    *     [[SheetConfig.MinSize]] to `perPage.maxSize`. */
-  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage, style: Style)
+    *     [[SheetConfig.MinSize]] to `perPage.maxSize` (see `rings` and
+    *     `hexDims` for the other shapes).
+    *   - `shapes`: the shapes that the pages use; never empty. */
+  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage, style: Style, shapes: Set[Shape] = Set(Shape.Square))
 
   object SheetConfig:
     val MinSize = 5
@@ -197,6 +204,32 @@ object Maze extends Activity:
       if w <= h then ((c.size * h / w).toInt, c.size)
       else (c.size, (c.size * w / h).toInt)
 
+    /** (rows, cols) of a hex maze. A passage is one hex edge, only 0.58 of
+      * the cell width, so hex uses 3/4 of `size` cells on the short side.
+      * The other count follows from the slot: the width across the flats
+      * is √3·s and the row step is 1.5·s (s = side length). */
+    def hexDims: (Int, Int) =
+      val n = math.max(3, c.size * 3 / 4)
+      val (w, h) = c.perPage.slotMm
+      if w <= h then
+        val side = w / (math.sqrt(3) * (n + 0.5))
+        (((h / side - 0.5) / 1.5).toInt, n)
+      else
+        val side = h / (1.5 * n + 0.5)
+        (n, (w / (math.sqrt(3) * side) - 0.5).toInt)
+
+    /** The rings of a circle maze. The ring width is then about the same
+      * as the square cell width at the same size. */
+    def rings: Int = math.max(2, c.size / 2 - 1)
+
+    /** Add or remove one shape. The last shape cannot be removed. */
+    def withShape(s: Shape): SheetConfig =
+      if !c.shapes(s) then c.copy(shapes = c.shapes + s)
+      else if c.shapes.size > 1 then c.copy(shapes = c.shapes - s)
+      else c
+
+    def withAllShapes: SheetConfig = c.copy(shapes = Shape.values.toSet)
+
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
     SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(10, Loops.Few, PerPage.Four, Style.Winding)),
     SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(16, Loops.Off, PerPage.Four, Style.Balanced)),
@@ -207,9 +240,14 @@ object Maze extends Activity:
   def presetToken(presetId: String): String =
     encodeConfig(sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config)
 
-  /** The recipe as one URL path segment, for example `s10.winding.few.pp4`. */
+  /** The recipe as one URL path segment, for example `s10.winding.few.pp4`
+    * or `s10.winding.few.pp4.circle-hex`. Square only has no shapes token,
+    * so older links and stored rows stay the same. */
   def encodeConfig(c: SheetConfig): String =
-    s"s${c.size}.${c.style.toString.toLowerCase}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}"
+    val shapes =
+      if c.shapes == Set(Shape.Square) then ""
+      else "." + Shape.values.filter(c.shapes).map(_.toString.toLowerCase).mkString("-")
+    s"s${c.size}.${c.style.toString.toLowerCase}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}$shapes"
 
   private val SizeToken = "s(\\d+)".r
   private val PerPageToken = "pp(\\d+)".r
@@ -226,7 +264,9 @@ object Maze extends Activity:
         // toIntOption: a digit run too long for an Int must not throw.
         case SizeToken(n)    => n.toIntOption.fold(c)(v => c.copy(size = v))
         case PerPageToken(n) => PerPage.values.find(p => n.toIntOption.contains(p.n)).fold(c)(v => c.copy(perPage = v))
-        case _               => c
+        case _ =>
+          val parts = t.split('-').toList.map(p => SheetBuilder.named(Shape.values, p))
+          if parts.forall(_.isDefined) then c.copy(shapes = parts.flatten.toSet) else c
       )
     }
     raw.copy(size = SheetBuilder.clamp(raw.size, SheetConfig.MinSize, raw.perPage.maxSize))
@@ -442,22 +482,44 @@ object Maze extends Activity:
 
   // ---------- print ----------
 
-  /** `n` pages of `perPage` mazes each. One generator makes them in page
-    * order, so page k does not change when pages are added after it. */
-  def sheetGrids(c: SheetConfig, n: Int, seed: Long): Vector[Vector[Grid]] =
+  /** One printed page: its shape and its mazes. */
+  final case class SheetPage(shape: Shape, mazes: Vector[MazeGraph.Carved])
+
+  private def layoutOf(c: SheetConfig, shape: Shape): MazeGraph.Layout = shape match
+    case Shape.Square =>
+      val (rows, cols) = c.dims
+      MazeGraph.RectLayout(rows, cols)
+    case Shape.Hex =>
+      val (rows, cols) = c.hexDims
+      MazeGraph.HexLayout(rows, cols)
+    case Shape.Circle => MazeGraph.CircleLayout(c.rings)
+
+  /** `n` pages of `perPage` mazes each. The shape of each page comes in
+    * shuffled rounds (see [[SheetBuilder.rounds]]); the order is fixed for
+    * `MaxPages` first. Then one generator makes the pages in order, so page
+    * k does not change when pages are added after it. */
+  def sheetPages(c: SheetConfig, n: Int, seed: Long): Vector[SheetPage] =
     val rng = new Random(seed)
-    val (rows, cols) = c.dims
-    Vector.fill(n)(Vector.fill(c.perPage.n)(generate(rows, cols, c.loops.braid, rng, c.style)))
+    val order = SheetBuilder.rounds(Shape.values.toVector.filter(c.shapes), math.max(n, SheetBuilder.MaxPages), rng)
+    order.take(n).map { shape =>
+      val layout = layoutOf(c, shape)
+      SheetPage(shape, Vector.fill(c.perPage.n)(MazeGraph.carve(layout, c.style, c.loops.braid, rng)))
+    }
 
   /** One printed page of mazes, without the printable frame. Each maze gets
     * the largest square cells that fit in its slot. */
-  def sheetBody(c: SheetConfig, grids: Vector[Grid]): HtmlElement =
+  def sheetBody(c: SheetConfig, page: SheetPage): HtmlElement =
     val (slotW, slotH) = c.perPage.slotMm
     div(
       cls := s"maze-print-sheet maze-print-sheet--pp${c.perPage.n}",
-      grids.map { g =>
-        val cell = math.min(slotW / g.cols, slotH / g.rows)
-        printableMaze(g, g.cols * cell)
+      dataAttr("shape") := page.shape.toString.toLowerCase,
+      page.mazes.map { m =>
+        m.layout match
+          case _: MazeGraph.RectLayout =>
+            val g = toGrid(m)
+            val cell = math.min(slotW / g.cols, slotH / g.rows)
+            printableMaze(g, g.cols * cell)
+          case _ => div() // Task 5 draws circle and hex.
       }
     )
 
@@ -474,13 +536,13 @@ object Maze extends Activity:
   /** The row label: the preset name, or "Custom". */
   def tokenSummary(token: String): Strings => String = SheetBuilder.summary(sheetSpec, token)
 
-  private lazy val sheetSpec: SheetBuilder.Spec[SheetConfig, Vector[Grid]] = SheetBuilder.Spec(
+  private lazy val sheetSpec: SheetBuilder.Spec[SheetConfig, SheetPage] = SheetBuilder.Spec(
     testIdPrefix = "maze",
     presets = sheetPresets,
     encode = encodeConfig,
     decode = decodeConfig,
     title = _ => _.offline.maze.printTitle,
-    pagesOf = sheetGrids,
+    pagesOf = sheetPages,
     body = sheetBody,
     form = sheetForm,
     newLabel = _.maze.newGame

@@ -136,7 +136,7 @@ object Sudoku extends Activity:
     * immediate dead end). On the sparse grids the hard generator produces this
     * is dramatically faster than scanning to the first empty cell — naive
     * first-empty backtracking spent ~500ms per hard puzzle, MRV a few ms. */
-  private def countSolutions(v: Variant, grid: Array[Array[Int]], cap: Int): Int =
+  private[activities] def countSolutions(v: Variant, grid: Array[Array[Int]], cap: Int): Int =
     var count = 0
     def go(): Boolean =
       // Pick the empty cell with the fewest candidates (MRV).

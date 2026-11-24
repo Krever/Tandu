@@ -46,6 +46,28 @@ object SudokuSheet:
     * for workbook rows. */
   def presetToken(presetId: String): String = SheetBuilder.presetToken(sheetSpec, presetId)
 
+  // ---------- workbook ----------
+
+  /** All page bodies of a workbook row; the answer pages follow when the
+    * row has answers on. */
+  def workbookPages(token: String, n: Int, rng: Random): Seq[HtmlElement] =
+    SheetBuilder.workbookPages(sheetSpec, token, n, rng)
+
+  /** The editor of a workbook row: the print page's form and preview. */
+  def settingsEditor(token: Var[String]): HtmlElement = SheetBuilder.embedded(sheetSpec, token)
+
+  /** The workbook row label: the preset name, otherwise the size and the
+    * level (for example "9×9 · Hard"). */
+  def tokenSummary(token: String): Strings => String =
+    val c = decodeConfig(token)
+    SheetBuilder.presetName(sheetSpec, c).getOrElse { str =>
+      val level = c.level match
+        case Level.Easy   => str.offline.sudoku.form.levelEasy
+        case Level.Medium => str.offline.sudoku.form.levelMedium
+        case Level.Hard   => str.offline.sudoku.form.levelHard
+      s"${c.size.n}×${c.size.n} · $level"
+    }
+
   /** The token of the old 9×9 print sheets: digits, six per page. */
   def classicToken(level: Level): String =
     encodeConfig(SheetConfig(GridSize.G9, Symbols.Digits, level, PerPage.Six, answers = false))

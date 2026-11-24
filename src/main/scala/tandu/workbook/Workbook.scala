@@ -2,8 +2,8 @@ package tandu.workbook
 
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
-import tandu.activities.{Battleships, DotToDot, GuideRobot, LetterTracing, MathPractice, Maze, SeekAndFind, Sudoku, SudokuLogic, SudokuSheet, WordBuilder, WordSearch}
-import tandu.ui.SheetBuilder
+import tandu.activities.{Battleships, DotToDot, GuideRobot, LetterTracing, MathPractice, Maze, SeekAndFind, SudokuSheet, WordBuilder, WordSearch}
+import tandu.activities.SudokuLogic.Level
 import tandu.i18n.{Lang, Strings}
 
 import scala.scalajs.js
@@ -126,15 +126,20 @@ object Workbook:
           editor = SeekAndFind.settingsEditor
         )))
     )),
-    Group("sudoku", "#", "plum", _.sudoku.name,
-      Sudoku.variants.map { v =>
-        val token = v.id match
-          case "emoji4" => SudokuSheet.presetToken("easy")
-          case "emoji6" => SudokuSheet.presetToken("medium")
-          case other    => SudokuSheet.classicToken(SudokuLogic.Level.values.find(_.toString.toLowerCase == other).get)
-        Source(s"sudoku-${v.id}", v.nameKey, _.offline.sudoku.printTitle,
-          ctx => SheetBuilder.workbookPages(SudokuSheet.sheetSpec, token, 1, ctx.rng).head)
-      }),
+    // One source with its own form (the print page's form): size, symbols,
+    // difficulty, puzzles per page, answers. Rows keep their settings in
+    // `params`.
+    Group("sudoku", "#", "plum", _.sudoku.name, List(
+      Source("sudoku", _.sudoku.name, _.offline.sudoku.printTitle,
+        ctx => SudokuSheet.workbookPages(SudokuSheet.presetToken("easy"), 1, ctx.rng).head,
+        settings = Some(Settings(
+          default = SudokuSheet.presetToken("easy"),
+          summary = SudokuSheet.tokenSummary,
+          title = _ => _.offline.sudoku.printTitle,
+          pages = SudokuSheet.workbookPages,
+          editor = SudokuSheet.settingsEditor
+        )))
+    )),
     // One source with its own form (the print page's form): size, loops,
     // mazes per page. Rows keep their settings in `params`.
     Group("maze", "🐭", "peach", _.maze.name, List(
@@ -257,6 +262,9 @@ object Workbook:
   /** A one-page Seek & Find row with the given settings token. */
   private def seekRow(token: String): Row = Row("seek-and-find", 1, Some(token))
 
+  /** A one-page Sudoku row with the given settings token. */
+  private def sudokuRow(token: String): Row = Row("sudoku", 1, Some(token))
+
   /** A one-page Maze row with the settings of a preset. */
   private def mazeRow(presetId: String): Row = Row("maze", 1, Some(Maze.presetToken(presetId)))
 
@@ -267,7 +275,7 @@ object Workbook:
       Row("dot-to-dot", 1),
       seekRow(SeekAndFind.presetToken("easy")),
       seekRow(SeekAndFind.countSheetToken),
-      Row("sudoku-emoji4", 1),
+      sudokuRow(SudokuSheet.presetToken("easy")),
       Row("math-easy", 1),
       mazeRow("easy")
     )),
@@ -276,7 +284,7 @@ object Workbook:
       Row("dot-to-dot", 1),
       Row("letter-tracing-lower", 1),
       seekRow(SeekAndFind.presetToken("medium")),
-      Row("sudoku-emoji6", 1),
+      sudokuRow(SudokuSheet.presetToken("medium")),
       Row("word-builder-easy", 1),
       Row("word-search-easy", 1),
       Row("math-medium", 1),
@@ -285,8 +293,8 @@ object Workbook:
     )),
     // Confident readers: mid/hard everything.
     Preset("age-8", _.workbook.age8plus, Vector(
-      Row("sudoku-medium", 1),
-      Row("sudoku-hard", 1),
+      sudokuRow(SudokuSheet.classicToken(Level.Medium)),
+      sudokuRow(SudokuSheet.classicToken(Level.Hard)),
       mazeRow("hard"),
       Row("word-search-medium", 1),
       Row("word-search-hard", 1),
@@ -299,7 +307,7 @@ object Workbook:
     Preset("travel", _.workbook.travel, Vector(
       Row("tic-tac-toe-grids", 1),
       mazeRow("easy"),
-      Row("sudoku-emoji6", 1),
+      sudokuRow(SudokuSheet.presetToken("medium")),
       Row("dot-to-dot", 1),
       seekRow(SeekAndFind.presetToken("medium")),
       Row("word-search-easy", 1),
@@ -310,8 +318,8 @@ object Workbook:
       Row("math-medium", 1),
       Row("math-hard", 1),
       seekRow(SeekAndFind.countSheetToken),
-      Row("sudoku-emoji6", 1),
-      Row("sudoku-easy", 1)
+      sudokuRow(SudokuSheet.presetToken("medium")),
+      sudokuRow(SudokuSheet.classicToken(Level.Easy))
     )),
     // Doubles as "empty the book" via the replace-with-preset panel.
     Preset("empty", _.workbook.emptyPreset, Vector.empty)
@@ -330,14 +338,17 @@ object Workbook:
         d
       }*)
 
-    /** Old source ids of Seek & Find and Maze, mapped to (new source id,
-      * settings token of the same sheet). Books saved before these kinds got
-      * their forms keep their pages. */
+    /** Old source ids of Seek & Find, Maze and Sudoku, mapped to (new
+      * source id, settings token of the same sheet). Books saved before
+      * these kinds got their forms keep their pages. */
     private val legacyRows: Map[String, (String, String)] =
       val levels = List("easy", "medium", "hard")
       levels.map(p => s"seek-and-find-$p" -> ("seek-and-find", SeekAndFind.presetToken(p))).toMap +
         ("seek-and-find-count" -> ("seek-and-find", SeekAndFind.countSheetToken)) ++
-        levels.map(p => s"maze-$p" -> ("maze", Maze.presetToken(p)))
+        levels.map(p => s"maze-$p" -> ("maze", Maze.presetToken(p))) +
+        ("sudoku-emoji4" -> ("sudoku", SudokuSheet.presetToken("easy"))) +
+        ("sudoku-emoji6" -> ("sudoku", SudokuSheet.presetToken("medium"))) ++
+        Level.values.map(l => s"sudoku-${l.toString.toLowerCase}" -> ("sudoku", SudokuSheet.classicToken(l)))
 
     private def migrate(row: Row): Row =
       legacyRows.get(row.sourceId).fold(row)((id, token) => row.copy(sourceId = id, params = Some(token)))

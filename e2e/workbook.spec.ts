@@ -27,6 +27,7 @@ const kindRows = (page, name: string) =>
   page.locator(".wbk-row", { has: page.locator(".wbk-row__name", { hasText: name }) })
 const seekAndFindRows = (page) => kindRows(page, "Seek & Find")
 const mazeRows = (page) => kindRows(page, "Maze")
+const sudokuRows = (page) => kindRows(page, "Sudoku")
 
 // Creates a book and gives it the first age band — the composition most
 // tests poke at.
@@ -119,20 +120,18 @@ test("adding pages is by kind; the variant is switched on the row, preview in ha
   await expect(page.locator(".wbk-add-chip")).toHaveCount(12)
   await expect(page.locator(".wbk-add-chip", { hasText: "Sudoku" })).toHaveCount(1)
 
-  // The default book already has a Sudoku row (Emoji 4×4). Open its preview.
-  const sudokuRow = page.locator(".wbk-row", { hasText: "Sudoku" }).first()
-  await sudokuRow.locator(".wbk-row__main").click()
-  await expect(sudokuRow.locator(".wbk-preview .sudoku-print-board--4").first()).toBeVisible()
-
-  // Step two: switch the variant via the row's dropdown — the preview re-renders.
-  await expect(sudokuRow.locator(".wbk-variant-select option")).toHaveCount(5)
+  // Step two: switch the variant via the row's dropdown — the preview
+  // re-renders. The default book has a Math row (Easy).
+  const mathRow = kindRows(page, "Math")
+  await mathRow.locator(".wbk-row__main").click()
+  const before = await mathRow.locator(".wbk-preview").textContent()
+  await expect(mathRow.locator(".wbk-variant-select option")).toHaveCount(3)
+  await mathRow.locator(".wbk-variant-select").selectOption({ index: 2 })
+  await expect(mathRow.locator(".wbk-preview")).not.toHaveText(before!)
   // Handwriting offers all four sets, including the random mix.
   const writingRow = page.locator(".wbk-row", { hasText: "Handwriting" })
   await expect(writingRow.locator(".wbk-variant-select option")).toHaveCount(4)
   await expect(writingRow.locator(".wbk-variant-select option").last()).toHaveText("Random")
-  await sudokuRow.locator(".wbk-variant-select").selectOption({ label: "Hard" })
-  await expect(sudokuRow.locator(".wbk-preview .sudoku-print-board--4")).toHaveCount(0)
-  await expect(sudokuRow.locator(".wbk-preview .sudoku-print-board").first()).toBeVisible()
 })
 
 test("rows reorder by dragging the grip", async ({ page }) => {
@@ -436,6 +435,49 @@ test("books saved with the old maze variants keep their sheets", async ({ page }
   const firstSheet = page.locator(".print-only .maze-print-sheet").first()
   // Hard: one maze per page (of any shape: the presets use all shapes).
   await expect(firstSheet.locator(".maze-print-board")).toHaveCount(1)
+})
+
+test("a Sudoku row has its own settings form; they save and print", async ({ page }) => {
+  await createBook(page) // 4–5 preset: one Easy Sudoku row
+  const row = sudokuRows(page)
+  await expect(row).toHaveCount(1)
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("Easy")
+  await expect(row.locator(".wbk-variant-select")).toHaveCount(0)
+
+  // The summary unfolds the form; the preview follows it.
+  await row.getByTestId("wbk-row-summary").click()
+  await expect(row.getByTestId("sudoku-preview").locator(".sudoku-print-board--4")).toHaveCount(6)
+  await row.getByTestId("sudoku-size-9").click()
+  await expect(row.getByTestId("wbk-row-summary")).toHaveText("9×9 · Easy")
+  await expect(row.getByTestId("sudoku-preview").locator(".sudoku-print-board--4")).toHaveCount(0)
+  await row.getByTestId("sudoku-answers").click()
+
+  // Saved: a reload keeps the settings.
+  await page.reload()
+  await expect(sudokuRows(page).getByTestId("wbk-row-summary")).toHaveText("9×9 · Easy")
+
+  // Printed: the puzzle page, then the answer page of the row.
+  await page.locator(".wbk-print-btn").click()
+  await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
+  await expect(page.locator(".print-only .sudoku-answers")).toHaveCount(1)
+  await expect(page.locator(".print-only .sudoku-answer")).toHaveCount(6)
+})
+
+test("books saved with the old Sudoku variants keep their sheets", async ({ page }) => {
+  await page.goto("/workbook")
+  await page.evaluate(() => localStorage.setItem("tandu.workbook.books", JSON.stringify([{
+    id: "0123abcf", cover: false, name: "Old sudoku", emoji: "🦊",
+    rows: [{ s: "sudoku-hard", c: 1 }, { s: "sudoku-emoji4", c: 1 }],
+  }])))
+  await page.goto("/workbook/0123abcf")
+  await expect(page.getByTestId("wbk-row-summary")).toHaveText(["9×9 · Hard", "Easy"])
+
+  await page.locator(".wbk-print-btn").click()
+  await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
+  const sheets = page.locator(".print-only .sudoku-print-sheet")
+  await expect(sheets).toHaveCount(2)
+  await expect(sheets.nth(0).locator(".sudoku-print-board:not(.sudoku-print-board--4)")).toHaveCount(6)
+  await expect(sheets.nth(1).locator(".sudoku-print-board--4")).toHaveCount(6)
 })
 
 test("a book preset replacing the rows refreshes an open Maze form", async ({ page }) => {

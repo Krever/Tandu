@@ -79,3 +79,10 @@ class SudokuSheetSpec extends AnyFunSuite:
     val _ = pages(3)
     assert(made.toList == List(3))
   }
+
+  test("summary: preset name, else size and level") {
+    val en = tandu.i18n.Strings.en
+    val _ = assert(tokenSummary(presetToken("hard"))(en) == "Hard")
+    val _ = assert(tokenSummary(classicToken(Level.Hard))(en) == "9×9 · Hard")
+    assert(tokenSummary(presetToken("easy").replace("pp6", "pp2"))(en) == "4×4 · Easy")
+  }

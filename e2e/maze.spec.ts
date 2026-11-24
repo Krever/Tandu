@@ -1,15 +1,8 @@
 import { test, expect } from "@playwright/test"
+import { stepperMinus, stepperPlus, startPrinting } from "./helpers"
 
 // The Maze print page is a sheet builder: presets fill a form, a live
 // preview shows the page, and the print matches the preview.
-
-/** The "+" button of a stepper. */
-const stepperPlus = (page, testId: string) => page.getByTestId(testId).locator("button").nth(1)
-const stepperMinus = (page, testId: string) => page.getByTestId(testId).locator("button").first()
-
-/** The print copies are built only while printing; this starts that, as
-  * Ctrl+P does. */
-const startPrinting = (page) => page.evaluate(() => window.dispatchEvent(new Event("beforeprint")))
 
 /** A maze's identity: all its walls. */
 const walls = (board) => board.locator("line").evaluateAll(
@@ -81,8 +74,8 @@ test("print mode: presets fill the form, the preview follows, print matches it",
 
 test("print mode: size is limited by mazes per page", async ({ page }) => {
   await page.goto("/activity/maze/print")
-  // Mazes per page comes first in the form, because it limits the size.
-  // Shapes come first (they say what kind of maze), then mazes per page.
+  // Shapes come first (they say what kind of maze), then mazes per page
+  // (it limits the size).
   const rows = page.locator(".sb-form__row")
   await expect(rows.nth(0).getByTestId("maze-shape-square")).toBeVisible()
   await expect(rows.nth(1).getByTestId("maze-per-page-1")).toBeVisible()

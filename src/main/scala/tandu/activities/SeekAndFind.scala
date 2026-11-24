@@ -249,9 +249,6 @@ object SeekAndFind extends Activity:
   private val countSheetConfig =
     SheetConfig(Task.Count, Set.empty, kinds = 4, perKindMin = 4, perKindMax = 9, extras = 0, Layout.Tidy, lookAlikes = false, showCounts = true, Answer.Circle)
 
-  private def presetConfig(presetId: String): SheetConfig =
-    sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config
-
   // ---------- recipe in the URL ----------
 
   /** The recipe as one URL path segment, for example
@@ -642,7 +639,7 @@ object SeekAndFind extends Activity:
   // ---------- workbook ----------
 
   /** The settings token of a preset, for workbook rows. */
-  def presetToken(presetId: String): String = encodeConfig(presetConfig(presetId))
+  def presetToken(presetId: String): String = SheetBuilder.presetToken(sheetSpec, presetId)
 
   /** The settings token of the classic counting sheet. */
   val countSheetToken: String = encodeConfig(countSheetConfig)

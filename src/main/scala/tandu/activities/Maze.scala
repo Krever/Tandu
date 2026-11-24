@@ -77,8 +77,8 @@ object Maze extends Activity:
     * `braid` (0..1) optionally knocks an extra wall out of that fraction of
     * dead-ends, turning some into gentle loops. We use it on the easy tier so
     * the youngest solvers meet fewer frustrating dead-ends. */
-  def generate(rows: Int, cols: Int, braid: Double, rng: Random = new Random(), style: Style = Style.Winding): Grid =
-    toGrid(MazeGraph.carve(MazeGraph.RectLayout(rows, cols), style, braid, rng))
+  def generate(rows: Int, cols: Int, braid: Double, rng: Random = new Random()): Grid =
+    toGrid(MazeGraph.carve(MazeGraph.RectLayout(rows, cols), Style.Winding, braid, rng))
 
   /** The in-app and square print drawing read a [[Grid]]. */
   private def toGrid(m: MazeGraph.Carved): Grid = m.layout match
@@ -185,13 +185,15 @@ object Maze extends Activity:
   enum Shape:
     case Square, Circle, Hex
 
+  val AllShapes: Set[Shape] = Shape.values.toSet
+
   /** The full recipe of one printable sheet. The builder form edits this
     * value and nothing else.
     *   - `size`: cells on the short side of each maze, from
     *     [[SheetConfig.MinSize]] to `perPage.maxSize` (see `rings` and
     *     `hexDims` for the other shapes).
     *   - `shapes`: the shapes that the pages use; never empty. */
-  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage, style: Style, shapes: Set[Shape] = Set(Shape.Square))
+  final case class SheetConfig(size: Int, loops: Loops, perPage: PerPage, style: Style, shapes: Set[Shape])
 
   object SheetConfig:
     val MinSize = 5
@@ -225,7 +227,7 @@ object Maze extends Activity:
       else if c.shapes.size > 1 then c.copy(shapes = c.shapes - s)
       else c
 
-    def withAllShapes: SheetConfig = c.copy(shapes = Shape.values.toSet)
+    def withAllShapes: SheetConfig = c.copy(shapes = AllShapes)
 
   /** Of `options`, the one whose `cells` is nearest to `target` by ratio.
     * By ratio, not by difference: the cell counts of circle mazes grow in
@@ -237,6 +239,12 @@ object Maze extends Activity:
   private def hexSide(pp: PerPage, n: Int): Double =
     val (w, h) = pp.slotMm
     if w <= h then w / (math.sqrt(3) * (n + 0.5)) else h / (1.5 * n + 0.5)
+
+  /** The hex side length in mm of a `rows` × `cols` hex maze in its slot:
+    * the largest that fits. */
+  private[activities] def hexSideMm(pp: PerPage, rows: Int, cols: Int): Double =
+    val (w, h) = pp.slotMm
+    math.min(w / (math.sqrt(3) * (cols + 0.5)), h / (1.5 * rows + 0.5))
 
   /** (rows, cols) of a hex maze with `n` cells on the short side. The other
     * count follows from the slot: the width across the flats is √3·s and
@@ -250,37 +258,38 @@ object Maze extends Activity:
   /** The most hex cells on the short side that the paper allows: a
     * passage is one hex edge, which must be at least 4 mm, and the width
     * across the flats at least 5.5 mm. */
-  private def hexMaxShort(pp: PerPage): Int =
-    (3 to 200).takeWhile(n => hexSide(pp, n) >= 4.0 && math.sqrt(3) * hexSide(pp, n) >= 5.5).last
+  private lazy val hexMaxShort: Map[PerPage, Int] = PerPage.values.map { pp =>
+    pp -> (3 to 200).takeWhile(n => hexSide(pp, n) >= 4.0 && math.sqrt(3) * hexSide(pp, n) >= 5.5).last
+  }.toMap
 
   /** The most circle rings that the paper allows: the ring width must be
     * at least 5.5 mm, and the narrowest doorway (inner arc of a cell) at
     * least 4 mm. */
-  private def circleMaxRings(pp: PerPage): Int =
+  private lazy val circleMaxRings: Map[PerPage, Int] = PerPage.values.map { pp =>
     val (w, h) = pp.slotMm
-    (2 to 200).takeWhile { r =>
+    pp -> (2 to 200).takeWhile { r =>
       val ring = math.min(w, h) / 2 / (r + 1)
       val sizes = MazeGraph.CircleLayout.ringSizes(r)
       val doorway = (1 to r).map(i => 2 * math.Pi * i / sizes(i)).min * ring
       ring >= 5.5 && doorway >= 4.0
     }.last
+  }.toMap
 
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
-    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(11, Loops.Few, PerPage.Four, Style.Winding, Shape.values.toSet)),
-    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(13, Loops.Off, PerPage.Four, Style.Balanced, Shape.values.toSet)),
-    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One, Style.Branchy, Shape.values.toSet))
+    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(11, Loops.Few, PerPage.Four, Style.Winding, AllShapes)),
+    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(13, Loops.Off, PerPage.Four, Style.Balanced, AllShapes)),
+    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One, Style.Branchy, AllShapes))
   )
 
   /** The settings token of a preset, for workbook rows. */
-  def presetToken(presetId: String): String =
-    encodeConfig(sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config)
+  def presetToken(presetId: String): String = SheetBuilder.presetToken(sheetSpec, presetId)
 
   /** The recipe as one URL path segment, for example `s11.winding.few.pp4`
     * or `s11.winding.few.pp4.circle-hex`. All shapes (as in the presets)
     * have no shapes token; other sets are named. */
   def encodeConfig(c: SheetConfig): String =
     val shapes =
-      if c.shapes == Shape.values.toSet then ""
+      if c.shapes == AllShapes then ""
       else "." + Shape.values.filter(c.shapes).map(_.toString.toLowerCase).mkString("-")
     s"s${c.size}.${c.style.toString.toLowerCase}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}$shapes"
 
@@ -522,7 +531,7 @@ object Maze extends Activity:
   /** One printed page: its shape and its mazes. */
   final case class SheetPage(shape: Shape, mazes: Vector[MazeGraph.Carved])
 
-  private def layoutOf(c: SheetConfig, shape: Shape): MazeGraph.Layout = shape match
+  private[activities] def layoutOf(c: SheetConfig, shape: Shape): MazeGraph.Layout = shape match
     case Shape.Square =>
       val (rows, cols) = c.dims
       MazeGraph.RectLayout(rows, cols)
@@ -538,9 +547,9 @@ object Maze extends Activity:
   def sheetPages(c: SheetConfig, n: Int, seed: Long): Vector[SheetPage] =
     val rng = new Random(seed)
     val order = SheetBuilder.rounds(Shape.values.toVector.filter(c.shapes), math.max(n, SheetBuilder.MaxPages), rng)
+    val layouts = c.shapes.iterator.map(shape => shape -> layoutOf(c, shape)).toMap
     order.take(n).map { shape =>
-      val layout = layoutOf(c, shape)
-      SheetPage(shape, Vector.fill(c.perPage.n)(MazeGraph.carve(layout, c.style, c.loops.braid, rng)))
+      SheetPage(shape, Vector.fill(c.perPage.n)(MazeGraph.carve(layouts(shape), c.style, c.loops.braid, rng)))
     }
 
   /** One printed page of mazes, without the printable frame. Each maze gets
@@ -555,10 +564,9 @@ object Maze extends Activity:
           case _: MazeGraph.RectLayout =>
             val g = toGrid(m)
             val cell = math.min(slotW / g.cols, slotH / g.rows)
-            printableMaze(g, g.cols * cell)
+            squareMaze(g, g.cols * cell)
           case l: MazeGraph.HexLayout =>
-            val side = math.min(slotW / (math.sqrt(3) * (l.cols + 0.5)), slotH / (1.5 * l.rows + 0.5))
-            hexMaze(m, l, math.sqrt(3) * side * (l.cols + 0.5))
+            hexMaze(m, l, math.sqrt(3) * hexSideMm(c.perPage, l.rows, l.cols) * (l.cols + 0.5))
           case l: MazeGraph.CircleLayout =>
             circleMaze(m, l, math.min(slotW, slotH))
       }
@@ -633,31 +641,32 @@ object Maze extends Activity:
       ), l => config.update(_.copy(loops = l))))
     )
 
-  /** The board is `widthMm` wide on paper. The CSS lets it become
-    * narrower when its column is narrower (the preview page on the screen
-    * has padding); the height follows from the aspect ratio. */
-  private def printableMaze(g: Grid, widthMm: Double): HtmlElement =
-    div(
-      cls := "maze-print-board maze-print-board--square",
-      styleAttr := f"width: $widthMm%.1fmm; aspect-ratio: ${g.cols} / ${g.rows};",
-      svg.svg(
-        svg.cls := "maze-print-svg",
-        svg.viewBox := s"0 0 ${g.cols * CELL} ${g.rows * CELL}",
-        wallLines(g),
-        mazeGlyph("maze-start-glyph", svg.x := cx(0).toString, svg.y := cy(0).toString, "🐭"),
-        mazeGlyph("maze-goal", svg.x := cx(g.cols - 1).toString, svg.y := cy(g.rows - 1).toString, "🧀")
-      )
+  private def squareMaze(g: Grid, widthMm: Double): HtmlElement =
+    board("square", widthMm, g.cols * CELL, g.rows * CELL,
+      wallLines(g),
+      mazeGlyph("maze-start-glyph", svg.x := cx(0).toString, svg.y := cy(0).toString, "🐭"),
+      mazeGlyph("maze-goal", svg.x := cx(g.cols - 1).toString, svg.y := cy(g.rows - 1).toString, "🧀")
     )
 
+  /** A number for SVG and CSS, with 3 decimals. JavaScript's toFixed, not
+    * f"%.3f": the Scala.js formatter is slow, and a big maze has
+    * thousands of numbers. */
+  private def num(d: Double): String =
+    val fixed = d.asInstanceOf[js.Dynamic].toFixed(3).asInstanceOf[String]
+    // "110.000" → "110", "1.500" → "1.5": shorter SVG.
+    if fixed.contains('.') then fixed.reverse.dropWhile(_ == '0').dropWhile(_ == '.').reverse else fixed
+
   /** A board of one printed maze. The board is `widthMm` wide on paper;
-    * `w` × `h` is the size of the SVG view box. */
+    * `w` × `h` is the size of the SVG view box. The CSS lets the board
+    * become narrower when its column is narrower (the preview page on the
+    * screen has padding); the height follows from the aspect ratio. */
   private def board(shape: String, widthMm: Double, w: Double, h: Double, content: Modifier[SvgElement]*): HtmlElement =
     div(
       cls := s"maze-print-board maze-print-board--$shape",
-      styleAttr := f"width: $widthMm%.1fmm; aspect-ratio: $w%.3f / $h%.3f;",
+      styleAttr := s"width: ${num(widthMm)}mm; aspect-ratio: ${num(w)} / ${num(h)};",
       svg.svg(
         svg.cls := "maze-print-svg",
-        svg.viewBox := f"0 0 $w%.3f $h%.3f",
+        svg.viewBox := s"0 0 ${num(w)} ${num(h)}",
         content
       )
     )
@@ -665,8 +674,8 @@ object Maze extends Activity:
   private def wall(x1: Double, y1: Double, x2: Double, y2: Double): SvgElement =
     svg.line(
       svg.cls := "maze-wall",
-      svg.x1 := f"$x1%.3f", svg.y1 := f"$y1%.3f",
-      svg.x2 := f"$x2%.3f", svg.y2 := f"$y2%.3f"
+      svg.x1 := num(x1), svg.y1 := num(y1),
+      svg.x2 := num(x2), svg.y2 := num(y2)
     )
 
   /** A hex maze. The side of a hexagon is `CELL` units; the hexagons have
@@ -684,24 +693,13 @@ object Maze extends Activity:
       val (x, y) = centre(cell)
       val a = math.toRadians(-90 + 60 * k)
       (x + side * math.cos(a), y + side * math.sin(a))
-    def neighbourIn(cell: Int, k: Int): Option[Int] =
-      val (r, c) = (cell / l.cols, cell % l.cols)
-      val d = if r % 2 == 0 then -1 else 0
-      val (nr, nc) = k match
-        case 0 => (r - 1, c + d + 1)
-        case 1 => (r, c + 1)
-        case 2 => (r + 1, c + d + 1)
-        case 3 => (r + 1, c + d)
-        case 4 => (r, c - 1)
-        case _ => (r - 1, c + d)
-      Option.when(nr >= 0 && nr < l.rows && nc >= 0 && nc < l.cols)(nr * l.cols + nc)
     val walls =
       for
         cell <- 0 until l.cellCount
         k <- 0 until 6
         // A border edge always; a shared edge once (from the smaller cell),
         // and only where there is no passage.
-        if neighbourIn(cell, k).forall(n => n > cell && !m.open(cell, n))
+        if l.neighbourIn(cell, k).forall(n => n > cell && !m.open(cell, n))
       yield
         val (x1, y1) = corner(cell, k)
         val (x2, y2) = corner(cell, (k + 1) % 6)
@@ -710,8 +708,8 @@ object Maze extends Activity:
     val (gx, gy) = centre(l.goal)
     board("hex", widthMm, across * (l.cols + 0.5), side * (1.5 * l.rows + 0.5),
       walls,
-      mazeGlyph("maze-start-glyph", svg.x := f"$sx%.3f", svg.y := f"$sy%.3f", "🐭"),
-      mazeGlyph("maze-goal", svg.x := f"$gx%.3f", svg.y := f"$gy%.3f", "🧀")
+      mazeGlyph("maze-start-glyph", svg.x := num(sx), svg.y := num(sy), "🐭"),
+      mazeGlyph("maze-goal", svg.x := num(gx), svg.y := num(gy), "🧀")
     )
 
   /** A circle maze. A ring is `CELL` units wide; the centre cell (the goal)
@@ -724,10 +722,10 @@ object Maze extends Activity:
     val (startFrom, startTo) = l.arc(m.start)
     val turn = math.Pi / 2 - (startFrom + startTo) / 2
     def point(radius: Double, angle: Double): String =
-      f"${outer + radius * math.cos(angle + turn)}%.3f ${outer + radius * math.sin(angle + turn)}%.3f"
+      s"${num(outer + radius * math.cos(angle + turn))} ${num(outer + radius * math.sin(angle + turn))}"
     def arcPath(radius: Double, from: Double, to: Double): String =
       val large = if to - from > math.Pi then 1 else 0
-      f"M ${point(radius, from)} A $radius%.3f $radius%.3f 0 $large 1 ${point(radius, to)}"
+      s"M ${point(radius, from)} A ${num(radius)} ${num(radius)} 0 $large 1 ${point(radius, to)}"
     def path(cssClass: String, d: String): SvgElement = svg.path(svg.cls := cssClass, svg.d := d)
     val walls =
       for
@@ -737,7 +735,7 @@ object Maze extends Activity:
         part <- List(
           // The inner side of the cell: one arc, a wall where the cell has
           // no passage to the cell inside it.
-          Option.when(!m.open(cell, l.neighbours(cell).head))(path("maze-wall", arcPath(ring * unit, from, to))),
+          Option.when(!m.open(cell, l.inward(cell)))(path("maze-wall", arcPath(ring * unit, from, to))),
           // The radial wall to the next cell clockwise on the same ring.
           Option.when(!m.open(cell, l.cellAt(ring, (l.indexInRing(cell) + 1) % l.ringSizes(ring))))(
             path("maze-wall", s"M ${point(ring * unit, to)} L ${point((ring + 1) * unit, to)}"))
@@ -747,6 +745,6 @@ object Maze extends Activity:
     board("circle", widthMm, 2 * outer, 2 * outer,
       walls, border,
       // At the bottom, in the start cell.
-      mazeGlyph("maze-start-glyph", svg.x := f"$outer%.3f", svg.y := f"${outer + outer - unit / 2}%.3f", "🐭"),
-      mazeGlyph("maze-goal", svg.x := f"$outer%.3f", svg.y := f"$outer%.3f", "🧀")
+      mazeGlyph("maze-start-glyph", svg.x := num(outer), svg.y := num(2 * outer - unit / 2), "🐭"),
+      mazeGlyph("maze-goal", svg.x := num(outer), svg.y := num(outer), "🧀")
     )

@@ -97,7 +97,10 @@ object SheetBuilder:
     // The print copies exist only while printing: building every page in
     // hidden DOM on each change in the form is wasted work.
     val printing = Var(false)
-    val sheets = config.signal.combineWith(pages.signal, seed.signal).map { (c, n, sd) =>
+    // Distinct: a tap that sets the same recipe (an active pill) must not
+    // make new pages or write the URL.
+    val recipe = config.signal.distinct
+    val sheets = recipe.combineWith(pages.signal, seed.signal).map { (c, n, sd) =>
       (c, spec.pagesOf(c, n, sd))
     }
     // Move the shown page into range first. Each `set` is a separate
@@ -117,7 +120,7 @@ object SheetBuilder:
       cls := "stack-lg",
       // Keep the URL in step with the form, so the page can be bookmarked
       // or shared. Replace, not push: each tap must not add a history entry.
-      config.signal.combineWith(pages.signal).changes --> { (c, n) =>
+      recipe.combineWith(pages.signal).changes --> { (c, n) =>
         Routing.replace(Page.Activity(activityId, List("print", spec.encode(c) + encodePages(n))))
       },
       // Ctrl+P and the browser menu print too, not only the Print button.
@@ -200,6 +203,11 @@ object SheetBuilder:
     spec.presets.find(_.config == c).map(_.name)
 
   /** The workbook row label: the preset name, or "Custom". */
+  /** The recipe token of a preset (the first preset for an unknown id),
+    * for workbook rows. */
+  def presetToken[C](spec: Spec[C, ?], presetId: String): String =
+    spec.encode(spec.presets.find(_.presetId == presetId).getOrElse(spec.presets.head).config)
+
   def summary[C](spec: Spec[C, ?], token: String): Strings => String =
     presetName(spec, spec.decode(token)).getOrElse(_.printable.custom)
 

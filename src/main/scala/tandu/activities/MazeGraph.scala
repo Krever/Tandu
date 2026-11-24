@@ -8,6 +8,22 @@ import scala.util.Random
   * same [[carve]] makes the maze for every shape. */
 object MazeGraph:
 
+  /** A passage between `a` and `b`, stored as (smaller cell, larger cell). */
+  private def key(a: Int, b: Int): (Int, Int) = if a < b then (a, b) else (b, a)
+
+  /** The path length from `from` to each cell through open passages; -1
+    * where there is no path. */
+  private[activities] def distances(layout: Layout, from: Int, open: (Int, Int) => Boolean): Array[Int] =
+    val dist = Array.fill(layout.cellCount)(-1)
+    dist(from) = 0
+    val queue = mutable.Queue(from)
+    while queue.nonEmpty do
+      val cell = queue.dequeue()
+      for next <- layout.neighbours(cell) if dist(next) < 0 && open(cell, next) do
+        dist(next) = dist(cell) + 1
+        queue.enqueue(next)
+    dist
+
   /** The cells of one maze shape. `neighbours` must be symmetric: if `b`
     * is a neighbour of `a`, then `a` is a neighbour of `b`. */
   sealed trait Layout:
@@ -41,14 +57,24 @@ object MazeGraph:
     val cellCount: Int = rows * cols
     val start: Int = 0
     val goal: Int = cellCount - 1
-    private val table: Vector[Vector[Int]] = Vector.tabulate(cellCount) { cell =>
+
+    /** The neighbour across edge `k` of the hexagon: 0 upper right,
+      * 1 right, 2 lower right, 3 lower left, 4 left, 5 upper left. The
+      * rows above and below touch columns c-1 and c (even row), or c and
+      * c+1 (odd row). */
+    def neighbourIn(cell: Int, k: Int): Option[Int] =
       val (r, c) = (cell / cols, cell % cols)
-      // The rows above and below touch columns c-1 and c (even row), or
-      // c and c+1 (odd row).
       val d = if r % 2 == 0 then -1 else 0
-      Vector((r, c - 1), (r, c + 1), (r - 1, c + d), (r - 1, c + d + 1), (r + 1, c + d), (r + 1, c + d + 1))
-        .collect { case (nr, nc) if nr >= 0 && nr < rows && nc >= 0 && nc < cols => nr * cols + nc }
-    }
+      val (nr, nc) = k match
+        case 0 => (r - 1, c + d + 1)
+        case 1 => (r, c + 1)
+        case 2 => (r + 1, c + d + 1)
+        case 3 => (r + 1, c + d)
+        case 4 => (r, c - 1)
+        case _ => (r - 1, c + d)
+      Option.when(nr >= 0 && nr < rows && nc >= 0 && nc < cols)(nr * cols + nc)
+
+    private val table: Vector[Vector[Int]] = Vector.tabulate(cellCount)(cell => (0 until 6).flatMap(neighbourIn(cell, _)).toVector)
     def neighbours(cell: Int): Vector[Int] = table(cell)
 
   /** Rings of cells around one centre cell. Ring `i` spans the radius
@@ -56,42 +82,44 @@ object MazeGraph:
     * A ring has two times the cells of the ring inside it when its cells
     * would otherwise be wider than 1.5 ring widths (at the inner side), so
     * all cells keep about the same size, from 0.75 to 1.5 ring widths. More
-    * and smaller cells give a harder maze in the same circle. The start is the outer-ring cell at the bottom; the
-    * angles are turned so that this cell is centred at the bottom.
-    * Angles are in radians, clockwise from the right (y points down). */
+    * and smaller cells give a harder maze in the same circle. The start is
+    * an outer-ring cell (see `startChoices`); the drawing turns the circle
+    * so that it is at the bottom. Angles are in radians, clockwise from the
+    * right (y points down). */
   final case class CircleLayout(rings: Int) extends Layout:
     val ringSizes: Vector[Int] = CircleLayout.ringSizes(rings)
     private val firstCell: Vector[Int] = ringSizes.scanLeft(0)(_ + _)
     val cellCount: Int = firstCell.last
+    private val ringOfCell: Array[Int] = Array.tabulate(cellCount)(cell => firstCell.lastIndexWhere(_ <= cell))
     def cellAt(ring: Int, i: Int): Int = firstCell(ring) + i
-    def ringOf(cell: Int): Int = firstCell.lastIndexWhere(_ <= cell)
+    def ringOf(cell: Int): Int = ringOfCell(cell)
     def indexInRing(cell: Int): Int = cell - firstCell(ringOf(cell))
+    /** The cell on the next ring in whose arc contains this cell's arc. */
+    def inward(cell: Int): Int =
+      val ring = ringOf(cell)
+      cellAt(ring - 1, indexInRing(cell) * ringSizes(ring - 1) / ringSizes(ring))
     val goal: Int = 0
-    val start: Int = cellAt(rings, ringSizes(rings) / 4)
+    /** The root of the carving; the real start is one of `startChoices`. */
+    val start: Int = cellAt(rings, 0)
     // The centre is near every outer cell, so a fixed entrance gives a
     // short path, and a centre with many doors can be reached from many
     // sides. Therefore the entrance is the outer cell farthest from the centre,
     // and the centre has one door.
     override val startChoices: Vector[Int] = (0 until ringSizes(rings)).map(cellAt(rings, _)).toVector
     override val goalHasOneDoor: Boolean = true
-    /** Turns the circle so that the start cell is centred at the bottom. */
-    private val offset: Double = math.Pi / 2 - (indexInRing(start) + 0.5) * 2 * math.Pi / ringSizes(rings)
 
     /** The angles (from, to) of a cell's arc; the centre cell has the full
       * circle. */
     def arc(cell: Int): (Double, Double) =
-      val ring = ringOf(cell)
-      val step = 2 * math.Pi / ringSizes(ring)
+      val step = 2 * math.Pi / ringSizes(ringOf(cell))
       val i = indexInRing(cell)
-      (offset + i * step, offset + (i + 1) * step)
+      (i * step, (i + 1) * step)
 
     private val table: Vector[Vector[Int]] = Vector.tabulate(cellCount) { cell =>
       val ring = ringOf(cell)
       val i = indexInRing(cell)
       val n = ringSizes(ring)
-      val inward =
-        if ring == 0 then Vector.empty
-        else Vector(cellAt(ring - 1, i * ringSizes(ring - 1) / n))
+      val in = if ring == 0 then Vector.empty else Vector(inward(cell))
       val outward =
         if ring == rings then Vector.empty
         else
@@ -100,7 +128,7 @@ object MazeGraph:
       val beside =
         if ring == 0 then Vector.empty
         else Vector(cellAt(ring, (i + n - 1) % n), cellAt(ring, (i + 1) % n)).distinct
-      inward ++ beside ++ outward
+      in ++ beside ++ outward
     }
     def neighbours(cell: Int): Vector[Int] = table(cell)
 
@@ -116,8 +144,9 @@ object MazeGraph:
   /** The carved maze: the open passages between neighbour cells. Each pair
     * is stored as (smaller cell, larger cell). */
   final case class Carved(layout: Layout, passages: Set[(Int, Int)], start: Int):
-    def open(a: Int, b: Int): Boolean = passages.contains(if a < b then (a, b) else (b, a))
+    def open(a: Int, b: Int): Boolean = passages.contains(key(a, b))
     def degree(cell: Int): Int = layout.neighbours(cell).count(open(cell, _))
+    def distancesFrom(cell: Int): Array[Int] = distances(layout, cell, open)
 
   /** Carve a maze in the given style (see [[Maze.Style]]): a spanning tree
     * of the layout, with exactly one path between any two cells.
@@ -127,11 +156,17 @@ object MazeGraph:
     * passage. */
   def carve(layout: Layout, style: Maze.Style, braid: Double, rng: Random): Carved =
     val n = layout.cellCount
+    val goal = layout.goal
     val visited = Array.fill(n)(false)
     val passages = mutable.Set.empty[(Int, Int)]
-    def link(a: Int, b: Int): Unit = passages += (if a < b then (a, b) else (b, a))
-    def linked(a: Int, b: Int): Boolean = passages.contains(if a < b then (a, b) else (b, a))
+    def link(a: Int, b: Int): Unit = passages += key(a, b)
+    def linked(a: Int, b: Int): Boolean = passages.contains(key(a, b))
     val root = layout.start
+    // A goal with one door is left out of the carving and gets its door at
+    // the end.
+    val skip = if layout.goalHasOneDoor then goal else -1
+    def neighbours(cell: Int): Vector[Int] =
+      if skip < 0 then layout.neighbours(cell) else layout.neighbours(cell).filter(_ != skip)
 
     // Recursive backtracker. An explicit stack, so a big maze cannot blow
     // the call stack.
@@ -139,7 +174,7 @@ object MazeGraph:
       val stack = mutable.Stack(root)
       visited(root) = true
       while stack.nonEmpty do
-        val unvisited = layout.neighbours(stack.top).filterNot(visited)
+        val unvisited = neighbours(stack.top).filterNot(visited)
         if unvisited.isEmpty then { val _ = stack.pop() }
         else
           val next = unvisited(rng.nextInt(unvisited.size))
@@ -154,10 +189,10 @@ object MazeGraph:
     def balanced(): Unit =
       val exit = new Array[Int](n)
       visited(root) = true
-      for first <- rng.shuffle((0 until n).toVector) if !visited(first) do
+      for first <- rng.shuffle((0 until n).toVector) if !visited(first) && first != skip do
         var cur = first
         while !visited(cur) do
-          val ns = layout.neighbours(cur)
+          val ns = neighbours(cur)
           exit(cur) = ns(rng.nextInt(ns.size))
           cur = exit(cur)
         cur = first
@@ -174,7 +209,7 @@ object MazeGraph:
       val inFrontier = Array.fill(n)(false)
       def add(cell: Int): Unit =
         visited(cell) = true
-        for next <- layout.neighbours(cell) if !visited(next) && !inFrontier(next) do
+        for next <- neighbours(cell) if !visited(next) && !inFrontier(next) do
           inFrontier(next) = true
           frontier += next
       add(root)
@@ -183,7 +218,7 @@ object MazeGraph:
         val cell = frontier(i)
         frontier(i) = frontier.last
         frontier.dropRightInPlace(1)
-        val inMaze = layout.neighbours(cell).filter(visited)
+        val inMaze = neighbours(cell).filter(visited)
         link(cell, inMaze(rng.nextInt(inMaze.size)))
         add(cell)
 
@@ -192,35 +227,15 @@ object MazeGraph:
       case Maze.Style.Balanced => balanced()
       case Maze.Style.Branchy  => branchy()
 
-    val goal = layout.goal
-    if layout.goalHasOneDoor then
-      // Keep one random door of the goal. Close each other door; the part
-      // of the maze behind it is then cut off, so connect that part to the
-      // rest through a random wall that does not touch the goal.
-      val doors = rng.shuffle(layout.neighbours(goal).filter(linked(goal, _)))
-      for door <- doors.drop(1) do
-        passages -= (if goal < door then (goal, door) else (door, goal))
-        val part = mutable.Set(door)
-        val queue = mutable.Queue(door)
-        while queue.nonEmpty do
-          val cell = queue.dequeue()
-          for next <- layout.neighbours(cell) if next != goal && linked(cell, next) && part.add(next) do queue.enqueue(next)
-        val bridges = part.toVector.sorted.flatMap(a => layout.neighbours(a).filter(b => b != goal && !part(b)).map(a -> _))
-        val (a, b) = bridges(rng.nextInt(bridges.size))
-        link(a, b)
+    if skip >= 0 then
+      val doors = layout.neighbours(goal)
+      link(goal, doors(rng.nextInt(doors.size)))
 
     // The start: of the choices, the one with the longest path to the goal.
     val start =
       if layout.startChoices.size == 1 then layout.startChoices.head
       else
-        val dist = Array.fill(n)(-1)
-        dist(goal) = 0
-        val queue = mutable.Queue(goal)
-        while queue.nonEmpty do
-          val cell = queue.dequeue()
-          for next <- layout.neighbours(cell) if linked(cell, next) && dist(next) < 0 do
-            dist(next) = dist(cell) + 1
-            queue.enqueue(next)
+        val dist = distances(layout, goal, linked)
         layout.startChoices.maxBy(dist(_))
 
     if braid > 0 then

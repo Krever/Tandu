@@ -11,7 +11,10 @@ class MazeDifficultySpec extends AnyFunSuite:
   private def cfg(size: Int, perPage: PerPage, style: Style, shape: Shape): SheetConfig =
     SheetConfig(size, Loops.Off, perPage, style, Set(shape))
 
-  test("report: difficulty by shape, style and size") {
+  // The two reports only print a table (no assertion) and are the slowest
+  // part of the suite, so they are off. Change `ignore` to `test` to see
+  // the table after a change to the generator.
+  ignore("report: difficulty by shape, style and size") {
     val lines =
       for
         (size, pp) <- List((10, PerPage.Four), (16, PerPage.Four), (24, PerPage.One))
@@ -24,7 +27,7 @@ class MazeDifficultySpec extends AnyFunSuite:
     succeed
   }
 
-  test("report: difficulty of the presets, for each shape") {
+  ignore("report: difficulty of the presets, for each shape") {
     val lines =
       for
         preset <- sheetPresets
@@ -54,9 +57,12 @@ class MazeDifficultySpec extends AnyFunSuite:
         val _ = assert(m.degree(m.layout.goal) == 1, s"$style $loops")
   }
 
-  private def presetStats(id: String, shape: Shape): MazeDifficulty.Stats =
-    val p = sheetPresets.find(_.presetId == id).get.config
-    MazeDifficulty.measure(p.copy(shapes = Set(shape)), mazes = 40, seed = 4L)
+  /** Stats of each preset for each shape, measured once for all tests. */
+  private lazy val presetTable: Map[(String, Shape), MazeDifficulty.Stats] =
+    (for p <- sheetPresets; shape <- Shape.values yield
+      (p.presetId, shape) -> MazeDifficulty.measure(p.config.copy(shapes = Set(shape)), mazes = 40, seed = 4L)).toMap
+
+  private def presetStats(id: String, shape: Shape): MazeDifficulty.Stats = presetTable((id, shape))
 
   test("presets get harder: Easy < Medium < Hard in effort and decisions, for every shape") {
     for shape <- Shape.values do

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test"
+import { stepperPlus, startPrinting } from "./helpers"
 
 // The scene is generated at runtime from themed emoji pools, so these tests
 // double as a smoke check that the dealer keeps its promises: exact target
@@ -7,13 +8,6 @@ import { test, expect } from "@playwright/test"
 /** A scene's identity: each picture and where it sits. */
 const scene = (root) => root.locator(".snf-print-field image").evaluateAll(
   es => es.map(e => `${e.getAttribute("href")}@${e.getAttribute("transform")}`).join("|"))
-
-/** The "+" button of a stepper. */
-const stepperPlus = (page, testId: string) => page.getByTestId(testId).locator("button").nth(1)
-
-/** The print copies are built only while printing; this starts that, as
-  * Ctrl+P does. */
-const startPrinting = (page) => page.evaluate(() => window.dispatchEvent(new Event("beforeprint")))
 
 test("seek mode: legend counts match the field and tapping them all wins", async ({ page }) => {
   await page.goto("/activity/seek-and-find/seek/easy")

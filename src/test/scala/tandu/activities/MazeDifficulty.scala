@@ -23,15 +23,11 @@ object MazeDifficulty:
     def detour: Double = effort / solution
 
   def solution(m: MazeGraph.Carved): Vector[Int] =
-    val l = m.layout
-    val prev = mutable.Map(m.start -> m.start)
-    val queue = mutable.Queue(m.start)
-    while queue.nonEmpty && !prev.contains(l.goal) do
-      val cell = queue.dequeue()
-      for n <- l.neighbours(cell) if m.open(cell, n) && !prev.contains(n) do
-        prev(n) = cell
-        queue.enqueue(n)
-    Iterator.iterate(l.goal)(prev).takeWhile(_ != m.start).toVector.reverse.prepended(m.start)
+    val dist = m.distancesFrom(m.start)
+    // Walk back from the goal, each step to a neighbour one step nearer.
+    val back = Iterator.iterate(m.layout.goal)(cell =>
+      m.layout.neighbours(cell).find(n => m.open(cell, n) && dist(n) == dist(cell) - 1).get)
+    back.take(dist(m.layout.goal) + 1).toVector.reverse
 
   def decisions(m: MazeGraph.Carved): Int =
     val path = solution(m)
@@ -61,7 +57,8 @@ object MazeDifficulty:
   /** Mean stats over `mazes` carved mazes from the recipe. */
   def measure(c: Maze.SheetConfig, mazes: Int, seed: Long): Stats =
     val rng = new Random(seed)
-    val all = Maze.sheetPages(c, mazes, seed).flatMap(_.mazes).take(mazes)
+    val pages = (mazes + c.perPage.n - 1) / c.perPage.n
+    val all = Maze.sheetPages(c, pages, seed).flatMap(_.mazes).take(mazes)
     val rows = all.map { m =>
       val forward = effort(m, rng, 30)
       Vector(m.layout.cellCount.toDouble, solution(m).size.toDouble, decisions(m).toDouble, forward,

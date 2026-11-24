@@ -2,7 +2,6 @@ package tandu.activities
 
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.mutable
 import scala.util.Random
 
 class MazeGraphSpec extends AnyFunSuite:
@@ -10,13 +9,7 @@ class MazeGraphSpec extends AnyFunSuite:
   import Maze.Style
 
   /** Cells that can be reached from the start through open passages. */
-  private def reachable(c: Carved): Int =
-    val seen = mutable.Set(c.layout.start)
-    val queue = mutable.Queue(c.layout.start)
-    while queue.nonEmpty do
-      val cell = queue.dequeue()
-      for n <- c.layout.neighbours(cell) if c.open(cell, n) && seen.add(n) do queue.enqueue(n)
-    seen.size
+  private def reachable(c: Carved): Int = c.distancesFrom(c.start).count(_ >= 0)
 
   private def symmetric(l: Layout): Boolean =
     (0 until l.cellCount).forall(a => l.neighbours(a).forall(b => l.neighbours(b).contains(a)))
@@ -35,6 +28,15 @@ class MazeGraphSpec extends AnyFunSuite:
 
   test("every style carves a perfect maze on the rect layout") {
     perfect(RectLayout(12, 15))
+  }
+
+  test("styles differ: winding has the fewest dead ends, branchy the most") {
+    def deadEnds(style: Style): Int =
+      (1 to 10).map(seed => carve(RectLayout(20, 20), style, 0.0, new Random(seed)))
+        .map(c => (0 until 400).count(c.degree(_) == 1)).sum
+    val (w, b, br) = (deadEnds(Style.Winding), deadEnds(Style.Balanced), deadEnds(Style.Branchy))
+    val _ = assert(w < b, s"winding $w, balanced $b")
+    assert(b < br, s"balanced $b, branchy $br")
   }
 
   test("loops open every dead end except start and goal") {
@@ -66,14 +68,16 @@ class MazeGraphSpec extends AnyFunSuite:
       val _ = assert(w >= 0.7 && w <= 1.5, s"ring $i arc width $w: ${l.ringSizes}")
   }
 
-  test("circle neighbours are symmetric; centre is the goal; start is on the outer ring at the bottom") {
+  test("circle neighbours are symmetric; centre is the goal; start is on the outer ring") {
     val l = CircleLayout(8)
     val _ = assert(symmetric(l))
     val _ = assert(l.goal == 0)
     val _ = assert(l.neighbours(0).size == l.ringSizes(1))
-    val _ = assert(l.ringOf(l.start) == 8)
-    val (a0, a1) = l.arc(l.start)
-    assert(a0 < math.Pi / 2 && math.Pi / 2 < a1, s"start arc ($a0, $a1)")
+    val _ = assert(l.startChoices.forall(l.ringOf(_) == 8))
+    // The carved start is one of the outer-ring cells; the centre has one door.
+    val c = carve(l, Style.Balanced, 0.0, new Random(1))
+    val _ = assert(l.startChoices.contains(c.start))
+    assert(c.degree(l.goal) == 1)
   }
 
   test("every style carves a perfect maze on hex and circle") {

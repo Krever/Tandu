@@ -405,9 +405,9 @@ test("a Maze row has its own settings form; they save and print", async ({ page 
   await row.getByTestId("maze-per-page-2").click()
   await expect(row.getByTestId("wbk-row-summary")).toHaveText("Custom")
   await expect(row.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(2)
-  // Circle only.
-  await row.getByTestId("maze-shape-circle").click()
+  // Circle only (the preset has all shapes).
   await row.getByTestId("maze-shape-square").click()
+  await row.getByTestId("maze-shape-hex").click()
   await expect(row.getByTestId("maze-preview").locator(".maze-print-board--circle")).toHaveCount(2)
 
   // Saved: a reload keeps the settings.
@@ -434,8 +434,8 @@ test("books saved with the old maze variants keep their sheets", async ({ page }
   await page.locator(".wbk-print-btn").click()
   await expect.poll(async () => page.evaluate(() => (window as any).__printCalls)).toBeGreaterThan(0)
   const firstSheet = page.locator(".print-only .maze-print-sheet").first()
+  // Hard: one maze per page (of any shape: the presets use all shapes).
   await expect(firstSheet.locator(".maze-print-board")).toHaveCount(1)
-  expect(await firstSheet.locator("svg").getAttribute("viewBox")).toBe("0 0 240 290")
 })
 
 test("a book preset replacing the rows refreshes an open Maze form", async ({ page }) => {

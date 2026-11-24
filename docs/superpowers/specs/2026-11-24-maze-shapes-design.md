@@ -136,9 +136,10 @@ pages go through the selected shapes.
   Hex** (like the Seek & Find theme chips: `SheetBuilder.chip`). "All"
   selects all three. Removing the last selected shape is not possible
   (the chip stays on). Then Mazes per page, Size, Style, Loops.
-- **Presets stay Square only**, so stored rows and links keep matching
-  their preset ("Easy", "Hard"), and the presets keep their meaning. The
-  parent picks shapes in the form.
+- ~~Presets stay Square only.~~ **Changed 2026-11-24 (after the
+  difficulty tuning made the shapes equally hard): presets use all
+  shapes.** All shapes is the default and has no URL token; other sets,
+  Square only included, are named (`.square`).
 - **A preset sets the whole recipe, shapes included** (user's decision):
   tapping "Hard" after picking Circle + Hex resets the shapes to Square,
   and a row with Hard settings plus Circle shows "Custom". This is how

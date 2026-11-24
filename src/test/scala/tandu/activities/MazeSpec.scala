@@ -139,19 +139,25 @@ class MazeSpec extends AnyFunSuite:
 
   test("shapes codec") {
     val _ = assert(encodeConfig(easy) == "s11.winding.few.pp4")
-    val sc = easy.withShape(Shape.Circle)
+    // The presets use all shapes: that needs no token. Others are named.
+    val _ = assert(easy.shapes == Shape.values.toSet)
+    val sc = easy.withShape(Shape.Hex)
     val _ = assert(encodeConfig(sc).endsWith(".square-circle"))
+    val _ = assert(encodeConfig(easy.copy(shapes = Set(Shape.Square))).endsWith(".pp4.square"))
     val _ = assert(decodeConfig(encodeConfig(sc)) == sc)
     val _ = assert(decodeConfig("s10.winding.few.pp4.circle-hex").shapes == Set(Shape.Circle, Shape.Hex))
     val _ = assert(decodeConfig("s10.square").shapes == Set(Shape.Square))
-    val _ = assert(decodeConfig("s10.bogus-hex").shapes == Set(Shape.Square))
-    // Only dashes: no shape names at all. The recipe must keep a shape.
-    val _ = assert(decodeConfig("s10.-").shapes == Set(Shape.Square))
-    assert(decodeConfig("s10.--").shapes == Set(Shape.Square))
+    // Missing or unknown: the presets' shapes (all).
+    val _ = assert(decodeConfig("s10").shapes == Shape.values.toSet)
+    val _ = assert(decodeConfig("s10.bogus-hex").shapes == Shape.values.toSet)
+    // Only dashes: no shape names at all. The recipe must keep its shapes.
+    val _ = assert(decodeConfig("s10.-").shapes == Shape.values.toSet)
+    assert(decodeConfig("s10.--").shapes == Shape.values.toSet)
   }
 
   test("the last shape cannot be removed") {
-    assert(easy.withShape(Shape.Square) == easy)
+    val square = easy.copy(shapes = Set(Shape.Square))
+    assert(square.withShape(Shape.Square) == square)
   }
 
   test("pages go through the shapes in rounds") {

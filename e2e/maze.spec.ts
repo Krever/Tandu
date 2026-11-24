@@ -17,6 +17,12 @@ const walls = (board) => board.locator("line").evaluateAll(
 
 const viewBox = (board) => board.locator("svg").getAttribute("viewBox")
 
+/** Presets use all shapes. Tests that read square walls keep square only. */
+const squareOnly = async (page) => {
+  await page.getByTestId("maze-shape-circle").click()
+  await page.getByTestId("maze-shape-hex").click()
+}
+
 // Errors that Airstream catches go to the console and do not fail a step,
 // thus each test also checks that the console has no errors.
 let consoleErrors: string[] = []
@@ -37,8 +43,10 @@ test("print mode: presets fill the form, the preview follows, print matches it",
   const preview = page.getByTestId("maze-preview")
   const boards = preview.locator(".maze-print-board")
 
-  // Easy: 4 mazes, 10 cells wide and 12 high (the slot is tall).
+  // Easy (all shapes); then square only: 4 mazes, 11 cells wide and 13
+  // high (the slot is tall).
   await expect(page.getByTestId("maze-preset-easy")).toHaveClass(/is-active/)
+  await squareOnly(page)
   await expect(boards).toHaveCount(4)
   expect(await viewBox(boards.first())).toBe("0 0 110 130")
 
@@ -62,8 +70,9 @@ test("print mode: presets fill the form, the preview follows, print matches it",
   expect(await viewBox(boards.first())).toBe("0 0 180 110")
   await expect(page.getByTestId("maze-preset-easy")).not.toHaveClass(/is-active/)
 
-  // Hard: one big maze.
+  // Hard: one big maze (square only again: the preset sets all shapes).
   await page.getByTestId("maze-preset-hard").click()
+  await squareOnly(page)
   await expect(boards).toHaveCount(1)
   expect(await viewBox(boards.first())).toBe("0 0 240 290")
 
@@ -94,10 +103,11 @@ test("print mode: the style changes the maze and is kept in the URL", async ({ p
   await page.goto("/activity/maze/print")
   const first = page.getByTestId("maze-preview").locator(".maze-print-board").first()
   await expect(page.getByTestId("maze-style-winding")).toHaveClass(/is-active/) // Easy
+  await squareOnly(page)
   const before = await walls(first)
 
   await page.getByTestId("maze-style-branchy").click()
-  await expect(page).toHaveURL(/\/print\/s11\.branchy\.few\.pp4$/)
+  await expect(page).toHaveURL(/\/print\/s11\.branchy\.few\.pp4\.square$/)
   await expect(page.getByTestId("maze-preset-easy")).not.toHaveClass(/is-active/)
   expect(await walls(first)).not.toBe(before)
 
@@ -142,9 +152,9 @@ test("print mode: the recipe is kept in the URL", async ({ page }) => {
   await expect(page.getByTestId("maze-size")).toContainText("16")
   await expect(page.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(4)
 
-  // A shapes token of only dashes falls back to square; the page works.
+  // A shapes token of only dashes falls back to all shapes; the page works.
   await page.goto("/activity/maze/print/s10.winding.off.pp1.-")
-  await expect(page.getByTestId("maze-preview").locator(".maze-print-board--square")).toHaveCount(1)
+  await expect(page.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(1)
 
   // A number too long for an Int is ignored; the page still works.
   await page.goto("/activity/maze/print/s99999999999")
@@ -153,7 +163,7 @@ test("print mode: the recipe is kept in the URL", async ({ page }) => {
 })
 
 test("print mode: several pages, each with new mazes", async ({ page }) => {
-  await page.goto("/activity/maze/print")
+  await page.goto("/activity/maze/print/s11.winding.few.pp4.square")
   const preview = page.getByTestId("maze-preview")
   const first = await walls(preview.locator(".maze-print-board").first())
 
@@ -186,10 +196,15 @@ const shapeOf = (sheet) => sheet.locator(".maze-print-sheet").first().getAttribu
 test("print mode: shapes are a multi-select, pages go through them", async ({ page }) => {
   await page.goto("/activity/maze/print")
   const preview = page.getByTestId("maze-preview")
-  await expect(page.getByTestId("maze-shape-square")).toHaveClass(/is-active/)
+  // The presets use all shapes.
+  await expect(page.getByTestId("maze-shape-all")).toHaveClass(/is-active/)
+  for (const s of ["square", "circle", "hex"]) {
+    await expect(page.getByTestId(`maze-shape-${s}`)).toHaveClass(/is-active/)
+  }
 
-  await page.getByTestId("maze-shape-circle").click()
+  await page.getByTestId("maze-shape-hex").click()
   await expect(page).toHaveURL(/\.square-circle$/)
+  await expect(page.getByTestId("maze-shape-all")).not.toHaveClass(/is-active/)
   await page.getByTestId("maze-shape-square").click()
   await expect(page).toHaveURL(/\.circle$/)
   await expect(preview.locator(".maze-print-board--circle").first()).toBeVisible()
@@ -248,11 +263,11 @@ test("print mode: a circle at 2 per page is round and fits", async ({ page }) =>
   }
 })
 
-test("print mode: a preset resets the shapes to square", async ({ page }) => {
+test("print mode: a preset sets all shapes", async ({ page }) => {
   await page.goto("/activity/maze/print")
   await page.getByTestId("maze-shape-hex").click()
   await page.getByTestId("maze-preset-hard").click()
-  await expect(page.getByTestId("maze-shape-square")).toHaveClass(/is-active/)
-  await expect(page.getByTestId("maze-shape-hex")).not.toHaveClass(/is-active/)
+  await expect(page.getByTestId("maze-shape-all")).toHaveClass(/is-active/)
+  await expect(page.getByTestId("maze-shape-hex")).toHaveClass(/is-active/)
   await expect(page).toHaveURL(/\.pp1$/)
 })

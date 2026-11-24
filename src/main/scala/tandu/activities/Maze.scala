@@ -266,21 +266,21 @@ object Maze extends Activity:
     }.last
 
   val sheetPresets: List[SheetBuilder.Preset[SheetConfig]] = List(
-    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(11, Loops.Few, PerPage.Four, Style.Winding)),
-    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(13, Loops.Off, PerPage.Four, Style.Balanced)),
-    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One, Style.Branchy))
+    SheetBuilder.Preset("easy", _.maze.easy.name, SheetConfig(11, Loops.Few, PerPage.Four, Style.Winding, Shape.values.toSet)),
+    SheetBuilder.Preset("medium", _.maze.medium.name, SheetConfig(13, Loops.Off, PerPage.Four, Style.Balanced, Shape.values.toSet)),
+    SheetBuilder.Preset("hard", _.maze.hard.name, SheetConfig(24, Loops.Off, PerPage.One, Style.Branchy, Shape.values.toSet))
   )
 
   /** The settings token of a preset, for workbook rows. */
   def presetToken(presetId: String): String =
     encodeConfig(sheetPresets.find(_.presetId == presetId).getOrElse(sheetPresets.head).config)
 
-  /** The recipe as one URL path segment, for example `s10.winding.few.pp4`
-    * or `s10.winding.few.pp4.circle-hex`. Square only has no shapes token,
-    * so older links and stored rows stay the same. */
+  /** The recipe as one URL path segment, for example `s11.winding.few.pp4`
+    * or `s11.winding.few.pp4.circle-hex`. All shapes (as in the presets)
+    * have no shapes token; other sets are named. */
   def encodeConfig(c: SheetConfig): String =
     val shapes =
-      if c.shapes == Set(Shape.Square) then ""
+      if c.shapes == Shape.values.toSet then ""
       else "." + Shape.values.filter(c.shapes).map(_.toString.toLowerCase).mkString("-")
     s"s${c.size}.${c.style.toString.toLowerCase}.${c.loops.toString.toLowerCase}.pp${c.perPage.n}$shapes"
 

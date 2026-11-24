@@ -266,7 +266,9 @@ object Maze extends Activity:
         case PerPageToken(n) => PerPage.values.find(p => n.toIntOption.contains(p.n)).fold(c)(v => c.copy(perPage = v))
         case _ =>
           val parts = t.split('-').toList.map(p => SheetBuilder.named(Shape.values, p))
-          if parts.forall(_.isDefined) then c.copy(shapes = parts.flatten.toSet) else c
+          // A token of only dashes splits into no parts; it must not give
+          // a recipe with no shapes.
+          if parts.nonEmpty && parts.forall(_.isDefined) then c.copy(shapes = parts.flatten.toSet) else c
       )
     }
     raw.copy(size = SheetBuilder.clamp(raw.size, SheetConfig.MinSize, raw.perPage.maxSize))

@@ -142,6 +142,10 @@ test("print mode: the recipe is kept in the URL", async ({ page }) => {
   await expect(page.getByTestId("maze-size")).toContainText("16")
   await expect(page.getByTestId("maze-preview").locator(".maze-print-board")).toHaveCount(4)
 
+  // A shapes token of only dashes falls back to square; the page works.
+  await page.goto("/activity/maze/print/s10.winding.off.pp1.-")
+  await expect(page.getByTestId("maze-preview").locator(".maze-print-board--square")).toHaveCount(1)
+
   // A number too long for an Int is ignored; the page still works.
   await page.goto("/activity/maze/print/s99999999999")
   await expect(page.getByTestId("maze-size")).toContainText("10")

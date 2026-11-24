@@ -138,7 +138,10 @@ class MazeSpec extends AnyFunSuite:
     val _ = assert(decodeConfig(encodeConfig(sc)) == sc)
     val _ = assert(decodeConfig("s10.winding.few.pp4.circle-hex").shapes == Set(Shape.Circle, Shape.Hex))
     val _ = assert(decodeConfig("s10.square").shapes == Set(Shape.Square))
-    assert(decodeConfig("s10.bogus-hex").shapes == Set(Shape.Square))
+    val _ = assert(decodeConfig("s10.bogus-hex").shapes == Set(Shape.Square))
+    // Only dashes: no shape names at all. The recipe must keep a shape.
+    val _ = assert(decodeConfig("s10.-").shapes == Set(Shape.Square))
+    assert(decodeConfig("s10.--").shapes == Set(Shape.Square))
   }
 
   test("the last shape cannot be removed") {

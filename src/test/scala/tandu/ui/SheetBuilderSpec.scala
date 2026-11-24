@@ -24,3 +24,7 @@ class SheetBuilderSpec extends AnyFunSuite:
   test("rounds: one id repeats") {
     assert(SheetBuilder.rounds(Vector("x"), 4, new Random(1)) == Vector.fill(4)("x"))
   }
+
+  test("rounds: no ids give no values (and do not loop forever)") {
+    assert(SheetBuilder.rounds(Vector.empty[String], 5, new Random(1)) == Vector.empty)
+  }

@@ -69,7 +69,10 @@ object SheetBuilder:
     * value that ended the last one. Use it for the theme or shape of each
     * page. */
   def rounds[A](ids: Vector[A], n: Int, rng: Random): Vector[A] =
-    Iterator.iterate(Vector.empty[A]) { acc =>
+    // No values: return nothing. Without this, the rounds below never grow
+    // and the loop does not end.
+    if ids.isEmpty then Vector.empty
+    else Iterator.iterate(Vector.empty[A]) { acc =>
       val round = rng.shuffle(ids)
       val fixed =
         if round.size > 1 && acc.lastOption.contains(round.head) then round.tail.head +: round.head +: round.drop(2)

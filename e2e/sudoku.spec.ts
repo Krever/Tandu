@@ -176,23 +176,26 @@ test.describe("print", () => {
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
   })
 
-  test("both symbol kinds: pages alternate between shapes and digits", async ({ page }) => {
+  test("both symbol kinds: puzzles alternate on the page", async ({ page }) => {
     await page.goto("/activity/sudoku/print")
+    const preview = page.getByTestId("sudoku-preview")
     await page.getByTestId("sudoku-symbols-digits").click()
     await expect(page.getByTestId("sudoku-symbols-shapes")).toHaveClass(/is-active/)
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
     await expect(page).toHaveURL(/\.shapes-digits\./)
-    await stepperPlus(page, "sudoku-pages").click()
+    // One page: three shape puzzles (with a legend) and three digit
+    // puzzles (a blank legend line keeps the boards in line).
+    await expect(preview.locator(".sudoku-print-puzzle")).toHaveCount(6)
+    await expect(preview.locator(".sudoku-print-legend:not(.sudoku-print-legend--blank)")).toHaveCount(3)
+    await expect(preview.locator(".sudoku-print-legend--blank")).toHaveCount(3)
+    // The print is the preview.
     await startPrinting(page)
-    const sheets = page.locator(".print-only .sudoku-print-sheet")
-    await expect(sheets).toHaveCount(2)
-    // One page of shapes (with legends), one of digits (without).
-    const legends = [await sheets.nth(0).locator(".sudoku-print-legend").count(), await sheets.nth(1).locator(".sudoku-print-legend").count()]
-    expect(legends.sort()).toEqual([0, 6])
+    await expect(page.locator(".print-only .sudoku-print-legend--blank")).toHaveCount(3)
     // The last kind cannot be turned off.
     await page.getByTestId("sudoku-symbols-shapes").click()
     await page.getByTestId("sudoku-symbols-digits").click()
     await expect(page.getByTestId("sudoku-symbols-digits")).toHaveClass(/is-active/)
+    await expect(preview.locator(".sudoku-print-legend")).toHaveCount(0)
   })
 
   test("the URL recipe is read back", async ({ page }) => {

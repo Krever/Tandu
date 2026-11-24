@@ -27,7 +27,7 @@ object SudokuSheet:
     case Six extends PerPage(6)
 
   /** The recipe of a sheet. `symbols` holds one or both kinds; with both,
-    * pages alternate (one kind per page). 9×9 is digits only. When
+    * the puzzles alternate (on a page, and from page to page). 9×9 is digits only. When
     * `answers` is on, the sheet ends with pages of the solved grids. */
   final case class SheetConfig(size: GridSize, symbols: Set[Symbols], level: Level, perPage: PerPage, answers: Boolean)
 
@@ -117,13 +117,16 @@ object SudokuSheet:
 
   // ---------- pages ----------
 
+  /** One puzzle of a page and the kind of symbols that it is printed in. */
+  final case class SheetPuzzle(symbols: Symbols, puzzle: Puzzle)
+
   /** The solved grid of one puzzle, labelled "page·puzzle" (both from 1),
-    * in the symbols of its page. */
+    * in the symbols of the puzzle. */
   final case class AnswerEntry(label: String, symbols: Symbols, puzzle: Puzzle)
 
-  /** A page of the sheet: puzzles in one kind of symbols, or answers. */
+  /** A page of the sheet: puzzles, or answers. */
   enum SheetPage:
-    case Puzzles(symbols: Symbols, puzzles: Vector[Puzzle])
+    case Puzzles(puzzles: Vector[SheetPuzzle])
     case Answers(entries: Vector[AnswerEntry])
 
   /** Answers are small: more of them fit on a page than puzzles. */
@@ -149,21 +152,23 @@ object SudokuSheet:
   /** `n` puzzle pages from one seed, then the answer pages when answers
     * are on. Puzzle page k has its own seed, so it does not change when
     * pages are added, and it can be made without the other pages. With
-    * both kinds of symbols, the pages go through them in shuffled rounds;
-    * the rounds are made for [[SheetBuilder.MaxPages]] pages, so they also
+    * both kinds of symbols, the puzzles go through them in shuffled rounds
+    * (with two kinds: they alternate), on a page and from page to page.
+    * The rounds are made for [[SheetBuilder.MaxPages]] pages, so they also
     * do not change when pages are added. */
   def sheetPages(c: SheetConfig, n: Int, seed: Long): IndexedSeq[SheetPage] =
-    val kinds = SheetBuilder.rounds(Symbols.values.toVector.filter(c.symbols), math.max(n, SheetBuilder.MaxPages), new Random(seed))
+    val per = c.perPage.n
+    val kinds = SheetBuilder.rounds(Symbols.values.toVector.filter(c.symbols), math.max(n, SheetBuilder.MaxPages) * per, new Random(seed))
     val puzzlePages = lazyPages(n, k =>
       val rng = new Random(seed + 1_000_003L * k)
-      SheetPage.Puzzles(kinds(k), Vector.fill(c.perPage.n)(generate(c.size, c.level, rng))))
+      SheetPage.Puzzles(Vector.tabulate(per)(j => SheetPuzzle(kinds(k * per + j), generate(c.size, c.level, rng)))))
     val perAnswerPage = answersPerPage(c.size)
     val answerPages = if c.answers then (n * c.perPage.n + perAnswerPage - 1) / perAnswerPage else 0
     def entries: IndexedSeq[AnswerEntry] =
       (0 until n).flatMap { k =>
         puzzlePages(k) match
-          case SheetPage.Puzzles(kind, ps) => ps.zipWithIndex.map((p, j) => AnswerEntry(s"${k + 1}·${j + 1}", kind, p))
-          case SheetPage.Answers(_)        => Nil
+          case SheetPage.Puzzles(ps) => ps.zipWithIndex.map((p, j) => AnswerEntry(s"${k + 1}·${j + 1}", p.symbols, p.puzzle))
+          case SheetPage.Answers(_)  => Nil
       }
     lazyPages(n + answerPages, i =>
       if i < n then puzzlePages(i)
@@ -230,15 +235,20 @@ object SudokuSheet:
 
   def sheetBody(c: SheetConfig, page: SheetPage): HtmlElement =
     page match
-      case SheetPage.Puzzles(kind, ps) =>
-        val symbols = symbolsOf(c.size, kind)
+      case SheetPage.Puzzles(ps) =>
+        // On a page with both kinds, a digit puzzle gets a blank legend
+        // line, so that all boards are in line.
+        val mixed = ps.map(_.symbols).distinct.size > 1
+        val shapes = symbolsOf(c.size, Symbols.Shapes).mkString(" ")
         div(
           cls := s"sudoku-print-sheet sudoku-print-sheet--pp${c.perPage.n}",
           ps.map { p =>
             div(
               cls := "sudoku-print-puzzle",
-              when(kind == Symbols.Shapes)(div(cls := "sudoku-print-legend", symbols.mkString(" "))),
-              board(c.size, p.givens, symbols, boardMm(c), None)
+              if p.symbols == Symbols.Shapes then div(cls := "sudoku-print-legend", shapes)
+              else if mixed then div(cls := "sudoku-print-legend sudoku-print-legend--blank", aria.hidden := true, shapes)
+              else emptyNode,
+              board(c.size, p.puzzle.givens, symbolsOf(c.size, p.symbols), boardMm(c), None)
             )
           }
         )

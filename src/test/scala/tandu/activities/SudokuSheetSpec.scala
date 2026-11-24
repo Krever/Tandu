@@ -57,12 +57,24 @@ class SudokuSheetSpec extends AnyFunSuite:
     assert(preset("hard").withSymbol(Symbols.Shapes).symbols == Set(Symbols.Digits))
   }
 
-  test("both kinds: pages go through the kinds in rounds; adding pages keeps them") {
+  /** The kinds of the puzzles, page by page. */
+  private def kindsOf(pages: IndexedSeq[SheetPage]): IndexedSeq[Vector[Symbols]] =
+    pages.collect { case SheetPage.Puzzles(ps) => ps.map(_.symbols) }
+
+  test("both kinds: puzzles alternate on a page and across pages; adding pages keeps them") {
     val c = preset("easy").copy(symbols = AllSymbols)
-    val kinds = sheetPages(c, 6, 3L).collect { case SheetPage.Puzzles(k, _) => k }
-    for round <- kinds.grouped(2) do
-      val _ = assert(round.toSet == AllSymbols, kinds)
-    assert(sheetPages(c, 2, 3L).collect { case SheetPage.Puzzles(k, _) => k } == kinds.take(2))
+    val kinds = kindsOf(sheetPages(c, 3, 3L))
+    val all = kinds.flatten
+    val _ = assert(all.sliding(2).forall(w => w(0) != w(1)), all)
+    val _ = assert(kinds.forall(_.toSet == AllSymbols))
+    val _ = assert(kindsOf(sheetPages(c, 1, 3L)) == kinds.take(1))
+    // One puzzle per page: the pages alternate.
+    val one = kindsOf(sheetPages(c.copy(perPage = PerPage.One), 4, 3L)).flatten
+    assert(one.sliding(2).forall(w => w(0) != w(1)), one)
+  }
+
+  test("one kind: every puzzle has it") {
+    assert(kindsOf(sheetPages(preset("hard"), 2, 1L)).flatten.forall(_ == Symbols.Digits))
   }
 
   test("adding pages keeps the earlier pages; each page has perPage puzzles") {
@@ -71,13 +83,13 @@ class SudokuSheetSpec extends AnyFunSuite:
     val three = sheetPages(c, 3, 42L)
     val _ = assert(three.head == one.head && three.size == 3)
     val _ = assert(three.distinct.size == 3)
-    assert(three.forall { case SheetPage.Puzzles(_, ps) => ps.size == 6; case _ => false })
+    assert(three.forall { case SheetPage.Puzzles(ps) => ps.size == 6; case _ => false })
   }
 
   test("puzzles are at the recipe's size and level") {
     val c = preset("hard")
-    val SheetPage.Puzzles(_, ps) = sheetPages(c, 1, 5L).head: @unchecked
-    for p <- ps do
+    val SheetPage.Puzzles(ps) = sheetPages(c, 1, 5L).head: @unchecked
+    for SheetPuzzle(_, p) <- ps do
       val _ = assert(p.givens.size == 81)
       val _ = assert(rate(GridSize.G9, p.givens, Level.Hard).solved)
   }
@@ -87,8 +99,8 @@ class SudokuSheetSpec extends AnyFunSuite:
     val ps = sheetPages(c, 10, 7L)
     val _ = assert(ps.size == 12) // 60 puzzles, 56 per 4×4 answer page
     val puzzles = ps.take(10).zipWithIndex.flatMap {
-      case (SheetPage.Puzzles(kind, xs), k) => xs.zipWithIndex.map((p, j) => AnswerEntry(s"${k + 1}·${j + 1}", kind, p))
-      case _                                => Nil
+      case (SheetPage.Puzzles(xs), k) => xs.zipWithIndex.map((p, j) => AnswerEntry(s"${k + 1}·${j + 1}", p.symbols, p.puzzle))
+      case _                          => Nil
     }
     val answers = ps.drop(10).flatMap { case SheetPage.Answers(es) => es; case _ => Nil }
     val _ = assert(answers == puzzles)
@@ -102,7 +114,7 @@ class SudokuSheetSpec extends AnyFunSuite:
 
   test("reading one page makes only that page, once") {
     val made = scala.collection.mutable.ListBuffer.empty[Int]
-    val pages = lazyPages(10, i => { made += i; SheetPage.Puzzles(Symbols.Shapes, Vector.empty) })
+    val pages = lazyPages(10, i => { made += i; SheetPage.Puzzles(Vector.empty) })
     val _ = assert(pages.size == 10 && made.isEmpty)
     val _ = pages(3)
     val _ = pages(3)

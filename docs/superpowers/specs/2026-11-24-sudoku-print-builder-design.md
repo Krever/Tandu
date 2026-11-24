@@ -197,8 +197,10 @@ Decided (user picked "technique + givens" and "chips, one per page"):
   count falls with fewer empty cells, so it ranked Easy as hardest.) 9×9 Medium and Hard
   still need their technique level in at least 90% of cases.
 - **Mixed symbols:** Symbols become multi-select chips (Shapes, Digits),
-  like Maze shapes. With both on, pages alternate in shuffled rounds
-  (`SheetBuilder.rounds`); a page has one kind, so legends line up. The
+  like Maze shapes. With both on, the puzzles alternate on the page and
+  from page to page (user, after trying "one kind per page": a one-page
+  sheet showed no change). On a mixed page a digit puzzle has a blank
+  legend line, so the boards are in line. The
   last chip cannot be turned off. 9×9 is digits only (Shapes chip
   disabled). URL: `shapes`, `digits`, `shapes-digits`; old tokens keep
   working. Presets: Easy and Medium shapes, Hard digits (as before).

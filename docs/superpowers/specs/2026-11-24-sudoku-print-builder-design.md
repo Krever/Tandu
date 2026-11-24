@@ -188,7 +188,10 @@ Decided (user picked "technique + givens" and "chips, one per page"):
   techniques a grid does not reach (4×4 Medium/Hard, 6×6 Hard) uses the
   hardest level that it reaches (4×4: Easy; 6×6: Medium), for the dig
   and for the "needs the level" check. The givens target still makes it
-  differ. So Hard is never easier than Medium on any grid.
+  differ. So on average Hard is harder than Medium on every grid (for
+  one seed it can be easier). If a puzzle does not need its techniques
+  at the givens target, digging goes on until it does (final review:
+  6×6 Medium was slow and a quarter did not need Medium).
 - **Measured, per size:** Easy > Medium > Hard in mean givens, and
   Easy < Medium < Hard in mean search effort: at each step, empty cells
   divided by open moves (cells where one symbol fits, or the only place

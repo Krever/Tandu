@@ -98,3 +98,26 @@ class SudokuDifficultySpec extends AnyFunSuite:
       info(f"one $size $level page: $ms%.0f ms")
       val _ = assert(ms <= 60, f"one $size $level page: $ms%.0f ms")
   }
+
+  test("6×6 Medium puzzles need Medium in at least 95% of cases (100 seeds)") {
+    val n = (1 to 100).count { s =>
+      val p = generate(GridSize.G6, Level.Medium, new Random(1000 + s))
+      !rate(GridSize.G6, p.givens, Level.Easy).solved
+    }
+    assert(n >= 95, s"$n / 100")
+  }
+
+  // Fixed seeds can miss the slow cases, so this measures many random
+  // pages and checks the slow end (p90), for the levels that retry.
+  test("4×4 and 6×6 pages: p90 over 40 pages at most about 30 ms") {
+    for size <- List(GridSize.G4, GridSize.G6); level <- Level.values do
+      val _ = generate(size, level, new Random(0)) // warm up
+      val times = (1 to 40).map { s =>
+        val t = System.nanoTime()
+        (1 to 6).foreach(i => generate(size, level, new Random(5000 + s * 10 + i)))
+        (System.nanoTime() - t) / 1e6
+      }.sorted
+      val p90 = times((times.size * 9) / 10)
+      info(f"$size $level page p90: $p90%.0f ms, max ${times.last}%.0f ms")
+      val _ = assert(p90 <= 30, f"$size $level page p90: $p90%.0f ms")
+  }

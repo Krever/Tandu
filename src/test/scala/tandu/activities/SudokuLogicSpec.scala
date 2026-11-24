@@ -60,10 +60,17 @@ class SudokuLogicSpec extends AnyFunSuite:
     assert(Level.values.toList.map(effective(GridSize.G9, _)) == Level.values.toList)
   }
 
-  test("digging stops at the level's givens target") {
+  test("digging stops at the givens target, or goes on only until the puzzle needs its level") {
     for size <- GridSize.values; level <- Level.values; seed <- 1 to 3 do
       val p = generate(size, level, new Random(seed))
-      val _ = assert(p.givens.count(_ != 0) >= givensTarget(size, level), s"$size $level $seed")
+      val givens = p.givens.count(_ != 0)
+      val below = effective(size, level).below
+      // Below the target only when needed: one given more was not enough.
+      val _ = assert(givens >= givensTarget(size, level) || below.exists(b => !rate(size, p.givens, b).solved),
+        s"$size $level $seed: $givens givens")
+      // Easy has no level below, so it stops at the target.
+      if below.isEmpty && givensTarget(size, level) > 0 then
+        val _ = assert(givens == givensTarget(size, level), s"$size $level $seed: $givens givens")
   }
 
   test("the generator is deterministic for a seed") {

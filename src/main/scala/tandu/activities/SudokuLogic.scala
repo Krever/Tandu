@@ -297,7 +297,7 @@ object SudokuLogic:
     * Every 4×4 puzzle is solvable with naked singles, and 6×6 puzzles do
     * not need the Hard techniques (measured; see the report in
     * `SudokuDifficultySpec`). The givens target still makes the level
-    * differ, so Hard is never easier than Medium. */
+    * differ, so on average Hard is harder than Medium. */
   def effective(size: GridSize, level: Level): Level = (size, level) match
     case (GridSize.G4, _)          => Level.Easy
     case (GridSize.G6, Level.Hard) => Level.Medium
@@ -318,23 +318,32 @@ object SudokuLogic:
     * a full random grid, givens are removed in random order, down to
     * [[givensTarget]]; a removal stays only when the puzzle is still
     * solvable with the techniques. The puzzle must also need them (not be
-    * solvable at the level below). If no try in [[MaxTries]] needs them,
-    * the last try is kept: it is never harder than asked. A puzzle that
-    * logic solves has exactly one solution. */
+    * solvable at the level below): if it does not at the target, digging
+    * goes on until it does. If no try in [[MaxTries]] needs them, the last
+    * try is kept: it is never harder than asked. A puzzle that logic
+    * solves has exactly one solution. */
   def generate(size: GridSize, level: Level, rng: Random): Puzzle =
     val g = geometries(size)
     val techniques = effective(size, level)
     val target = givensTarget(size, level)
+    def needs(givens: Array[Int]): Boolean = techniques.below.forall(b => !solvable(g, givens, b))
+    // Dig down to the target. If the puzzle does not need the techniques
+    // there, dig on in the same order and stop as soon as it needs them.
+    // A new grid is necessary only when the minimum does not need them.
     def once(): Puzzle =
       val solution = fill(size, rng)
       val givens = solution.toArray
       var left = g.cells
-      for pos <- rng.shuffle((0 until g.cells).toVector) if left > target do
+      var done = false
+      for pos <- rng.shuffle((0 until g.cells).toVector) if !done do
         val saved = givens(pos)
         givens(pos) = 0
-        if solvable(g, givens, techniques) then left -= 1 else givens(pos) = saved
+        if !solvable(g, givens, techniques) then givens(pos) = saved
+        else
+          left -= 1
+          done = left <= target && needs(givens)
       Puzzle(givens.toVector, solution)
-    def needsLevel(p: Puzzle): Boolean = techniques.below.forall(b => !solvable(g, p.givens.toArray, b))
+    def needsLevel(p: Puzzle): Boolean = needs(p.givens.toArray)
     val tries = Iterator.continually(once()).take(MaxTries)
     var last = tries.next()
     while !needsLevel(last) && tries.hasNext do last = tries.next()

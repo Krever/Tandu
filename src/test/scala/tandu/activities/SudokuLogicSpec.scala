@@ -54,6 +54,18 @@ class SudokuLogicSpec extends AnyFunSuite:
       val _ = assert(unique(size, p.givens), s"$size $level $seed")
   }
 
+  test("the hardest reachable level: small grids fall back") {
+    val _ = assert(Level.values.toList.map(effective(GridSize.G4, _)) == List(Level.Easy, Level.Easy, Level.Easy))
+    val _ = assert(Level.values.toList.map(effective(GridSize.G6, _)) == List(Level.Easy, Level.Medium, Level.Medium))
+    assert(Level.values.toList.map(effective(GridSize.G9, _)) == Level.values.toList)
+  }
+
+  test("digging stops at the level's givens target") {
+    for size <- GridSize.values; level <- Level.values; seed <- 1 to 3 do
+      val p = generate(size, level, new Random(seed))
+      val _ = assert(p.givens.count(_ != 0) >= givensTarget(size, level), s"$size $level $seed")
+  }
+
   test("the generator is deterministic for a seed") {
     assert(generate(GridSize.G6, Level.Medium, new Random(9)) == generate(GridSize.G6, Level.Medium, new Random(9)))
   }

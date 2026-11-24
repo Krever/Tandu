@@ -32,7 +32,7 @@ class SudokuDifficultySpec extends AnyFunSuite:
         val need = ps.count(needs(size, level, _))
         f"${size.toString}%-3s ${level.toString}%-6s  givens ${mean(ps.map(_.givens.count(_ != 0)))}%5.1f  " +
           f"needs level $need%2d/${ps.size}  advanced steps ${mean(ratings.map(_.advancedSteps))}%5.1f  " +
-          f"steps ${mean(ratings.map(_.steps.values.sum))}%5.1f"
+          f"steps ${mean(ratings.map(_.steps.values.sum))}%5.1f  search ${ratings.map(_.meanSearch).sum / ratings.size}%5.2f"
     println(lines.mkString("\n", "\n", "\n"))
     succeed
   }
@@ -52,6 +52,21 @@ class SudokuDifficultySpec extends AnyFunSuite:
     assert(e._2 < m._2 && m._2 < h._2, s"advanced steps: $e, $m, $h")
   }
 
+  test("every size: Easy > Medium > Hard in mean givens; Easy < Medium < Hard in search effort") {
+    for size <- GridSize.values do
+      val List(e, m, h) = Level.values.toList.map { level =>
+        val ps = of(size, level)
+        (mean(ps.map(_.givens.count(_ != 0))), ps.map(p => rate(size, p.givens, level).meanSearch).sum / ps.size)
+      }: @unchecked
+      val _ = assert(e._1 > m._1 && m._1 > h._1, s"$size givens: $e, $m, $h")
+      val _ = assert(e._2 < m._2 && m._2 < h._2, s"$size search: $e, $m, $h")
+  }
+
+  test("6×6 Hard is never an Easy puzzle: it needs at least Medium") {
+    for p <- of(GridSize.G6, Level.Hard) do
+      val _ = assert(!rate(GridSize.G6, p.givens, Level.Easy).solved)
+  }
+
   test("small grids at Hard: valid in bounded time") {
     for size <- List(GridSize.G4, GridSize.G6); s <- 1 to 10 do
       val p = generate(size, Level.Hard, new Random(s))
@@ -69,16 +84,17 @@ class SudokuDifficultySpec extends AnyFunSuite:
     assert(ms <= 300, f"one Hard 9×9 page: $ms%.0f ms")
   }
 
-  // 6×6 Hard almost never needs Hard, so each puzzle uses every try.
-  // The answer page makes all pages at once; it must not freeze the
+  // Where a level is hard to need (6×6 Medium), a puzzle can use every
+  // try. The answer page makes all pages at once; it must not freeze the
   // preview for long.
-  test("one 6×6 Hard page (6 puzzles) takes at most about 60 ms") {
-    val _ = generate(GridSize.G6, Level.Hard, new Random(0)) // warm up
-    val ms = (1 to 3).map { s =>
-      val t = System.nanoTime()
-      (1 to 6).foreach(i => generate(GridSize.G6, Level.Hard, new Random(s * 10 + i)))
-      (System.nanoTime() - t) / 1e6
-    }.sum / 3
-    info(f"one 6×6 Hard page: $ms%.0f ms")
-    assert(ms <= 60, f"one 6×6 Hard page: $ms%.0f ms")
+  test("one 4×4 or 6×6 page (6 puzzles) takes at most about 60 ms, at every level") {
+    for size <- List(GridSize.G4, GridSize.G6); level <- Level.values do
+      val _ = generate(size, level, new Random(0)) // warm up
+      val ms = (1 to 3).map { s =>
+        val t = System.nanoTime()
+        (1 to 6).foreach(i => generate(size, level, new Random(s * 10 + i)))
+        (System.nanoTime() - t) / 1e6
+      }.sum / 3
+      info(f"one $size $level page: $ms%.0f ms")
+      val _ = assert(ms <= 60, f"one $size $level page: $ms%.0f ms")
   }

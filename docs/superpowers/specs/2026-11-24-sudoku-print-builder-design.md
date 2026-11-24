@@ -181,7 +181,7 @@ Decided (user picked "technique + givens" and "chips, one per page"):
   |     | Easy | Medium | Hard |
   |---|---|---|---|
   | 4×4 | 9 | 7 | minimum |
-  | 6×6 | 20 | 15 | minimum |
+  | 6×6 | 20 | 13 | minimum |
   | 9×9 | 36 | 30 | minimum |
 
 - **Fallback to the hardest reachable technique.** A level whose
@@ -189,9 +189,12 @@ Decided (user picked "technique + givens" and "chips, one per page"):
   hardest level that it reaches (4×4: Easy; 6×6: Medium), for the dig
   and for the "needs the level" check. The givens target still makes it
   differ. So Hard is never easier than Medium on any grid.
-- **Measured, per size:** Easy > Medium > Hard in mean givens and in
-  mean "open moves" (cells that the level's single techniques can fill
-  at each step; fewer open moves = more searching). 9×9 Medium and Hard
+- **Measured, per size:** Easy > Medium > Hard in mean givens, and
+  Easy < Medium < Hard in mean search effort: at each step, empty cells
+  divided by open moves (cells where one symbol fits, or the only place
+  of a symbol in a unit); about how many cells a solver looks at to find
+  a move. (Changed from a raw count of open moves while building: that
+  count falls with fewer empty cells, so it ranked Easy as hardest.) 9×9 Medium and Hard
   still need their technique level in at least 90% of cases.
 - **Mixed symbols:** Symbols become multi-select chips (Shapes, Digits),
   like Maze shapes. With both on, pages alternate in shuffled rounds

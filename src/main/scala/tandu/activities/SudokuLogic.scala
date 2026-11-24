@@ -47,8 +47,14 @@ object SudokuLogic:
   /** The result of the rating solver.
     *   - `solved`: the level's techniques filled every cell.
     *   - `grid`: the grid as far as the solver came.
-    *   - `steps`: how many times each technique made progress. */
-  final case class Rating(solved: Boolean, grid: Vector[Int], steps: Map[Technique, Int]):
+    *   - `steps`: how many times each technique made progress.
+    *   - `meanSearch`: the search effort, the mean over the steps of
+    *     (empty cells / open moves) before the step. An open move is an
+    *     empty cell where only one symbol fits, or that is the only place
+    *     of a symbol in a unit. This is about how many empty cells a solver
+    *     looks at to find one that it can fill. A step with no open move
+    *     (a pair or locked candidates) counts all empty cells. */
+  final case class Rating(solved: Boolean, grid: Vector[Int], steps: Map[Technique, Int], meanSearch: Double):
     /** All steps that are not naked singles. */
     def advancedSteps: Int = steps.iterator.collect { case (t, k) if t != NakedSingle => k }.sum
 
@@ -210,6 +216,20 @@ object SudokuLogic:
         }
       }
 
+    /** The open moves now (see [[Rating]]). */
+    def openMoves(): Int =
+      val open = new Array[Boolean](g.cells)
+      for cell <- 0 until g.cells if grid(cell) == 0 && Integer.bitCount(cand(cell)) == 1 do open(cell) = true
+      for unit <- g.units do
+        var once = 0
+        var twice = 0
+        for cell <- unit do
+          twice |= once & cand(cell)
+          once |= cand(cell)
+        val single = once & ~twice
+        if single != 0 then for cell <- unit if (cand(cell) & single) != 0 do open(cell) = true
+      open.count(identity)
+
     def apply(t: Technique): Boolean = t match
       case NakedSingle      => nakedSingle()
       case HiddenSingle     => hiddenSingle()
@@ -218,23 +238,28 @@ object SudokuLogic:
 
     /** Apply the level's techniques until the grid is full or no technique
       * makes progress. Each step uses the easiest technique that works.
-      * `count(t)` is called once for each step. */
-    def run(level: Level, count: Technique => Unit): Boolean =
+      * `before()` is called before each try of a step, and `count(t)` once
+      * for each step. */
+    def run(level: Level, count: Technique => Unit, before: () => Unit = () => ()): Boolean =
       val order = Technique.values.filter(level.techniques)
       var result: Option[Boolean] = None
       while result.isEmpty do
         if empty == 0 then result = Some(true)
         else if stuck then result = Some(false)
-        else order.find(apply) match
-          case Some(t) => count(t)
-          case None    => result = Some(false)
+        else
+          before()
+          order.find(apply) match
+            case Some(t) => count(t)
+            case None    => result = Some(false)
       result.get
 
   def rate(size: GridSize, givens: IndexedSeq[Int], level: Level): Rating =
     val solver = Solver(geometries(size), givens)
     val steps = scala.collection.mutable.Map.empty[Technique, Int]
-    val solved = solver.run(level, t => steps(t) = steps.getOrElse(t, 0) + 1)
-    Rating(solved, solver.grid.toVector, steps.toMap)
+    val search = scala.collection.mutable.ArrayBuffer.empty[Double]
+    def measure(): Unit = search += solver.empty.toDouble / math.max(1, solver.openMoves())
+    val solved = solver.run(level, t => steps(t) = steps.getOrElse(t, 0) + 1, measure)
+    Rating(solved, solver.grid.toVector, steps.toMap, if search.isEmpty then 0.0 else search.sum / search.size)
 
   /** The candidates of each cell (bit v for symbol v; 0 for a filled
     * cell) when the solver stops at `level`. For tests of the techniques. */
@@ -267,33 +292,50 @@ object SudokuLogic:
     * does not need its level. */
   val MaxTries = 20
 
-  /** Levels that the generator does not reach on a grid size: a small grid
-    * does not need the harder techniques (measured; see the report in
-    * `SudokuDifficultySpec`). More tries do not help there and only make
-    * the preview slow, so [[generate]] makes one try. */
-  def outOfReach(size: GridSize, level: Level): Boolean = (size, level) match
-    case (GridSize.G4, Level.Medium | Level.Hard) | (GridSize.G6, Level.Hard) => true
-    case _                                                                => false
+  /** The level whose techniques the generator uses for `level` on a grid
+    * size: the level itself, or the hardest level that the grid reaches.
+    * Every 4×4 puzzle is solvable with naked singles, and 6×6 puzzles do
+    * not need the Hard techniques (measured; see the report in
+    * `SudokuDifficultySpec`). The givens target still makes the level
+    * differ, so Hard is never easier than Medium. */
+  def effective(size: GridSize, level: Level): Level = (size, level) match
+    case (GridSize.G4, _)          => Level.Easy
+    case (GridSize.G6, Level.Hard) => Level.Medium
+    case _                         => level
 
-  /** A puzzle that is solvable at `level`. From a full random grid, givens
-    * are removed in random order; a removal stays only when the puzzle is
-    * still solvable at the level. The puzzle must also need the level (not
-    * be solvable at the level below). If no try in [[MaxTries]] needs the
-    * level, the last try is kept: it is never harder than asked. A level
-    * that is [[outOfReach]] gets one try. A puzzle that logic solves has
-    * exactly one solution. */
+  /** The fewest givens that digging leaves for a level; 0 means dig to the
+    * minimum. More givens leave more open moves at each step. */
+  def givensTarget(size: GridSize, level: Level): Int = (size, level) match
+    case (_, Level.Hard)             => 0
+    case (GridSize.G4, Level.Easy)   => 9
+    case (GridSize.G4, Level.Medium) => 7
+    case (GridSize.G6, Level.Easy)   => 20
+    case (GridSize.G6, Level.Medium) => 13
+    case (GridSize.G9, Level.Easy)   => 36
+    case (GridSize.G9, Level.Medium) => 30
+
+  /** A puzzle for `level`. The techniques are those of [[effective]]. From
+    * a full random grid, givens are removed in random order, down to
+    * [[givensTarget]]; a removal stays only when the puzzle is still
+    * solvable with the techniques. The puzzle must also need them (not be
+    * solvable at the level below). If no try in [[MaxTries]] needs them,
+    * the last try is kept: it is never harder than asked. A puzzle that
+    * logic solves has exactly one solution. */
   def generate(size: GridSize, level: Level, rng: Random): Puzzle =
     val g = geometries(size)
+    val techniques = effective(size, level)
+    val target = givensTarget(size, level)
     def once(): Puzzle =
       val solution = fill(size, rng)
       val givens = solution.toArray
-      for pos <- rng.shuffle((0 until g.cells).toVector) do
+      var left = g.cells
+      for pos <- rng.shuffle((0 until g.cells).toVector) if left > target do
         val saved = givens(pos)
         givens(pos) = 0
-        if !solvable(g, givens, level) then givens(pos) = saved
+        if solvable(g, givens, techniques) then left -= 1 else givens(pos) = saved
       Puzzle(givens.toVector, solution)
-    def needsLevel(p: Puzzle): Boolean = level.below.forall(b => !solvable(g, p.givens.toArray, b))
-    val tries = Iterator.continually(once()).take(if outOfReach(size, level) then 1 else MaxTries)
+    def needsLevel(p: Puzzle): Boolean = techniques.below.forall(b => !solvable(g, p.givens.toArray, b))
+    val tries = Iterator.continually(once()).take(MaxTries)
     var last = tries.next()
     while !needsLevel(last) && tries.hasNext do last = tries.next()
     last

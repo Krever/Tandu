@@ -463,3 +463,33 @@ Update the existing tests that used the Sudoku variant select: "adding pages is 
 - [ ] **Step 5: Update the local `PRINTING.md`** (git-excluded, not committed): Sudoku marked done, with the difficulty table from Task 2 and lessons.
 
 - [ ] **Step 6: Commit** `sudoku: workbook row with settings; old rows migrate`.
+
+---
+
+## Revision 1 (spec "Revision 1")
+
+### Task 6: Level = techniques + givens; fallback to the hardest reachable technique
+
+**Files:** `SudokuLogic.scala`, `SudokuLogicSpec.scala`, `SudokuDifficultySpec.scala`
+
+**Interfaces:**
+- Produces: `def givensTarget(size: GridSize, level: Level): Int` (Hard: 0); `def effective(size: GridSize, level: Level): Level` (replaces `outOfReach`: 4×4 → Easy; 6×6 Hard → Medium; else the level); `Rating.meanOpenMoves: Double` (mean, over steps, of the cells that the level's single techniques can fill before the step).
+- `generate(size, level, rng)`: dig with `effective` techniques, never below `givensTarget`; the "needs" check uses `effective(size, level).below`; `MaxTries` tries unless `effective != level` and the target is 0 (then one try).
+
+- [ ] Tests first (`SudokuDifficultySpec`): for every size, Easy > Medium > Hard in mean givens and in mean open moves (strict); 6×6 Hard puzzles are not solvable at Easy (no regression to Easy); 9×9 need-rate test stays; time budgets stay. `SudokuLogicSpec`: generated givens never below the target; `effective` table.
+- [ ] Run → fail. Implement. Run → pass; tune the targets only by measurement (ruling with numbers).
+- [ ] Commit `sudoku: level is techniques plus givens; fallback to the hardest reachable technique`.
+
+### Task 7: Mixed symbols (chips, one kind per page)
+
+**Files:** `SudokuSheet.scala`, `SheetBuilder.scala` (`chip` gets `isDisabled: Signal[Boolean] = Val(false)`; the `pills` `isDisabled` parameter goes, no other user), `SudokuSheetSpec.scala`, `e2e/sudoku.spec.ts`, `e2e/workbook.spec.ts`
+
+**Interfaces:**
+- `SheetConfig.symbols: Set[Symbols]`; `withSymbol(s)` toggles and keeps the last one; `withSize(G9)` sets `Set(Digits)`.
+- `SheetPage.Puzzles(symbols: Symbols, puzzles: Vector[Puzzle])`; `SheetPage.Answers(entries: Vector[AnswerEntry])` with `final case class AnswerEntry(label: String, symbols: Symbols, puzzle: Puzzle)`.
+- Page kinds from `SheetBuilder.rounds(Symbols.values.filter(c.symbols), max(n, MaxPages), new Random(seed))`, so page k stays when pages are added.
+- Codec: one token, kinds joined by `-` in enum order (`shapes`, `digits`, `shapes-digits`); a token of only known kinds sets the set; others are ignored.
+
+- [ ] Tests first: codec (old single tokens, `shapes-digits`, `digits-shapes`, `g9.shapes-digits` → digits), last chip stays, pages alternate in rounds with both on, answers carry their page's symbols; e2e: both chips on → pages 1 and 2 differ in kind (legend on one, not the other), 9×9 disables the Shapes chip.
+- [ ] Run → fail. Implement. Run unit + `e2e/sudoku.spec.ts e2e/workbook.spec.ts e2e/maze.spec.ts e2e/seek-and-find.spec.ts` → pass.
+- [ ] Commit `sudoku: shapes and digits can be mixed, one kind per page`.

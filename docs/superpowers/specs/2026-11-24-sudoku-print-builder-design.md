@@ -161,3 +161,41 @@ does not hide levels.
 - Whether the shared `SheetBuilder.Spec` needs a small extension for
   answer pages (for example `pagesOf` returning extra pages), as long as
   Seek & Find and Maze do not change behaviour.
+
+## Revision 1 (2026-11-24, after trying the branch)
+
+User feedback: the difficulty pill does nothing on 4×4, and on 6×6 Hard
+is barely different from Easy; the symbols could be mixed.
+
+Measured cause: every 4×4 puzzle is solvable with naked singles, even at
+the fewest givens (0/20 need Medium or Hard). 6×6 cannot reach Hard; the
+fallback kept whatever the dig gave, so 6×6 Hard (advanced steps 1.4)
+was easier than Medium (3.8), which retries until it needs Medium.
+
+Decided (user picked "technique + givens" and "chips, one per page"):
+
+- **Level = techniques + givens.** Each level sets the techniques allowed
+  and a givens target: digging stops at the target (Hard: no target, dig
+  to the minimum). Start targets, tuned by measurement:
+
+  |     | Easy | Medium | Hard |
+  |---|---|---|---|
+  | 4×4 | 9 | 7 | minimum |
+  | 6×6 | 20 | 15 | minimum |
+  | 9×9 | 36 | 30 | minimum |
+
+- **Fallback to the hardest reachable technique.** A level whose
+  techniques a grid does not reach (4×4 Medium/Hard, 6×6 Hard) uses the
+  hardest level that it reaches (4×4: Easy; 6×6: Medium), for the dig
+  and for the "needs the level" check. The givens target still makes it
+  differ. So Hard is never easier than Medium on any grid.
+- **Measured, per size:** Easy > Medium > Hard in mean givens and in
+  mean "open moves" (cells that the level's single techniques can fill
+  at each step; fewer open moves = more searching). 9×9 Medium and Hard
+  still need their technique level in at least 90% of cases.
+- **Mixed symbols:** Symbols become multi-select chips (Shapes, Digits),
+  like Maze shapes. With both on, pages alternate in shuffled rounds
+  (`SheetBuilder.rounds`); a page has one kind, so legends line up. The
+  last chip cannot be turned off. 9×9 is digits only (Shapes chip
+  disabled). URL: `shapes`, `digits`, `shapes-digits`; old tokens keep
+  working. Presets: Easy and Medium shapes, Hard digits (as before).

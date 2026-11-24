@@ -8,7 +8,6 @@ import tandu.ui.{Components, Mode, ModeChooser, RulesCard, SheetBuilder}
 import tandu.ui.Components.s
 import tandu.ui.DomExt.*
 
-import scala.collection.mutable
 import scala.scalajs.js
 import scala.util.Random
 
@@ -58,10 +57,6 @@ object Maze extends Activity:
       else if r1 == r2 then rightOpen(r1, math.min(c1, c2))
       else downOpen(math.min(r1, r2), c1)
 
-  private def neighbors(r: Int, c: Int, rows: Int, cols: Int): Vector[(Int, Int)] =
-    Vector((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1))
-      .filter((nr, nc) => nr >= 0 && nr < rows && nc >= 0 && nc < cols)
-
   // ---------- generator ----------
 
   /** How the maze is carved. Each style makes a spanning tree of the grid:
@@ -76,105 +71,22 @@ object Maze extends Activity:
   enum Style:
     case Winding, Balanced, Branchy
 
-  /** Carve a maze of `rows` × `cols` cells in the given style.
+  /** Carve a maze of `rows` × `cols` cells in the given style (see
+    * [[MazeGraph.carve]], which also makes the other shapes).
     *
     * `braid` (0..1) optionally knocks an extra wall out of that fraction of
     * dead-ends, turning some into gentle loops. We use it on the easy tier so
     * the youngest solvers meet fewer frustrating dead-ends. */
   def generate(rows: Int, cols: Int, braid: Double, rng: Random = new Random(), style: Style = Style.Winding): Grid =
-    val openRight = Array.fill(rows * cols)(false)
-    val openDown  = Array.fill(rows * cols)(false)
-    val visited   = Array.fill(rows * cols)(false)
-    def idx(r: Int, c: Int) = r * cols + c
+    toGrid(MazeGraph.carve(MazeGraph.RectLayout(rows, cols), style, braid, rng))
 
-    // Carve the passage between two adjacent cells: like `connected`, it lives
-    // on the right/down wall of the pair's upper-left cell.
-    def carve(r1: Int, c1: Int, r2: Int, c2: Int): Unit =
-      if r1 == r2 then openRight(idx(r1, math.min(c1, c2))) = true
-      else openDown(idx(math.min(r1, r2), c1)) = true
-
-    // Done iteratively with an explicit stack, so a big board cannot blow
-    // the call stack.
-    def winding(): Unit =
-      val stack = mutable.Stack[(Int, Int)]()
-      visited(idx(0, 0)) = true
-      stack.push((0, 0))
-      while stack.nonEmpty do
-        val (r, c) = stack.top
-        val unvisited = neighbors(r, c, rows, cols).filterNot((nr, nc) => visited(idx(nr, nc)))
-        if unvisited.isEmpty then { val _ = stack.pop() }
-        else
-          val (nr, nc) = unvisited(rng.nextInt(unvisited.size))
-          carve(r, c, nr, nc)
-          visited(idx(nr, nc)) = true
-          stack.push((nr, nc))
-
-    // From each cell that is not in the maze, walk at random until the walk
-    // touches the maze. When the walk crosses itself, the loop is erased:
-    // each cell keeps only its last exit. Then carve the walk into the maze.
-    def balanced(): Unit =
-      val exit = new Array[Int](rows * cols)
-      visited(idx(0, 0)) = true
-      for start <- rng.shuffle((0 until rows * cols).toVector) if !visited(start) do
-        var cur = start
-        while !visited(cur) do
-          val (r, c) = (cur / cols, cur % cols)
-          val ns = neighbors(r, c, rows, cols)
-          val (nr, nc) = ns(rng.nextInt(ns.size))
-          exit(cur) = idx(nr, nc)
-          cur = exit(cur)
-        cur = start
-        while !visited(cur) do
-          visited(cur) = true
-          val next = exit(cur)
-          carve(cur / cols, cur % cols, next / cols, next % cols)
-          cur = next
-
-    // Grow the maze from one cell: take a random cell next to the maze and
-    // connect it to a random maze neighbour.
-    def branchy(): Unit =
-      val frontier = mutable.ArrayBuffer.empty[Int]
-      val inFrontier = Array.fill(rows * cols)(false)
-      def add(r: Int, c: Int): Unit =
-        visited(idx(r, c)) = true
-        for (nr, nc) <- neighbors(r, c, rows, cols) if !visited(idx(nr, nc)) && !inFrontier(idx(nr, nc)) do
-          inFrontier(idx(nr, nc)) = true
-          frontier += idx(nr, nc)
-      add(0, 0)
-      while frontier.nonEmpty do
-        val i = rng.nextInt(frontier.size)
-        val cell = frontier(i)
-        frontier(i) = frontier.last
-        frontier.dropRightInPlace(1)
-        val (r, c) = (cell / cols, cell % cols)
-        val inMaze = neighbors(r, c, rows, cols).filter((nr, nc) => visited(idx(nr, nc)))
-        val (mr, mc) = inMaze(rng.nextInt(inMaze.size))
-        carve(r, c, mr, mc)
-        add(r, c)
-
-    style match
-      case Style.Winding  => winding()
-      case Style.Balanced => balanced()
-      case Style.Branchy  => branchy()
-
-    if braid > 0 then
-      // Same upper-left normalisation as `carve`/`connected`, read straight off
-      // the working arrays (every cell passed here is in-grid and adjacent).
-      def linked(r: Int, c: Int, nr: Int, nc: Int): Boolean =
-        if r == nr then openRight(idx(r, math.min(c, nc)))
-        else openDown(idx(math.min(r, nr), c))
-      def degree(r: Int, c: Int): Int =
-        neighbors(r, c, rows, cols).count((nr, nc) => linked(r, c, nr, nc))
-      for r <- 0 until rows; c <- 0 until cols do
-        if degree(r, c) == 1 && (r, c) != (0, 0) && (r, c) != (rows - 1, cols - 1)
-          && rng.nextDouble() < braid
-        then
-          val opts = neighbors(r, c, rows, cols).filterNot((nr, nc) => linked(r, c, nr, nc))
-          if opts.nonEmpty then
-            val (nr, nc) = opts(rng.nextInt(opts.size))
-            carve(r, c, nr, nc)
-
-    Grid(rows, cols, openRight.toVector, openDown.toVector)
+  /** The in-app and square print drawing read a [[Grid]]. */
+  private def toGrid(m: MazeGraph.Carved): Grid = m.layout match
+    case MazeGraph.RectLayout(rows, cols) =>
+      Grid(rows, cols,
+        Vector.tabulate(rows * cols)(i => i % cols < cols - 1 && m.open(i, i + 1)),
+        Vector.tabulate(rows * cols)(i => i / cols < rows - 1 && m.open(i, i + cols)))
+    case other => throw new IllegalArgumentException(s"not a square maze: $other")
 
   // ---------- play state ----------
 
